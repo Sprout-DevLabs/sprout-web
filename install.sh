@@ -23,10 +23,13 @@ err() {
 have() { command -v "$1" >/dev/null 2>&1; }
 
 download() { # url dest
+	# Retry transient failures, and give up on a stalled connection instead
+	# of hanging forever.
 	if have curl; then
-		curl -fsSL --proto '=https' --tlsv1.2 -o "$2" "$1"
+		curl -fsSL --proto '=https' --tlsv1.2 --retry 3 --connect-timeout 15 \
+			--speed-limit 1024 --speed-time 30 -o "$2" "$1"
 	elif have wget; then
-		wget -q --https-only -O "$2" "$1"
+		wget -q --https-only --tries=3 --timeout=30 -O "$2" "$1"
 	else
 		err "curl or wget is required"
 	fi
@@ -35,7 +38,7 @@ download() { # url dest
 latest_version() {
 	# github.com/.../releases/latest redirects to .../releases/tag/vX.Y.Z
 	if have curl; then
-		url=$(curl -fsSLI --proto '=https' -o /dev/null -w '%{url_effective}' "https://github.com/$repo/releases/latest")
+		url=$(curl -fsSLI --proto '=https' --retry 3 --connect-timeout 15 --max-time 60 -o /dev/null -w '%{url_effective}' "https://github.com/$repo/releases/latest")
 	else
 		url=$(wget -q --https-only --max-redirect=5 -S -O /dev/null "https://github.com/$repo/releases/latest" 2>&1 | sed -n 's/^ *Location: *//p' | tail -n 1)
 	fi
