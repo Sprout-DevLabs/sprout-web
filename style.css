@@ -269,3 +269,55 @@ pre.block {
   .js .hero .typed { width: auto; }
   .js .hero .root, .js .hero .branch .conn, .js .hero .branch .leaf, .js .hero .after { opacity: 1; clip-path: none; }
 }
+
+/* ---------- v0.2: install picker, reading order, speed, steps ---------- */
+
+.picker { margin-top: 36px; max-width: 100%; }
+.tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.tabs button {
+  font: 500 15px var(--text); color: var(--moss); background: none; cursor: pointer;
+  border: 1px solid transparent; border-radius: 999px; padding: 6px 14px;
+  transition: color .2s, background-color .2s, border-color .2s;
+}
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { color: var(--ink); background: var(--card); border-color: var(--rule); }
+.picker [role="tabpanel"] .alt { margin: 10px 0 0; font-size: 15px; color: var(--moss); max-width: 42em; }
+.picker .copy { white-space: nowrap; }
+
+.band p.small { font-size: 15px; }
+
+.sz { color: var(--leaf); }
+.row { transition: grid-template-rows .5s var(--ease-out), opacity .4s var(--ease-out), transform .6s var(--ease-out); }
+
+/* reading order: a genuine sequence, so it's numbered; the bar shows how
+   many files use each one */
+ol.entry { list-style: none; margin: 14px 0 0; padding: 0; font-size: 13px; }
+ol.entry li {
+  display: grid; grid-template-columns: 2.4ch minmax(0, auto) 1fr; column-gap: 1.2ch; align-items: baseline;
+  padding: 7px 0; border-top: 1px dashed var(--rule); line-height: 1.4;
+}
+ol.entry .n { color: var(--moss); text-align: right; }
+ol.entry .f { background: none; padding: 0; font-size: 1em; color: var(--ink); overflow-wrap: anywhere; }
+ol.entry .why { color: var(--moss); font-family: var(--text); font-size: 14px; }
+ol.entry .bar {
+  grid-column: 3; height: 3px; border-radius: 2px; background: var(--leaf);
+  width: calc(var(--w) * 100%); margin-top: 4px; transform-origin: left;
+}
+@media (max-width: 600px) { ol.entry li { grid-template-columns: 2.4ch 1fr; } ol.entry .why, ol.entry .bar { grid-column: 2; } }
+
+table.speed { border-collapse: collapse; width: 100%; font-size: 16px; }
+table.speed th { text-align: left; font: 600 14px var(--text); color: var(--moss); padding: 0 0 10px; }
+table.speed td { padding: 12px 0; border-top: 1px solid var(--rule); }
+table.speed td:last-child, table.speed th:last-child { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+table.speed tr.ref td { color: var(--moss); }
+
+ol.steps { list-style: none; padding: 0; margin: 28px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+ol.steps li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: start; }
+ol.steps .n {
+  font: 600 18px var(--mono); color: var(--paper); background: var(--leaf);
+  width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+}
+ol.steps b { display: block; font-size: 18px; margin: 4px 0 8px; }
+ol.steps p { margin: 0; color: var(--moss); }
+ol.steps pre.block { font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 900px) { ol.steps { grid-template-columns: 1fr; } }
