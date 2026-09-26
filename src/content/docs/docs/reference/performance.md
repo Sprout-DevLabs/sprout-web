@@ -5,16 +5,14 @@ description: How fast Sprout is on large repositories, and how to measure it.
 
 For controlled, versioned before/after measurements (including what didn't improve and how each run was measured), see the [benchmark log](/sprout-web/benchmarks/). The numbers below are a quick reference.
 
-Measured on Kubernetes (31,412 files) on a laptop with a warm cache:
+Measured on Kubernetes (31,412 files) at `636d292`, on an Apple M4 with a warm filesystem cache (medians from the controlled run in the benchmark log):
 
-| Command | Time |
-|---|---|
-| `sprout -L 2` | 0.25 s |
-| `sprout` | 0.47 s |
-| `find . -type f`, for reference | 0.49 s |
-| `sprout --size -L 1` | 0.57 s |
-| `sprout --entry` | 1.0 s |
-| `sprout --ai` | 1.1 s |
+| Command | Time | Peak memory |
+|---|---|---|
+| `sprout` | 0.23 s | 31 MB |
+| `sprout --json` | 0.33 s | 29 MB |
+| `sprout --entry` | 0.57 s | 302 MB |
+| `sprout --ai` | 0.72 s | 310 MB |
 
 ## Why it's fast
 
