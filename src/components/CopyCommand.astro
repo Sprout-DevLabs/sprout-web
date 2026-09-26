@@ -1,0 +1,13 @@
+---
+// A command that copies itself when clicked.
+interface Props { command: string; label?: string }
+const { command, label } = Astro.props;
+---
+<button class="cmd" type="button" data-copy={command} aria-label={label ?? `Copy: ${command}`}>
+  <span class="sigil" aria-hidden="true">$</span>
+  <span class="txt">{command}</span>
+  <span class="copy-ic" aria-hidden="true">
+    <svg class="cp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+    <svg class="ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+  </span>
+</button>

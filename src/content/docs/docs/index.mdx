@@ -1,0 +1,35 @@
+---
+title: Introduction
+description: Sprout is a tree command that understands projects, for you and your AI agent.
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Sprout prints your project as a tree, the way `tree` does, but it knows what a project is:
+
+- It respects `.gitignore`, and counts what it hides.
+- It marks git changes, sizes and commit hotspots in place.
+- It shows a pull request as a tree of what changed.
+- It tells you where to start reading.
+- It gives LLMs and coding agents a compact map of the code, including real function and type signatures.
+
+Sprout is one small binary with no dependencies. It works on local folders and on repositories you haven't cloned.
+
+## Quick start
+
+```sh
+brew install sprout-devlabs/tap/sprout     # other options: /docs/install/
+cd your-project
+sprout                                      # the tree, .gitignore respected
+sprout --entry                              # where to start reading
+sprout --ai | pbcopy                        # a map to paste into any chat
+```
+
+## Where to go next
+
+<CardGrid>
+  <LinkCard title="The tree" href="/sprout-web/docs/guides/tree/" description="Filtering, sizes, sorting and what gets hidden." />
+  <LinkCard title="AI context" href="/sprout-web/docs/guides/ai/" description="Token-budgeted maps with key signatures." />
+  <LinkCard title="Git, diffs and hotspots" href="/sprout-web/docs/guides/git/" description="--git, --diff main...HEAD and --churn." />
+  <LinkCard title="MCP for coding agents" href="/sprout-web/docs/guides/mcp/" description="Give Claude Code, Cursor and others the map." />
+</CardGrid>
