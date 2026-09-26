@@ -1,0 +1,239 @@
+---
+import CopyCommand from './CopyCommand.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const platforms = [
+  {
+    id: 'macos', label: 'macOS',
+    cmds: ['brew install sprout-devlabs/tap/sprout'],
+    note: 'Includes shell completions and man sprout.',
+  },
+  {
+    id: 'linux', label: 'Linux',
+    cmds: ['curl -fsSL https://sprout-devlabs.github.io/sprout-web/install.sh | sh'],
+    note: 'Checks the SHA-256 and never uses sudo. Homebrew works too, and .deb, .rpm, .apk and Arch packages are on every release.',
+  },
+  {
+    id: 'windows', label: 'Windows',
+    cmds: ['scoop bucket add sprout https://github.com/Sprout-DevLabs/scoop-bucket', 'scoop install sprout'],
+    note: 'amd64 and arm64. Zips are on every release too.',
+  },
+  {
+    id: 'go', label: 'Go',
+    cmds: ['go install github.com/Sprout-DevLabs/sprout@latest'],
+    note: 'Needs Go 1.22 or newer. Add completions with sprout --completion zsh (or bash, fish, powershell).',
+  },
+];
+---
+
+<section class="section install" id="install">
+  <div class="wrap">
+    <div class="card">
+      <div class="head">
+        <h2>Install in one line</h2>
+        <p class="lead">A single binary with no dependencies. git is only needed for git features.</p>
+      </div>
+
+      <div class="picker">
+        <div class="tabs" role="tablist" aria-label="Install on">
+          <span class="ind" aria-hidden="true"></span>
+          {
+            platforms.map((p, i) => (
+              <button role="tab" type="button" id={`tab-${p.id}`} data-os={p.id} aria-controls={`pane-${p.id}`}
+                aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>{p.label}</button>
+            ))
+          }
+        </div>
+        {
+          platforms.map((p, i) => (
+            <div class="pane" role="tabpanel" id={`pane-${p.id}`} aria-labelledby={`tab-${p.id}`} hidden={i !== 0}>
+              <div class="cmds">{p.cmds.map((c) => <CopyCommand command={c} />)}</div>
+              <p class="muted">{p.note}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      <ol class="next">
+        <li><span class="n">1</span><div><b>Run it in a project</b><code>sprout</code></div></li>
+        <li><span class="n">2</span><div><b>Find your way in</b><code>sprout --entry</code></div></li>
+        <li><span class="n">3</span><div><b>Hand it to your agent</b><code>claude mcp add sprout -- sprout mcp</code></div></li>
+      </ol>
+      <p class="docs-link"><a href={`${base}/docs/install/`}>All install options and verification</a></p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { animate } from 'motion';
+  import { reducedMotion } from '../scripts/stage';
+
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('#install [role="tab"]')];
+  const ind = document.querySelector<HTMLElement>('#install .ind')!;
+  const move = (t: HTMLElement, instant = false) =>
+    animate(ind, { x: t.offsetLeft, width: t.offsetWidth }, instant || reducedMotion() ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 36 });
+
+  function select(os: string, instant = false) {
+    tabs.forEach((t) => {
+      const on = t.dataset.os === os;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      const pane = document.getElementById(t.getAttribute('aria-controls')!)!;
+      pane.hidden = !on;
+      if (on) {
+        move(t, instant);
+        if (!instant && !reducedMotion()) animate(pane, { opacity: [0, 1], y: [6, 0] }, { duration: 0.35, ease: [0.22, 1, 0.36, 1] });
+      }
+    });
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => select(t.dataset.os!));
+    t.addEventListener('keydown', (e) => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      const n = tabs[(i + d + tabs.length) % tabs.length];
+      select(n.dataset.os!);
+      n.focus();
+    });
+  });
+
+  const p = ((navigator as any).userAgentData?.platform || navigator.platform || '').toLowerCase();
+  const os = p.includes('win') ? 'windows' : p.includes('linux') ? 'linux' : 'macos';
+  document.fonts.ready.then(() => select(os, true));
+  addEventListener('resize', () => {
+    const on = tabs.find((t) => t.getAttribute('aria-selected') === 'true');
+    if (on) move(on, true);
+  });
+</script>
+
+<style>
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    background:
+      radial-gradient(120% 90% at 100% 0%, var(--leaf-soft), transparent 55%),
+      var(--surface);
+    padding: clamp(28px, 6vw, 72px);
+    display: grid;
+    gap: 40px;
+    overflow: hidden;
+  }
+  .head {
+    display: grid;
+    gap: 16px;
+  }
+  .head p {
+    margin: 0;
+  }
+  .picker {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .tabs {
+    position: relative;
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    padding: 4px;
+    gap: 2px;
+    border-radius: 12px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs button {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    font: 500 14.5px var(--sans);
+    color: var(--muted);
+    background: none;
+    border: 0;
+    border-radius: 9px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .tabs button[aria-selected='true'] {
+    color: var(--ink);
+  }
+  .ind {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 0;
+    width: 0;
+    border-radius: 9px;
+    background: var(--surface);
+    box-shadow: 0 1px 3px rgba(12, 26, 19, 0.12), 0 0 0 1px var(--line);
+  }
+  .pane p {
+    margin: 12px 0 0;
+    font-size: 15px;
+    max-width: 44em;
+  }
+  .cmds {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    justify-items: start;
+  }
+  .cmds :global(.cmd) {
+    max-width: 100%;
+  }
+  .next {
+    list-style: none;
+    margin: 0;
+    padding: 28px 0 0;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+  }
+  .next li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  .next .n {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--bg);
+    font: 600 14px var(--mono);
+  }
+  .next div {
+    display: grid;
+    gap: 8px;
+  }
+  .next b {
+    font-weight: 600;
+  }
+  .next code {
+    width: fit-content;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+  }
+  .docs-link {
+    margin: -12px 0 0;
+  }
+  .docs-link a {
+    color: var(--leaf-ink);
+    font-weight: 500;
+    text-underline-offset: 4px;
+  }
+  @media (max-width: 860px) {
+    .next {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

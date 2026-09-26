@@ -1,0 +1,95 @@
+---
+title: Install
+description: Install Sprout with Homebrew, Scoop, Linux packages, the install script or go install.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+Sprout is a single static binary for Linux, macOS and Windows on amd64 and arm64. git is only needed for git features.
+
+<Tabs syncKey="os">
+  <TabItem label="macOS">
+    ```sh
+    brew install sprout-devlabs/tap/sprout
+    ```
+  </TabItem>
+  <TabItem label="Linux">
+    ```sh
+    curl -fsSL https://sprout-devlabs.github.io/sprout-web/install.sh | sh
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    ```powershell
+    scoop bucket add sprout https://github.com/Sprout-DevLabs/scoop-bucket
+    scoop install sprout
+    ```
+  </TabItem>
+  <TabItem label="Go">
+    ```sh
+    go install github.com/Sprout-DevLabs/sprout@latest
+    ```
+  </TabItem>
+</Tabs>
+
+## Homebrew
+
+```sh
+brew install sprout-devlabs/tap/sprout
+```
+
+Works on macOS and Linux. It installs shell completions for bash, zsh and fish, plus the man page (`man sprout`). `brew upgrade` picks up new releases.
+
+## Scoop
+
+```powershell
+scoop bucket add sprout https://github.com/Sprout-DevLabs/scoop-bucket
+scoop install sprout
+```
+
+Works on Windows, amd64 and arm64.
+
+## Linux packages
+
+Every [release](https://github.com/Sprout-DevLabs/sprout/releases) has `.deb`, `.rpm`, `.apk` and Arch (`.pkg.tar.zst`) packages. They install the completions and the man page.
+
+```sh
+sudo apt install ./sprout_*_linux_amd64.deb      # Debian, Ubuntu
+sudo dnf install ./sprout_*_linux_amd64.rpm      # Fedora, RHEL
+sudo apk add --allow-untrusted ./sprout_*.apk    # Alpine
+sudo pacman -U ./sprout_*.pkg.tar.zst            # Arch
+```
+
+## Install script
+
+```sh
+curl -fsSL https://sprout-devlabs.github.io/sprout-web/install.sh | sh
+```
+
+[`install.sh`](https://sprout-devlabs.github.io/sprout-web/install.sh) works out your OS and architecture and downloads the release archive. It **checks the SHA-256** against the release's `checksums.txt` before installing anything. It installs to `/usr/local/bin` if that's writable and to `~/.local/bin` otherwise, and it never uses `sudo`.
+
+| Variable | Effect |
+|---|---|
+| `SPROUT_VERSION=v0.2.0` | Install a specific release |
+| `SPROUT_INSTALL_DIR=~/bin` | Install somewhere else |
+
+<Aside>Piping a script into `sh` means trusting it. Read it first at the link above. It's under 130 lines.</Aside>
+
+## Go
+
+```sh
+go install github.com/Sprout-DevLabs/sprout@latest
+```
+
+Needs Go 1.22 or newer. Add completions yourself: see [Completions, man page, exit codes](/sprout-web/docs/reference/shell/).
+
+## Verify an install
+
+```sh
+sprout --version
+```
+
+To check a download by hand, compare it with the release's `checksums.txt`:
+
+```sh
+shasum -a 256 -c checksums.txt --ignore-missing
+```

@@ -1,0 +1,92 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const features = [
+  { flag: '.gitignore', text: 'Git decides what’s shown. Anything hidden is counted on the last line.', ex: 'sprout -a', href: 'guides/tree/' },
+  { flag: '--only  --ignore', text: 'gitignore patterns, anchored or with **, plus a .sproutignore.', ex: "sprout --only 'src/**/*.ts'", href: 'guides/tree/#filtering' },
+  { flag: '--size  --sort', text: 'True folder totals, even past --depth. Largest or newest first.', ex: 'sprout --size --sort size -L 2', href: 'guides/tree/#sizes-and-sorting' },
+  { flag: '--diff', text: 'A pull request as a tree, with +/- lines rolled up per folder.', ex: 'sprout --diff main...HEAD', href: 'guides/git/' },
+  { flag: '--changed-within', text: 'Only what you touched recently, without git.', ex: 'sprout --changed-within 7d', href: 'guides/tree/#filtering' },
+  { flag: 'github.com/…', text: 'Map a repository you haven’t cloned. Private ones too.', ex: 'sprout github.com/owner/repo --ai', href: 'guides/remote/' },
+  { flag: '.sproutrc', text: 'Your defaults, per project or in ~/.config/sprout/config.', ex: 'echo --hyperlink >> .sproutrc', href: 'guides/config/' },
+  { flag: '--json', text: 'A versioned schema for scripts, CI and PR bots.', ex: 'sprout --diff main...HEAD --json', href: 'reference/json/' },
+];
+---
+
+<section class="section" id="workflow">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Fits the way you already work</h2>
+      <p class="lead">
+        Plain <code>sprout</code> is usually enough. When it isn’t, the flags follow conventions you already know, and your
+        defaults live in a config file.
+      </p>
+    </div>
+    <dl class="features">
+      {
+        features.map((f) => (
+          <a class="feature" href={`${base}/docs/${f.href}`}>
+            <dt>{f.flag}</dt>
+            <dd>
+              {f.text}
+              <code>{f.ex}</code>
+            </dd>
+          </a>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<style>
+  .features {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(32px, 5vw, 72px);
+    margin: 0;
+  }
+  .feature {
+    display: grid;
+    grid-template-columns: minmax(0, 13em) minmax(0, 1fr);
+    gap: 20px;
+    padding: 26px 0;
+    border-top: 1px solid var(--line);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.3s;
+  }
+  .feature:hover {
+    border-top-color: var(--leaf);
+  }
+  .feature:hover dt {
+    color: var(--leaf-ink);
+  }
+  dt {
+    font: 500 15px var(--mono);
+    color: var(--ink);
+    transition: color 0.25s;
+  }
+  dd {
+    margin: 0;
+    color: var(--ink-2);
+    display: grid;
+    gap: 10px;
+  }
+  dd code {
+    width: fit-content;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  @media (max-width: 900px) {
+    .features {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 560px) {
+    .feature {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+    }
+  }
+</style>

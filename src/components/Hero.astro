@@ -1,0 +1,411 @@
+---
+import CopyCommand from './CopyCommand.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const headline = 'The map of your codebase, for you and your AI agent.';
+const words = headline.split(' ');
+
+// Views of the sample project, in the order the demo plays them.
+const tabs = [
+  { id: 'tree', label: 'Tree' },
+  { id: 'git', label: 'Changes' },
+  { id: 'churn', label: 'Hotspots' },
+  { id: 'size', label: 'Sizes' },
+  { id: 'diff', label: 'Pull request' },
+];
+
+// Topographic contours: closed wobbly rings, generated once at build time.
+function contour(r: number, seed: number) {
+  const pts: string[] = [];
+  const n = 72;
+  for (let i = 0; i <= n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const w =
+      1 + 0.09 * Math.sin(3 * a + seed) + 0.05 * Math.sin(5 * a + seed * 1.7) + 0.03 * Math.sin(8 * a - seed * 0.6);
+    pts.push(`${(600 + Math.cos(a) * r * w * 1.5).toFixed(1)},${(420 + Math.sin(a) * r * w).toFixed(1)}`);
+  }
+  return `M${pts.join('L')}Z`;
+}
+const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i * 0.35));
+---
+
+<section class="hero">
+  <svg class="topo" viewBox="0 0 1200 840" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    {rings.map((d) => <path d={d} />)}
+  </svg>
+
+  <div class="wrap hero-copy">
+    <a class="news" href="https://github.com/Sprout-DevLabs/sprout/releases/latest">
+      <span class="dot" aria-hidden="true"></span> New in v0.2: signatures for AI agents
+    </a>
+    <h1 aria-label={headline}>
+      {words.map((w, i) => <span class="w" style={`--i:${i}`} aria-hidden="true">{w} </span>)}
+    </h1>
+    <p class="lead hero-lead">
+      Sprout is a tree command that understands projects. It respects your <code>.gitignore</code>, marks changes and
+      hotspots in place, shows a pull request as a tree, and hands your agent a compact map with real signatures.
+    </p>
+    <div class="actions">
+      <CopyCommand command="brew install sprout-devlabs/tap/sprout" />
+      <a class="btn btn-ghost" href={`${base}/docs/`}>Read the docs</a>
+    </div>
+    <p class="also muted">
+      Also on <a href={`${base}/docs/install/#scoop`}>Scoop</a>,{' '}
+      <a href={`${base}/docs/install/#linux-packages`}>apt, dnf and apk</a>,{' '}
+      <a href={`${base}/docs/install/#install-script`}>curl | sh</a> and <a href={`${base}/docs/install/#go`}>go install</a>.
+    </p>
+  </div>
+
+  <div class="wrap hero-demo">
+    <div class="tilt">
+      <div class="panel hero-panel">
+        <div class="panel-bar">
+          <div class="tabs" role="tablist" aria-label="Views of the sample project">
+            <span class="ind" aria-hidden="true"></span>
+            {
+              tabs.map((t, i) => (
+                <button role="tab" type="button" data-i={i} aria-selected={i === 0 ? 'true' : 'false'}>
+                  {t.label}
+                  <span class="prog" aria-hidden="true" />
+                </button>
+              ))
+            }
+          </div>
+          <span class="repo">trailhead</span>
+        </div>
+        <div class="panel-body">
+          <div class="prompt"><span class="sigil">$</span><span><span id="hero-cmd"></span><span class="caret"></span></span></div>
+          <div class="stage" id="hero-stage" aria-live="off"></div>
+        </div>
+      </div>
+      <p class="caption muted">
+        Real output of <code>sprout</code> on a sample Go and React project, partway through a feature branch.
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { animate, scroll, stagger } from 'motion';
+  import demo from '../data/demo.json';
+  import { Stage, typeInto, reducedMotion, type Line } from '../scripts/stage';
+  import { flatten, churnScale, label, esc, type TreeNode } from '../scripts/tree';
+
+  type Mode = { id: string; cmd: string; header: string; tree: TreeNode; summary: string; size?: boolean };
+  const modes = demo.modes as Mode[];
+  const reduced = reducedMotion();
+  const ease = [0.22, 1, 0.36, 1] as const;
+
+  // Headline, lead and actions rise in once on load.
+  if (!reduced) {
+    animate('.hero .w', { opacity: [0, 1], y: ['0.35em', 0] }, { duration: 0.9, ease, delay: stagger(0.045) });
+    animate(
+      '.hero .news, .hero-lead, .hero .actions, .hero .also',
+      { opacity: [0, 1], y: [14, 0] },
+      { duration: 0.8, ease, delay: stagger(0.08, { startDelay: 0.35 }) },
+    );
+    animate('.hero .tilt', { opacity: [0, 1], y: [40, 0] }, { duration: 1.1, ease, delay: 0.55 });
+    // The panel starts tipped back and settles flat as it scrolls into view.
+    scroll(animate('.hero .tilt', { rotateX: [16, 0], scale: [0.94, 1] }, { ease: 'linear' }), {
+      target: document.querySelector('.hero-demo')!,
+      offset: ['start end', 'start 0.18'],
+    });
+  }
+
+  const linesFor = (m: Mode): Line[] => {
+    const rows = flatten(m.tree);
+    const scale = churnScale(rows);
+    const [dir, ...rest] = m.header.split(' ');
+    return [
+      { key: 'head', html: `<span class="t-head">${esc(dir)}</span>${rest.length ? ` <span class="t-dim">${esc(rest.join(' '))}</span>` : ''}` },
+      ...rows.map((r) => ({ key: r.key, html: `<span class="t-conn">${r.conn}</span>${label(r.node, scale, m.size)}` })),
+      { key: 'gap', html: ' ' },
+      { key: 'summary', html: `<span class="t-dim">${esc(m.summary)}</span>` },
+    ];
+  };
+
+  const stageEl = document.getElementById('hero-stage')!;
+  const cmdEl = document.getElementById('hero-cmd')!;
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.hero [role="tab"]')];
+  const ind = document.querySelector<HTMLElement>('.hero .ind')!;
+  const maxRows = Math.max(...modes.map((m) => linesFor(m).length));
+  const stage = new Stage(stageEl, maxRows);
+
+  let current = -1;
+  let busy = Promise.resolve();
+
+  function moveIndicator(i: number, instant = false) {
+    const t = tabs[i];
+    const opts = instant || reduced ? { duration: 0 } : { type: 'spring' as const, stiffness: 420, damping: 36 };
+    animate(ind, { x: t.offsetLeft, width: t.offsetWidth }, opts);
+  }
+
+  function show(i: number) {
+    if (i === current) return busy;
+    current = i;
+    tabs.forEach((t, j) => t.setAttribute('aria-selected', String(j === i)));
+    moveIndicator(i);
+    const m = modes[i];
+    busy = typeInto(cmdEl, m.cmd).then(() => {
+      if (current === i) stage.render(linesFor(m));
+    });
+    return busy;
+  }
+
+  // Autoplay while the panel is on screen, until the visitor picks a view.
+  const DWELL = 5200;
+  let auto = !reduced;
+  let visible = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const root = document.querySelector<HTMLElement>('.hero-panel')!;
+
+  function schedule() {
+    clearTimeout(timer);
+    root.style.setProperty('--dwell', `${DWELL}ms`);
+    root.classList.toggle('auto', auto && visible);
+    if (!auto || !visible) return;
+    timer = setTimeout(() => show((current + 1) % modes.length).then(schedule), DWELL);
+  }
+
+  tabs.forEach((t, i) =>
+    t.addEventListener('click', () => {
+      auto = false;
+      schedule();
+      show(i);
+    }),
+  );
+  tabs.forEach((t, i) =>
+    t.addEventListener('keydown', (e) => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      const n = (i + d + tabs.length) % tabs.length;
+      tabs[n].focus();
+      tabs[n].click();
+    }),
+  );
+
+  new IntersectionObserver(([e]) => {
+    visible = e.isIntersecting;
+    schedule();
+  }, { threshold: 0.3 }).observe(root);
+
+  addEventListener('resize', () => current >= 0 && moveIndicator(current, true));
+  document.fonts.ready.then(() => moveIndicator(Math.max(current, 0), true));
+
+  // Start once the headline has landed.
+  setTimeout(() => show(0).then(schedule), reduced ? 0 : 700);
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    padding: clamp(40px, 6vw, 76px) 0 clamp(80px, 10vw, 140px);
+    isolation: isolate;
+  }
+  .topo {
+    position: absolute;
+    inset: -80px 0 auto 0;
+    width: 100%;
+    height: 900px;
+    z-index: -1;
+    fill: none;
+    stroke: var(--line-2);
+    stroke-width: 1;
+    opacity: 0.7;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 20%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 20%, transparent 75%);
+  }
+  .hero-copy {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+  .hero-copy > * {
+    min-width: 0;
+  }
+  .news {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    font-size: 14px;
+    color: var(--ink-2);
+    text-decoration: none;
+    margin-bottom: 24px;
+    transition: border-color 0.2s;
+  }
+  .news:hover {
+    border-color: var(--leaf);
+  }
+  .news .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--leaf);
+    box-shadow: 0 0 0 4px var(--leaf-soft);
+  }
+  h1 {
+    font-size: clamp(42px, 6.4vw, 82px);
+    line-height: 1;
+    letter-spacing: -0.032em;
+    font-weight: 680;
+    max-width: min(100%, 17ch);
+  }
+  .w {
+    display: inline-block;
+    white-space: pre;
+  }
+  .hero-lead {
+    margin: 24px auto 0;
+    max-width: min(100%, 38em);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .also {
+    margin: 18px 0 0;
+    font-size: 14.5px;
+  }
+  .also a {
+    color: var(--ink-2);
+    text-underline-offset: 3px;
+    text-decoration-color: var(--line-2);
+  }
+  .also a:hover {
+    text-decoration-color: var(--leaf);
+  }
+
+  .hero-demo {
+    margin-top: clamp(48px, 6vw, 72px);
+    perspective: 1600px;
+  }
+  .tilt {
+    transform-origin: 50% 0%;
+    position: relative;
+    will-change: transform;
+  }
+  .tilt::before {
+    content: '';
+    position: absolute;
+    inset: 8% 10% -6%;
+    background: radial-gradient(closest-side, var(--glow), transparent);
+    filter: blur(40px);
+    z-index: -1;
+  }
+  .hero-panel .panel-body {
+    padding-top: 20px;
+  }
+  .repo {
+    margin-left: auto;
+    font: 500 12.5px var(--mono);
+    color: var(--term-dim);
+  }
+  .tabs {
+    position: relative;
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .tabs button {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    font: 500 13px var(--sans);
+    color: var(--term-dim);
+    background: none;
+    border: 0;
+    padding: 7px 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: color 0.25s;
+  }
+  .tabs button:hover {
+    color: var(--term-fg);
+  }
+  .tabs button[aria-selected='true'] {
+    color: #fff;
+  }
+  .ind {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  .prog {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 3px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--term-add);
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 0;
+  }
+  .hero-panel.auto [aria-selected='true'] .prog {
+    opacity: 0.8;
+    animation: fill var(--dwell) linear forwards;
+  }
+  @keyframes fill {
+    to {
+      transform: scaleX(1);
+    }
+  }
+  .caption {
+    text-align: center;
+    font-size: 14px;
+    margin: 20px 0 0;
+  }
+  :global(.js) .hero .w,
+  :global(.js) .hero .news,
+  :global(.js) .hero-lead,
+  :global(.js) .hero .actions,
+  :global(.js) .hero .also,
+  :global(.js) .hero .tilt {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .hero .w,
+    :global(.js) .hero .news,
+    :global(.js) .hero-lead,
+    :global(.js) .hero .actions,
+    :global(.js) .hero .also,
+    :global(.js) .hero .tilt {
+      opacity: 1;
+    }
+  }
+  @media (max-width: 640px) {
+    .repo {
+      display: none;
+    }
+    .hero-copy {
+      text-align: left;
+      justify-items: start;
+    }
+    .actions {
+      justify-content: flex-start;
+      width: 100%;
+    }
+    .actions :global(.cmd) {
+      width: 100%;
+    }
+  }
+</style>

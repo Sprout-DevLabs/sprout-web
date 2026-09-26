@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sprout docs</title>
+<meta http-equiv="refresh" content="1; url=docs/">
+<link rel="canonical" href="https://sprout-devlabs.github.io/sprout-web/docs/">
+<script>
+  // The docs used to be one page; send old #anchors to their new pages.
+  var map = {
+    install: 'install/', basics: 'guides/tree/', ignore: 'guides/tree/#what-gets-hidden', filter: 'guides/tree/#filtering',
+    size: 'guides/tree/#sizes-and-sorting', config: 'guides/config/', ai: 'guides/ai/', entry: 'guides/entry/',
+    diff: 'guides/git/', git: 'guides/git/', churn: 'guides/git/#--churn-hotspots', stats: 'reference/json/',
+    json: 'reference/json/', remote: 'guides/remote/', mcp: 'guides/mcp/', shell: 'reference/shell/',
+    speed: 'reference/performance/', flags: 'reference/flags/', faq: 'faq/'
+  };
+  location.replace('docs/' + (map[location.hash.slice(1)] || ''));
+</script>
+<p>The docs have moved to <a href="docs/">sprout-devlabs.github.io/sprout-web/docs/</a>.</p>

@@ -1,0 +1,70 @@
+/* Starlight, dressed in Sprout's palette and type. */
+
+:root {
+  --sl-font: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --sl-font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sl-content-width: 46rem;
+  --sl-line-height: 1.7;
+}
+
+/* dark (Starlight's default theme) */
+:root {
+  --sl-color-accent-low: #13271b;
+  --sl-color-accent: #3fbf73;
+  --sl-color-accent-high: #bff0d0;
+  --sl-color-white: #eef4ef;
+  --sl-color-gray-1: #d6e0d8;
+  --sl-color-gray-2: #b3c1b7;
+  --sl-color-gray-3: #8b998f;
+  --sl-color-gray-4: #5a6960;
+  --sl-color-gray-5: #26332b;
+  --sl-color-gray-6: #151e19;
+  --sl-color-black: #0a0f0c;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #e1f3e7;
+  --sl-color-accent: #17924d;
+  --sl-color-accent-high: #0b5c2f;
+  --sl-color-white: #0c1a13;
+  --sl-color-gray-1: #1d2b24;
+  --sl-color-gray-2: #33423a;
+  --sl-color-gray-3: #58665d;
+  --sl-color-gray-4: #8a968e;
+  --sl-color-gray-5: #d3dbd0;
+  --sl-color-gray-6: #eef2ec;
+  --sl-color-gray-7: #f6f8f4;
+  --sl-color-black: #fafbf8;
+}
+
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+h1#_top {
+  font-family: 'Bricolage Grotesque', var(--sl-font);
+  letter-spacing: -0.025em;
+  font-weight: 650;
+}
+h1#_top {
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  letter-spacing: -0.035em;
+}
+.site-title {
+  color: var(--sl-color-white);
+  font-family: 'Bricolage Grotesque', var(--sl-font);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* code blocks read like the site's instrument panels */
+.expressive-code .frame {
+  --ec-frm-edBg: #0d1511;
+}
+.sl-markdown-content table {
+  display: table;
+  width: 100%;
+}
+.sl-markdown-content :not(pre) > code {
+  border-radius: 6px;
+  padding: 0.12em 0.4em;
+}

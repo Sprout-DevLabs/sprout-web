@@ -1,0 +1,126 @@
+---
+// Measured on kubernetes (31,412 files), warm cache; see bench_test.go.
+const rows = [
+  { cmd: 'sprout -L 2', s: 0.25 },
+  { cmd: 'sprout', s: 0.47 },
+  { cmd: 'find . -type f', s: 0.49, ref: true },
+  { cmd: 'sprout --size -L 1', s: 0.57 },
+  { cmd: 'sprout --entry', s: 1.01 },
+  { cmd: 'sprout --ai', s: 1.14 },
+];
+const max = Math.max(...rows.map((r) => r.s));
+---
+
+<section class="section" id="speed">
+  <div class="wrap split">
+    <div class="copy">
+      <h2>Fast on big repositories</h2>
+      <p class="lead">
+        Sprout reads only what the output needs and parses source files in parallel. A full tree of Kubernetes, all 31,412
+        files, takes about as long as <code>find</code>.
+      </p>
+      <p class="muted small">Timings on a laptop with a warm cache. <code>bench_test.go</code> in the repository reproduces them.</p>
+    </div>
+    <div class="chart" role="table" aria-label="Timings on Kubernetes">
+      {
+        rows.map((r) => (
+          <div class:list={['row', { ref: r.ref }]} role="row" style={`--v:${r.s / max}`}>
+            <code role="cell">{r.cmd}</code>
+            <div class="track" role="presentation"><span class="fill" /></div>
+            <span class="t" role="cell" data-v={r.s}>{r.s.toFixed(2)} s</span>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import { animate, inView } from 'motion';
+  import { reducedMotion } from '../scripts/stage';
+
+  if (!reducedMotion()) {
+    const chart = document.querySelector<HTMLElement>('#speed .chart')!;
+    const fills = [...chart.querySelectorAll<HTMLElement>('.fill')];
+    const nums = [...chart.querySelectorAll<HTMLElement>('.t')];
+    animate(fills, { scaleX: 0 }, { duration: 0 });
+    inView(chart, () => {
+      fills.forEach((f, i) => {
+        const v = Number(getComputedStyle(f.closest('.row')!).getPropertyValue('--v'));
+        animate(f, { scaleX: v }, { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: i * 0.07 });
+      });
+      nums.forEach((n, i) => {
+        const v = Number(n.dataset.v);
+        animate(0, v, { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: i * 0.07, onUpdate: (x) => (n.textContent = `${x.toFixed(2)} s`) });
+      });
+    }, { amount: 0.4 });
+  }
+</script>
+
+<style>
+  .copy {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    align-content: start;
+  }
+  .copy p {
+    margin: 0;
+  }
+  .small {
+    font-size: 14.5px;
+  }
+  .chart {
+    display: grid;
+    gap: 6px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 12em) minmax(0, 1fr) 5.5em;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+  }
+  .row code {
+    width: fit-content;
+    font-size: 13px;
+  }
+  .track {
+    height: 10px;
+    border-radius: 10px;
+    background: var(--bg-2);
+    overflow: hidden;
+  }
+  .fill {
+    display: block;
+    height: 100%;
+    width: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--leaf), #4fcf82);
+    transform: scaleX(var(--v));
+    transform-origin: left;
+  }
+  .ref .fill {
+    background: var(--line-2);
+  }
+  .ref code,
+  .ref .t {
+    color: var(--muted);
+  }
+  .t {
+    text-align: right;
+    font: 500 15px var(--mono);
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 560px) {
+    .row {
+      grid-template-columns: minmax(0, 1fr) 5em;
+      row-gap: 10px;
+    }
+    .track {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+</style>
