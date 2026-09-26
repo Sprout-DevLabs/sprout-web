@@ -4,152 +4,140 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sprout: map your codebase</title>
-  <meta name="description" content="A fast, single-binary directory explorer that respects .gitignore, shows git changes and hotspots in the tree, renders PRs as trees, and gives AI agents a compact project map.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
+  <meta name="description" content="Sprout is a single-binary directory explorer that respects .gitignore, shows git changes and hotspots in the tree, renders a pull request as a tree, and gives AI agents a compact project map.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600&family=Martian+Mono:wdth,wght@75..112.5,200..800&display=swap">
   <link rel="stylesheet" href="style.css">
+  <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
-<nav>
-  <div class="wrap">
-    <a class="brand" href="./">🌱 Sprout</a>
-    <a href="docs.html">Docs</a>
-    <a href="docs.html#mcp">MCP</a>
-    <a href="https://github.com/Sprout-DevLabs/sprout">GitHub</a>
-  </div>
-</nav>
 
-<header class="hero">
-  <div class="wrap">
-    <h1>Map your codebase,<br><span>for you and your AI agent.</span></h1>
-    <p class="lede">A fast, single-binary directory explorer. It respects <code>.gitignore</code>, shows git changes and hotspots in the tree, renders a PR as a tree, and hands LLMs a compact project map.</p>
-    <div class="install">
-      <span><span class="prompt">$ </span><span id="cmd">brew install sprout-devlabs/tap/sprout</span></span>
-      <button type="button" data-copy="cmd">Copy</button>
-    </div>
-    <p class="alt">or <code>go install github.com/Sprout-DevLabs/sprout@latest</code> · <a href="https://github.com/Sprout-DevLabs/sprout/releases">binaries</a> for macOS, Linux, Windows</p>
-  </div>
+<header class="wrap nav">
+  <a class="brand" href="./" aria-label="Sprout home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 29V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M16 16C16 9 11 5 4 5c0 7 5 11 12 11Z" fill="#3f8a3a"/><path d="M16 19c0-6 4-10 12-10 0 6-4 10-12 10Z" fill="#6fb35f"/></svg>
+    sprout
+  </a>
+  <a href="docs.html">Docs</a>
+  <a href="https://github.com/Sprout-DevLabs/sprout">GitHub</a>
 </header>
 
-<section>
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="cmdline" aria-hidden="true">$ <span class="typed">sprout</span><span class="caret"></span></p>
+      <h1 class="tree-head">
+        <span class="root">your-project/</span>
+        <span class="branch" style="--i:0"><span class="conn" aria-hidden="true">├── </span><span class="leaf">only what matters</span></span>
+        <span class="branch" style="--i:1"><span class="conn" aria-hidden="true">├── </span><span class="leaf">what changed, and where</span></span>
+        <span class="branch" style="--i:2"><span class="conn" aria-hidden="true">└── </span><span class="leaf">a map your AI agent can read</span></span>
+      </h1>
+      <div class="after">
+        <p class="lede"><strong>Sprout is a directory tree that understands projects.</strong> It respects your <code>.gitignore</code>, marks changes and hotspots in place, shows a pull request as a tree, and gives LLMs a compact project map. One small binary, no dependencies.</p>
+        <div class="install">
+          <button class="copy" type="button" data-copy="brew install sprout-devlabs/tap/sprout">brew install sprout-devlabs/tap/sprout<span class="hint">Copy</span></button>
+          <span class="alt">or <code>go install github.com/Sprout-DevLabs/sprout@latest</code></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="views">
+    <div class="wrap split">
+      <div>
+        <h2>One project, seen four ways</h2>
+        <p>This is real Sprout output for <strong>trailhead</strong>, a sample trail-map app with a Go API and a React frontend, partway through a feature branch. Pick a command to see what it shows.</p>
+        <ul class="modes" id="modes"></ul>
+      </div>
+      <div class="panel" id="demo" aria-label="Sprout output">
+        <div class="prompt">$ <b id="demo-cmd">sprout -L 2</b></div>
+        <div class="head" id="demo-head"></div>
+        <div id="demo-rows"></div>
+        <div class="summary" id="demo-summary"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="ai">
+    <div class="wrap split">
+      <div>
+        <h2>Context that fits the window</h2>
+        <p><code>sprout --ai</code> writes a plain-text map for a prompt or an agent: what the project is, its stack, entry points, CI and config, uncommitted work, recent hotspots, and the layout. It never includes file contents.</p>
+        <p>You set a token budget. Every folder starts as a one-line summary and opens breadth-first while the map still fits, with your own code before tests and fixtures. Drag the slider to watch it spend the budget.</p>
+        <div class="budget">
+          <label for="budget">Token budget <output id="budget-out" for="budget">300</output></label>
+          <input type="range" id="budget" min="0" max="8" step="1" value="1">
+          <div class="ends"><span>smaller</span><span>everything</span></div>
+        </div>
+      </div>
+      <div class="panel map" aria-label="sprout --ai output">
+        <div class="prompt">$ <b id="ai-cmd">sprout --ai --budget 300</b></div>
+        <div id="ai-rows"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="mcp">
+    <div class="wrap split">
+      <div>
+        <h2>Give your coding agent the map</h2>
+        <p>Sprout runs as an MCP server. Claude Code, Cursor and other agents can get oriented in one call, instead of spending their context on <code>ls -R</code> and <code>find</code>.</p>
+        <p>The server is read-only, and paths can't leave the project, even through symlinks. <a href="docs.html#mcp">MCP setup</a></p>
+      </div>
+      <div>
+        <pre class="block">claude mcp add sprout -- sprout mcp</pre>
+        <ul class="tree-list" aria-label="Tools the MCP server provides">
+          <li class="top"><span></span><span>sprout mcp/</span></li>
+          <li><span class="conn">├── </span><span class="what"><b>project_map</b>the --ai map, for getting oriented</span></li>
+          <li><span class="conn">├── </span><span class="what"><b>tree</b>any folder, with git status or churn</span></li>
+          <li><span class="conn">└── </span><span class="what"><b>diff_tree</b>what a branch changed</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="defaults">
+    <div class="wrap split">
+      <div>
+        <h2>Plain <code>sprout</code> is usually enough</h2>
+        <p>The defaults are chosen so you rarely need a flag. Anything Sprout hides is counted on the last line, and <code>--all</code> shows it again.</p>
+      </div>
+      <ul class="tree-list" aria-label="Sprout defaults">
+        <li class="top"><span></span><span>defaults/</span></li>
+        <li><span class="conn">├── </span><span class="what">In a git repo, <code>.gitignore</code> decides what's shown</span></li>
+        <li><span class="conn">├── </span><span class="what">Outside git, <code>node_modules</code>, <code>.venv</code>, <code>dist</code> and friends are hidden</span></li>
+        <li><span class="conn">├── </span><span class="what">Flags work before or after the path</span></li>
+        <li><span class="conn">├── </span><span class="what">Color only in terminals, and <code>NO_COLOR</code> is respected</span></li>
+        <li><span class="conn">├── </span><span class="what"><code>--json</code> for scripts, with a versioned schema</span></li>
+        <li><span class="conn">└── </span><span class="what">About 1 MB for Linux, macOS and Windows, with no dependencies</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2>Install</h2>
+      <div class="install">
+        <button class="copy" type="button" data-copy="brew install sprout-devlabs/tap/sprout">brew install sprout-devlabs/tap/sprout<span class="hint">Copy</span></button>
+        <button class="copy" type="button" data-copy="go install github.com/Sprout-DevLabs/sprout@latest">go install github.com/Sprout-DevLabs/sprout@latest<span class="hint">Copy</span></button>
+      </div>
+      <p style="margin-top:20px">Binaries for every platform are on the <a href="https://github.com/Sprout-DevLabs/sprout/releases">releases page</a>. Next, read the <a href="docs.html">docs</a>.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
   <div class="wrap">
-    <div class="feature">
-      <div>
-        <span class="flag">sprout --ai</span>
-        <h3>Context for LLMs, sized to fit</h3>
-        <p>What the project is, its stack, entry points, CI and config, uncommitted work, recent hotspots, and the directory structure. Never file contents.</p>
-        <p>Sprout fills a token budget breadth-first, so you get the whole shape of the project before the detail of one corner.</p>
-      </div>
-      <div class="term"><div class="bar"><i></i><i></i><i></i></div><pre><span class="p">$</span> sprout --ai --budget 500 | pbcopy
-<span class="b"># bubbletea</span>
-The fun, functional and stateful way to build terminal apps.
-
-stack: Go (go.mod)
-languages: Go 66%, Markdown 26%, YAML 8%
-git: on main
-most changed (90d): tea.go (5), color.go (2), …
-entry points: tutorials/basics/main.go, …
-config: .github/workflows/build.yml, .goreleaser.yml, …
-
-<span class="b">## structure</span>
-./ LICENSE README.md clipboard.go … tea.go +10 more
-.github/ dependabot.yml
-  workflows/ build.yml lint.yml release.yml
-examples/ <span class="c">(147 files)</span>
-tutorials/ go.mod go.sum
-  basics/ README.md main.go</pre></div>
-    </div>
-
-    <div class="feature">
-      <div>
-        <span class="flag">sprout --diff main...HEAD</span>
-        <h3>A pull request, as a tree</h3>
-        <p>Only the paths a branch touched, nested in place, with line counts rolled up per folder. <code>-L</code> collapses deep subtrees into totals, so a 200-file PR still fits on one screen.</p>
-      </div>
-      <div class="term"><div class="bar"><i></i><i></i><i></i></div><pre><span class="p">$</span> sprout --diff main...HEAD -L 1
-<span class="b">.</span> <span class="c">main...HEAD</span>
-<span class="c">├── </span><span class="b">.github/</span>  <span class="c">(2 changed)</span>  <span class="g">+13</span> <span class="r">-28</span>
-<span class="c">├── </span>cursed_renderer.go  <span class="y">M</span>  <span class="g">+67</span> <span class="r">-17</span>
-<span class="c">├── </span>cursed_renderer_test.go  <span class="y">M</span>  <span class="g">+123</span> <span class="r">-0</span>
-<span class="c">├── </span><span class="b">examples/</span>  <span class="c">(3 changed)</span>  <span class="g">+5</span> <span class="r">-5</span>
-<span class="c">├── </span>tea.go  <span class="y">M</span>  <span class="g">+45</span> <span class="r">-20</span>
-<span class="c">└── </span><span class="b">testdata/</span>  <span class="c">(13 changed)</span>  <span class="g">+13</span> <span class="r">-13</span>
-
-34 files changed, +469 -98</pre></div>
-    </div>
-
-    <div class="feature">
-      <div>
-        <span class="flag">sprout --git &nbsp;·&nbsp; sprout --churn</span>
-        <h3>Changes and hotspots, where you're already looking</h3>
-        <p><code>--git</code> marks modified, added, renamed and untracked files, and shows deleted files where they used to be. <code>--churn</code> shows how many commits touched each path, so the busiest code stands out.</p>
-      </div>
-      <div class="term"><div class="bar"><i></i><i></i><i></i></div><pre><span class="p">$</span> sprout --churn -L 1
-<span class="b">.</span>
-<span class="c">├── </span>README.md  <span class="c">▂ 23</span>
-<span class="c">├── </span>cursed_renderer.go  <span class="r">▇ 86</span>
-<span class="c">├── </span><span class="b">examples/</span>  <span class="r">█ 141</span>
-<span class="c">└── </span>tea.go  <span class="r">█ 93</span>
-
-<span class="p">$</span> sprout --git -L 1
-<span class="b">.</span> <span class="c">on main</span>
-<span class="c">├── </span><span class="r">key.go</span>  <span class="r">D</span>
-<span class="c">├── </span>newfile.go  <span class="g">?</span>
-<span class="c">└── </span>tea.go  <span class="y">M</span></pre></div>
-    </div>
-
-    <div class="feature" id="mcp">
-      <div>
-        <span class="flag">sprout mcp</span>
-        <h3>Built for coding agents</h3>
-        <p>Sprout runs as an MCP server. Claude Code, Cursor and other agents get the project map, trees and PR diffs in one call, instead of spending context on <code>ls -R</code>.</p>
-        <p>Paths stay inside the project, symlinks included. <a href="docs.html#mcp">Setup →</a></p>
-      </div>
-      <div class="term"><div class="bar"><i></i><i></i><i></i></div><pre><span class="p">$</span> claude mcp add sprout -- sprout mcp
-
-<span class="c">// or, in any MCP client config</span>
-{
-  "mcpServers": {
-    "sprout": { "command": "sprout", "args": ["mcp"] }
-  }
-}
-
-<span class="c">tools:</span> project_map · tree · diff_tree</pre></div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2>Good defaults, no surprises</h2>
-    <p class="sub">Most of the time plain <code>sprout</code> is the right command.</p>
-    <div class="cards">
-      <div class="card"><h4>.gitignore-aware</h4><p>In a repo, git decides what's shown. Outside one, <code>node_modules</code>, <code>.venv</code>, <code>dist</code> and friends are hidden.</p></div>
-      <div class="card"><h4>Never silent</h4><p>The last line counts what was hidden. <code>--all</code> brings it back.</p></div>
-      <div class="card"><h4>Scriptable</h4><p><code>--json</code> with a versioned schema. Color only on terminals, and <code>NO_COLOR</code> is respected.</p></div>
-      <div class="card"><h4>One small binary</h4><p>About 1 MB, standard library only. Linux, macOS and Windows on amd64 and arm64.</p></div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <span>🌱 Sprout · MIT licensed · by Sprout DevLabs</span>
+    <span>Sprout is MIT licensed and made by Sprout DevLabs.</span>
     <a href="docs.html">Docs</a>
     <a href="https://github.com/Sprout-DevLabs/sprout">GitHub</a>
     <a href="https://github.com/Sprout-DevLabs/sprout/releases">Releases</a>
-    <a href="https://github.com/Sprout-DevLabs/sprout/issues">Issues</a>
+    <a href="https://github.com/Sprout-DevLabs/sprout/issues">Report an issue</a>
   </div>
 </footer>
 
-<script>
-  document.querySelectorAll('[data-copy]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const text = document.getElementById(btn.dataset.copy).textContent;
-      try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
-      catch { btn.textContent = 'Select & copy'; }
-      setTimeout(() => (btn.textContent = 'Copy'), 1500);
-    });
-  });
-</script>
+<script src="demo-data.js"></script>
+<script src="site.js"></script>
 </body>
 </html>

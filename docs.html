@@ -5,35 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sprout Docs</title>
   <meta name="description" content="Install and use Sprout: tree defaults, --ai project maps, --diff, --git, --churn, JSON output, and the MCP server for coding agents.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600&family=Martian+Mono:wdth,wght@75..112.5,200..800&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<nav>
-  <div class="wrap">
-    <a class="brand" href="./">🌱 Sprout</a>
-    <a href="docs.html">Docs</a>
-    <a href="#mcp">MCP</a>
-    <a href="https://github.com/Sprout-DevLabs/sprout">GitHub</a>
-  </div>
-</nav>
+<header class="wrap nav">
+  <a class="brand" href="./" aria-label="Sprout home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 29V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M16 16C16 9 11 5 4 5c0 7 5 11 12 11Z" fill="#3f8a3a"/><path d="M16 19c0-6 4-10 12-10 0 6-4 10-12 10Z" fill="#6fb35f"/></svg>
+    sprout
+  </a>
+  <a href="docs.html">Docs</a>
+  <a href="https://github.com/Sprout-DevLabs/sprout">GitHub</a>
+</header>
 
-<div class="wrap docs">
+<main class="wrap docs">
   <aside>
-    <h5>Start</h5>
+    <p>Start</p>
     <a href="#install">Install</a>
     <a href="#basics">Basics</a>
     <a href="#ignore">What gets hidden</a>
-    <h5>Views</h5>
+    <p>Views</p>
     <a href="#ai">--ai</a>
     <a href="#diff">--diff</a>
     <a href="#git">--git</a>
     <a href="#churn">--churn</a>
     <a href="#stats">--stats</a>
     <a href="#json">--json</a>
-    <h5>Agents</h5>
+    <p>Agents</p>
     <a href="#mcp">MCP server</a>
-    <h5>Reference</h5>
+    <p>Reference</p>
     <a href="#flags">All flags</a>
     <a href="#faq">FAQ</a>
   </aside>
@@ -43,7 +46,7 @@
     <p>Sprout is a single binary. Everything below is also in <code>sprout --help</code>.</p>
 
     <h2 id="install">Install</h2>
-    <pre class="plain"># macOS and Linux
+    <pre class="block"># macOS and Linux
 brew install sprout-devlabs/tap/sprout
 
 # Anywhere with Go 1.22+
@@ -51,12 +54,12 @@ go install github.com/Sprout-DevLabs/sprout@latest</pre>
     <p>Prebuilt archives for Linux, macOS and Windows (amd64 and arm64) are on the <a href="https://github.com/Sprout-DevLabs/sprout/releases">releases page</a>, with checksums. Git features need <code>git</code> on your <code>PATH</code>. Nothing else does.</p>
 
     <h2 id="basics">Basics</h2>
-    <pre class="plain">sprout              # current directory
+    <pre class="block">sprout              # current directory
 sprout src          # another directory
 sprout src -L 2     # flags go before or after the path
 sprout -a           # everything, including hidden and ignored entries</pre>
     <p>The tree ends with a summary line, the same as <code>tree</code>. It also counts anything Sprout hid:</p>
-    <pre class="plain">3 directories, 46 files (6 hidden or ignored, --all to show)</pre>
+    <pre class="block">3 directories, 46 files (6 hidden or ignored, --all to show)</pre>
 
     <h2 id="ignore">What gets hidden</h2>
     <p><strong>Inside a git repository</strong>, <code>.gitignore</code> decides. Sprout asks git for the list of tracked files plus untracked files that aren't ignored. Nested <code>.gitignore</code> files, negations (<code>!keep.log</code>) and your global excludes all behave exactly as they do in git.</p>
@@ -71,7 +74,7 @@ sprout -a           # everything, including hidden and ignored entries</pre>
     </table>
 
     <h2 id="ai">--ai: project map for LLMs</h2>
-    <pre class="plain">sprout --ai | pbcopy           # macOS
+    <pre class="block">sprout --ai | pbcopy           # macOS
 sprout --ai | xclip -sel c     # Linux
 sprout --ai --budget 800       # smaller map</pre>
     <p>This prints a plain-text overview meant to be pasted into a prompt or loaded by an agent. From top to bottom:</p>
@@ -89,7 +92,7 @@ sprout --ai --budget 800       # smaller map</pre>
     <div class="note">Only file and directory <strong>names</strong> go into the map, plus the README's first line. Sprout never reads or prints the contents of any other file.</div>
 
     <h2 id="diff">--diff: a revision range as a tree</h2>
-    <pre class="plain">sprout --diff main...HEAD      # what this branch changed since it forked
+    <pre class="block">sprout --diff main...HEAD      # what this branch changed since it forked
 sprout --diff HEAD~3           # last three commits plus working tree changes
 sprout --diff v1.0..v1.1 -L 2  # between tags, collapsed to depth 2</pre>
     <p>This shows only the changed paths, with <code>M A D R</code> markers and <code>+/-</code> line counts. Directories show how many files changed below them, plus line totals. With <code>-L</code>, deeper subtrees collapse into those totals. Any revision syntax git accepts works, with one exception: a value starting with <code>-</code> is refused, so it can't be mistaken for a git option.</p>
@@ -107,13 +110,13 @@ sprout --diff v1.0..v1.1 -L 2  # between tags, collapsed to depth 2</pre>
     <p>Directories show <code>(N changed)</code>, so changes stay visible when <code>-L</code> collapses a folder. The header shows the current branch. This works from any subdirectory of a repository.</p>
 
     <h2 id="churn">--churn: hotspots</h2>
-    <pre class="plain">sprout --churn
+    <pre class="block">sprout --churn
 sprout --churn --since '90 days ago'
 sprout --churn --git -L 2</pre>
     <p>Each path shows the number of commits that touched it, with a bar scaled against the busiest file. Directories are scaled against the busiest directory and count each commit once. Higher counts are colored yellow, then red. <code>--since</code> accepts any date git understands. Churn reads the history in a single <code>git log</code> pass. On very large histories, use <code>--since</code> to keep it quick.</p>
 
     <h2 id="stats">--stats</h2>
-    <pre class="plain">$ sprout --stats
+    <pre class="block">$ sprout --stats
 bubbletea/
 Project:        Go (go modules, go.mod)
 Files:          212
@@ -127,7 +130,7 @@ Languages:
 
     <h2 id="json">--json</h2>
     <p>This prints the tree, detected projects and summary as a single JSON document. It combines with every other flag: <code>--git</code> adds <code>status</code> and <code>changes</code>, <code>--churn</code> adds <code>churn</code>, and <code>--diff</code> adds <code>added</code> and <code>deleted</code>.</p>
-    <pre class="plain">{
+    <pre class="block">{
   "schemaVersion": 1,
   "name": "demo",
   "root": "/home/you/demo",
@@ -162,9 +165,9 @@ Languages:
     <h2 id="mcp">MCP server for coding agents</h2>
     <p><code>sprout mcp [root]</code> speaks the <a href="https://modelcontextprotocol.io">Model Context Protocol</a> over stdio. The root defaults to the directory it's started in.</p>
     <h3>Claude Code</h3>
-    <pre class="plain">claude mcp add sprout -- sprout mcp</pre>
+    <pre class="block">claude mcp add sprout -- sprout mcp</pre>
     <h3>Cursor, Claude Desktop and other clients</h3>
-    <pre class="plain">{
+    <pre class="block">{
   "mcpServers": {
     "sprout": { "command": "sprout", "args": ["mcp"] }
   }
@@ -215,15 +218,16 @@ Languages:
     <h3>Found a bug?</h3>
     <p><a href="https://github.com/Sprout-DevLabs/sprout/issues">Open an issue</a> and include <code>sprout --version</code>.</p>
   </article>
-</div>
+</main>
 
-<footer>
+<footer class="foot">
   <div class="wrap">
-    <span>🌱 Sprout · MIT licensed</span>
+    <span>Sprout is MIT licensed and made by Sprout DevLabs.</span>
     <a href="./">Home</a>
     <a href="https://github.com/Sprout-DevLabs/sprout">GitHub</a>
     <a href="https://github.com/Sprout-DevLabs/sprout/releases">Releases</a>
   </div>
 </footer>
+<script src="site.js"></script>
 </body>
 </html>
