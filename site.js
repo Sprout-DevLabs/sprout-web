@@ -50,6 +50,11 @@
       trailing.get(prev).push(el);
     }
 
+    // FLIP: remember where persisting rows are, so reordering (--sort size)
+    // slides them to their new places instead of teleporting.
+    const before = new Map();
+    if (!reduced) for (const [key, el] of existing) if (next.has(key)) before.set(el, el.getBoundingClientRect().top);
+
     const order = [...(trailing.get(null) || [])];
     const entering = [];
     for (const item of items) {
@@ -70,6 +75,17 @@
       order.push(el, ...(trailing.get(item.key) || []));
     }
     container.replaceChildren(...order);
+
+    for (const [el, top] of before) {
+      const dy = top - el.getBoundingClientRect().top;
+      if (Math.abs(dy) < 1) continue;
+      el.style.transition = 'none';
+      el.style.transform = `translateY(${dy}px)`;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.style.transition = '';
+        el.style.transform = '';
+      }));
+    }
 
     for (const els of trailing.values()) {
       for (const el of els) {
@@ -92,10 +108,19 @@
   // ---------- views demo ----------
 
   const BARS = '▁▂▃▄▅▆▇█';
+
+  // Same as sprout's humanSize: du -h style, powers of 1024.
+  function humanSize(n) {
+    if (n < 1024) return `${n}B`;
+    let div = 1024, exp = 0;
+    for (let m = Math.floor(n / 1024); m >= 1024; m = Math.floor(m / 1024)) { div *= 1024; exp++; }
+    return (n / div).toFixed(1).replace(/\.0$/, '') + 'KMGTPE'[exp];
+  }
   const SAY = {
     tree: 'The layout with .gitignore applied. The last line counts what was left out.',
     git: 'Uncommitted work on the feature branch: a new TODO, a deleted doc, and edits inside collapsed folders, counted on the folder.',
     churn: 'Commits per path over the project\'s history. web/src and internal/trails are where most of the work goes.',
+    size: 'Sizes with true folder totals, largest first. Collapsed folders are still measured all the way down.',
     diff: 'Everything feature/offline-maps changed since it left main, nested in place, with lines added and removed per folder.',
   };
 
@@ -119,10 +144,11 @@
     return s;
   }
 
-  function label(n, scale) {
+  function label(n, scale, sizes) {
     let h = n.type === 'directory'
       ? `<span class="d">${esc(n.name)}/</span>`
       : n.status === 'D' ? `<span class="name-D">${esc(n.name)}</span>` : esc(n.name);
+    if (sizes && (n.size > 0 || n.type !== 'directory')) h += `  <span class="ann sz">${humanSize(n.size || 0)}</span>`;
     if (n.status) h += `  <span class="ann st-${n.status}">${n.status}</span>`;
     if (n.changes) h += `  <span class="ann c">(${n.changes} changed)</span>`;
     if ((n.added || 0) + (n.deleted || 0) > 0) {
@@ -177,7 +203,7 @@
     headEl.innerHTML = `${esc(dir)}${rest.length ? ` <span class="dim">${esc(rest.join(' '))}</span>` : ''}`;
     const rows = flatten(m.tree);
     const scale = churnScale(rows);
-    reconcile(rowsEl, rows.map(r => ({ key: r.node.path, html: `<span class="c">${r.conn}</span>${label(r.node, scale)}` })));
+    reconcile(rowsEl, rows.map(r => ({ key: r.node.path, html: `<span class="c">${r.conn}</span>${label(r.node, scale, m.size)}` })));
     sumEl.textContent = m.summary;
     if (m.id === 'churn') growBars(rowsEl);
   }
@@ -241,4 +267,41 @@
   slider.max = data.ai.length - 1;
   slider.addEventListener('input', () => showBudget(+slider.value));
   showBudget(+slider.value);
+
+  // ---------- --entry reading order ----------
+
+  const entryEl = document.getElementById('entry-list');
+  if (entryEl && data.entry) {
+    const steps = data.entry.split('\n')
+      .map(l => l.match(/^\s*(\d+)\.\s+(\S+)\s+(.*)$/)).filter(Boolean)
+      .map(([, n, file, why]) => ({ n, file, why, used: +(why.match(/used by (\d+)/)?.[1] || 0) }));
+    const most = Math.max(1, ...steps.map(s => s.used));
+    entryEl.innerHTML = steps.map(s => `<li>
+      <span class="n">${esc(s.n)}.</span><code class="f">${esc(s.file)}</code>
+      <span class="why">${esc(s.why)}</span>
+      <span class="bar" style="--w:${s.used ? s.used / most : 0}"></span></li>`).join('');
+  }
+})();
+
+// ---------- install picker (works without the demo data) ----------
+(() => {
+  const tabs = [...document.querySelectorAll('[role="tab"][data-os]')];
+  if (!tabs.length) return;
+  const select = os => tabs.forEach(t => {
+    const on = t.dataset.os === os;
+    t.setAttribute('aria-selected', String(on));
+    t.tabIndex = on ? 0 : -1;
+    document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+  });
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => select(t.dataset.os));
+    t.addEventListener('keydown', e => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      const n = tabs[(i + d + tabs.length) % tabs.length];
+      select(n.dataset.os); n.focus();
+    });
+  });
+  const p = (navigator.userAgentData?.platform || navigator.platform || '').toLowerCase();
+  select(p.includes('win') ? 'windows' : p.includes('mac') ? 'macos' : p.includes('linux') ? 'linux' : 'macos');
 })();

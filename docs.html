@@ -27,143 +27,189 @@
     <a href="#install">Install</a>
     <a href="#basics">Basics</a>
     <a href="#ignore">What gets hidden</a>
+    <a href="#filter">Filtering</a>
+    <a href="#size">Sizes and sorting</a>
+    <a href="#config">Config files</a>
     <p>Views</p>
     <a href="#ai">--ai</a>
+    <a href="#entry">--entry</a>
     <a href="#diff">--diff</a>
     <a href="#git">--git</a>
     <a href="#churn">--churn</a>
     <a href="#stats">--stats</a>
     <a href="#json">--json</a>
-    <p>Agents</p>
+    <p>More</p>
+    <a href="#remote">Remote repositories</a>
     <a href="#mcp">MCP server</a>
-    <p>Reference</p>
+    <a href="#shell">Completions and man page</a>
+    <a href="#speed">Performance</a>
     <a href="#flags">All flags</a>
     <a href="#faq">FAQ</a>
   </aside>
 
   <article>
     <h1>Sprout documentation</h1>
-    <p>Sprout is a single binary. Everything below is also in <code>sprout --help</code>.</p>
+    <p>Sprout is a single binary. Everything here is also in <code>sprout --help</code> and <code>man sprout</code>.</p>
 
     <h2 id="install">Install</h2>
-    <pre class="block"># macOS and Linux
-brew install sprout-devlabs/tap/sprout
-
-# Anywhere with Go 1.22+
-go install github.com/Sprout-DevLabs/sprout@latest</pre>
-    <p>Prebuilt archives for Linux, macOS and Windows (amd64 and arm64) are on the <a href="https://github.com/Sprout-DevLabs/sprout/releases">releases page</a>, with checksums. Git features need <code>git</code> on your <code>PATH</code>. Nothing else does.</p>
+    <table>
+      <tr><th>Platform</th><th>Command</th></tr>
+      <tr><td>macOS, Linux</td><td><code>brew install sprout-devlabs/tap/sprout</code></td></tr>
+      <tr><td>Windows</td><td><code>scoop bucket add sprout https://github.com/Sprout-DevLabs/scoop-bucket</code><br><code>scoop install sprout</code></td></tr>
+      <tr><td>Debian, Ubuntu</td><td><code>sudo apt install ./sprout_*_linux_amd64.deb</code></td></tr>
+      <tr><td>Fedora, RHEL</td><td><code>sudo dnf install ./sprout_*_linux_amd64.rpm</code></td></tr>
+      <tr><td>Alpine, Arch</td><td>The <code>.apk</code> and <code>.pkg.tar.zst</code> packages on the <a href="https://github.com/Sprout-DevLabs/sprout/releases">releases page</a></td></tr>
+      <tr><td>Any Unix</td><td><code>curl -fsSL https://sprout-devlabs.github.io/sprout-web/install.sh | sh</code></td></tr>
+      <tr><td>Go 1.22+</td><td><code>go install github.com/Sprout-DevLabs/sprout@latest</code></td></tr>
+    </table>
+    <p><a href="install.sh">install.sh</a> works out your OS and architecture, downloads the release archive, and <strong>checks its SHA-256</strong> against the release's <code>checksums.txt</code> before installing. It installs to <code>/usr/local/bin</code> if that's writable and to <code>~/.local/bin</code> otherwise, and it never uses <code>sudo</code>. You can pin a version with <code>SPROUT_VERSION=v0.2.0</code> and choose the location with <code>SPROUT_INSTALL_DIR</code>.</p>
+    <p>Homebrew and the Linux packages install shell completions and the man page too. Every release also has plain archives for Linux, macOS and Windows on amd64 and arm64. git is only needed for git features.</p>
 
     <h2 id="basics">Basics</h2>
-    <pre class="block">sprout              # current directory
-sprout src          # another directory
-sprout src -L 2     # flags go before or after the path
-sprout -a           # everything, including hidden and ignored entries</pre>
-    <p>The tree ends with a summary line, the same as <code>tree</code>. It also counts anything Sprout hid:</p>
-    <pre class="block">3 directories, 46 files (6 hidden or ignored, --all to show)</pre>
+    <pre class="block">sprout                     # current directory
+sprout src -L 2            # flags go before or after the path
+sprout -a                  # everything, including hidden and ignored entries
+sprout github.com/o/repo   # a repository you haven't cloned</pre>
+    <p>The tree ends with a summary line, like <code>tree</code>'s. It also counts anything Sprout hid:</p>
+    <pre class="block">15 directories, 15 files (4 hidden or ignored, --all to show)</pre>
 
     <h2 id="ignore">What gets hidden</h2>
-    <p><strong>Inside a git repository</strong>, <code>.gitignore</code> decides. Sprout asks git for the list of tracked files plus untracked files that aren't ignored. Nested <code>.gitignore</code> files, negations (<code>!keep.log</code>) and your global excludes all behave exactly as they do in git.</p>
-    <p><strong>Outside git</strong>, Sprout hides common build and dependency directories: <code>node_modules</code>, <code>dist</code>, <code>build</code>, <code>target</code>, <code>obj</code>, <code>coverage</code>, <code>.venv</code>, <code>venv</code>, <code>__pycache__</code>, <code>.cache</code>, <code>.next</code>, <code>.nuxt</code>, <code>.pytest_cache</code>, <code>.mypy_cache</code>, <code>.idea</code>, <code>.vscode</code>, <code>.DS_Store</code>, <code>*.egg-info</code>.</p>
-    <p>Dotfiles are hidden in both cases, and <code>.git</code> is never shown.</p>
+    <p><strong>Inside a git repository</strong>, <code>.gitignore</code> decides. Sprout asks git for tracked files plus untracked files that aren't ignored, so nested <code>.gitignore</code> files, negations and your global excludes behave exactly as they do in git.</p>
+    <p><strong>Outside git</strong>, these are hidden: <code>node_modules</code>, <code>dist</code>, <code>build</code>, <code>target</code>, <code>obj</code>, <code>coverage</code>, <code>.venv</code>, <code>venv</code>, <code>__pycache__</code>, <code>.cache</code>, <code>.next</code>, <code>.nuxt</code>, <code>.pytest_cache</code>, <code>.mypy_cache</code>, <code>.idea</code>, <code>.vscode</code>, <code>.DS_Store</code>, <code>*.egg-info</code>.</p>
+    <p>Dotfiles are hidden in both cases, and <code>.git</code> is never shown. A <code>.sproutignore</code> in the target directory adds patterns on top.</p>
     <table>
       <tr><th>Flag</th><th>Effect</th></tr>
-      <tr><td><code>--hidden</code></td><td>Show dotfiles.</td></tr>
-      <tr><td><code>--no-ignore</code></td><td>Don't apply <code>.gitignore</code> or the built-in list. Dotfiles stay hidden.</td></tr>
-      <tr><td><code>-a, --all</code></td><td>Both of the above.</td></tr>
-      <tr><td><code>--ignore LIST</code></td><td>Also hide these names or globs, comma-separated: <code>--ignore '*.log,fixtures'</code>. Matches file and directory names, not paths.</td></tr>
+      <tr><td><code>--hidden</code></td><td>Show dotfiles</td></tr>
+      <tr><td><code>--no-ignore</code></td><td>Don't apply <code>.gitignore</code>, <code>.sproutignore</code> or the built-in list</td></tr>
+      <tr><td><code>-a, --all</code></td><td>Both of the above</td></tr>
     </table>
+
+    <h2 id="filter">Filtering</h2>
+    <p><code>--ignore</code>, <code>--only</code> and <code>.sproutignore</code> all use <strong>gitignore syntax</strong>. Flags can be repeated or comma-separated.</p>
+    <table>
+      <tr><th>Pattern</th><th>Matches</th></tr>
+      <tr><td><code>*.log</code></td><td>Any <code>.log</code> file at any depth (no slash means match the name)</td></tr>
+      <tr><td><code>src/gen</code></td><td>Exactly <code>src/gen</code> from the root (a slash anchors it)</td></tr>
+      <tr><td><code>build/</code></td><td>Directories named <code>build</code> only</td></tr>
+      <tr><td><code>docs/**/*.png</code></td><td>PNGs anywhere under <code>docs</code> (<code>**</code> crosses folders)</td></tr>
+      <tr><td><code>!keep.log</code></td><td>Re-include something an earlier pattern hid (the last match wins)</td></tr>
+    </table>
+    <pre class="block">sprout --only '*.go' --ignore '*_test.go'      # Go sources, no tests
+sprout --only 'web/src/**/*.tsx'                # one part of a frontend
+sprout --changed-within 2d                      # files modified in the last two days
+sprout --max-files 5                            # at most 5 files per folder, then "… 37 more files"</pre>
+    <p><code>--only</code> prunes folders it leaves empty. <code>--changed-within</code> accepts <code>30m</code>, <code>12h</code>, <code>7d</code>, <code>2w</code> or any Go duration. Everything these flags hide is counted in the summary line.</p>
+
+    <h2 id="size">Sizes and sorting</h2>
+    <pre class="block">sprout --size -L 1                  # folder totals, du-style
+sprout --size --sort size -L 2      # largest first
+sprout --sort time -r               # oldest first
+sprout --dirs-first --si --size     # folders first, powers of 1000</pre>
+    <p>Folder totals are <strong>true totals</strong>. When <code>-L</code> collapses a folder, Sprout still measures everything inside it without listing it. Sorting by size or time works the same way, so a collapsed folder sorts by what it contains. Sizes are shown <code>du -h</code> style (<code>4.2K</code>, <code>1.3M</code>), in powers of 1024 unless you pass <code>--si</code>.</p>
+
+    <h2 id="config">Config files</h2>
+    <p>Default flags go in a config file, one per line:</p>
+    <pre class="block"># ~/.config/sprout/config
+--hyperlink
+--ignore=*.snap,fixtures/
+--budget 4000</pre>
+    <table>
+      <tr><th>Read in this order</th><th></th></tr>
+      <tr><td>User</td><td><code>$SPROUT_CONFIG</code>, else <code>$XDG_CONFIG_HOME/sprout/config</code>, else <code>~/.config/sprout/config</code> (<code>%AppData%\sprout\config</code> on Windows)</td></tr>
+      <tr><td>Project</td><td>The nearest <code>.sproutrc</code> in the target directory or above it</td></tr>
+      <tr><td>Command line</td><td>Always wins. Turn a boolean off with <code>--git=false</code></td></tr>
+    </table>
+    <p><code>--ignore</code> and <code>--only</code> patterns add up across all three. <code>--no-config</code> skips both files. A mistake in a config file names the file and line. A repository you map by URL never has its <code>.sproutrc</code> applied.</p>
 
     <h2 id="ai">--ai: project map for LLMs</h2>
     <pre class="block">sprout --ai | pbcopy           # macOS
 sprout --ai | xclip -sel c     # Linux
-sprout --ai --budget 800       # smaller map</pre>
-    <p>This prints a plain-text overview meant to be pasted into a prompt or loaded by an agent. From top to bottom:</p>
+sprout --ai --budget 800       # a smaller map</pre>
+    <p>This prints a plain-text overview for a prompt or an agent. From top to bottom:</p>
     <ul>
-      <li>The README's first prose line. Headings, badges and HTML are skipped.</li>
-      <li><strong>stack</strong>: detected from manifests like <code>go.mod</code>, <code>package.json</code>, <code>pyproject.toml</code> and <code>Cargo.toml</code>. Every one found is listed.</li>
-      <li><strong>languages</strong>: share of files, counting programming and markup languages only.</li>
-      <li><strong>git</strong>: the branch and any uncommitted changes, plus the five files with the most commits in the last 90 days.</li>
-      <li><strong>entry points</strong>: files like <code>main.go</code>, <code>index.ts</code>, <code>app.py</code> and <code>main.rs</code>, outside tests and examples.</li>
-      <li><strong>config</strong>: Dockerfiles, compose files, CI workflows, <code>tsconfig.json</code>, <code>*.config.*</code> and similar.</li>
-      <li><strong>structure</strong>: one line per directory, with its files listed inline.</li>
+      <li>The README's first prose line</li>
+      <li><strong>stack</strong> and <strong>languages</strong>, from manifests and file counts</li>
+      <li><strong>git</strong>: the branch, uncommitted changes, and the 5 most-changed files in the last 90 days</li>
+      <li><strong>entry points</strong> and <strong>config</strong> (Dockerfiles, CI workflows, compose files, <code>tsconfig.json</code> and so on)</li>
+      <li><strong>structure</strong>: one line per folder, with its files inline</li>
+      <li><strong>key files</strong>: the files the rest of the code uses most, with their function and type signatures</li>
     </ul>
+    <pre class="block">## key files (most used first)
+web/src/lib/types.ts (used by 5): export interface Trail; export interface Report; export type Units
+internal/trails/store.go (used by 3): type Store struct; func NewStore(db *sql.DB) *Store; …</pre>
     <h3>How the budget works</h3>
-    <p><code>--budget</code> is an approximate token count (default 2000, at about 4 bytes per token). If the full structure fits, you get all of it. Otherwise every top-level directory starts as a one-line summary like <code>internal/ (84 files, mostly .go)</code>. Directories then open breadth-first while the map still fits. <code>examples/</code>, <code>test/</code>, <code>tests/</code>, <code>testdata/</code>, <code>fixtures/</code>, <code>vendor/</code> and <code>third_party/</code> open last. A directory too big to open doesn't stop its smaller siblings from opening.</p>
-    <div class="note">Only file and directory <strong>names</strong> go into the map, plus the README's first line. Sprout never reads or prints the contents of any other file.</div>
+    <p><code>--budget</code> is an approximate token count (default 2000, at about 4 bytes per token). The structure gets three fifths of it. Every top-level folder starts as a one-line summary like <code>internal/ (84 files, mostly .go)</code>, and folders open breadth-first while the map fits. Tests, examples, fixtures and vendored code open last. Key files get the rest of the budget.</p>
+    <h3>How key files are found</h3>
+    <p>Sprout reads source files, extracts top-level declarations with their signatures, and resolves local imports. Files are ranked by how many other files import or reference them. Tests don't count, and are never read for this.</p>
+    <table>
+      <tr><th>Language</th><th>How</th></tr>
+      <tr><td>Go</td><td>Go's own parser. Module imports and same-package references both count, so single-package programs rank too.</td></tr>
+      <tr><td>TypeScript, JavaScript</td><td><code>export</code> declarations, and relative <code>import</code>/<code>require</code>/<code>import()</code> (<code>./x.js</code> finds <code>x.ts</code>)</td></tr>
+      <tr><td>Python</td><td>Top-level <code>def</code>/<code>class</code> (not <code>_private</code>), and relative, dotted and <code>src/</code> imports</td></tr>
+      <tr><td>Rust</td><td><code>pub</code> items, <code>mod x;</code> and <code>use crate::…</code></td></tr>
+      <tr><td>Java, Kotlin</td><td>Public types and top-level declarations, and <code>import</code> under any source root</td></tr>
+    </table>
+    <div class="note">Only file and directory <strong>names</strong>, the README's first line and declaration <strong>signatures</strong> go into the map. Function bodies and other file contents never do. TypeScript path aliases (<code>@/…</code>) aren't resolved yet.</div>
+
+    <h2 id="entry">--entry: where to start reading</h2>
+    <pre class="block">$ sprout --entry
+Reading order for trailhead
+
+  1. README.md                  what the project is
+  2. cmd/api/main.go            entry point
+  3. web/src/main.tsx           entry point
+  4. web/src/lib/types.ts       used by 5 files
+  5. web/src/lib/api.ts         used by 4 files</pre>
+    <p>The order is the README, then entry points, then the most-used files from the same ranking as <code>--ai</code>, up to 15 steps.</p>
 
     <h2 id="diff">--diff: a revision range as a tree</h2>
     <pre class="block">sprout --diff main...HEAD      # what this branch changed since it forked
-sprout --diff HEAD~3           # last three commits plus working tree changes
+sprout --diff HEAD~3           # the last three commits plus uncommitted changes
 sprout --diff v1.0..v1.1 -L 2  # between tags, collapsed to depth 2</pre>
-    <p>This shows only the changed paths, with <code>M A D R</code> markers and <code>+/-</code> line counts. Directories show how many files changed below them, plus line totals. With <code>-L</code>, deeper subtrees collapse into those totals. Any revision syntax git accepts works, with one exception: a value starting with <code>-</code> is refused, so it can't be mistaken for a git option.</p>
+    <p>This shows only changed paths, with <code>M A D R</code> marks and <code>+/-</code> line counts. Folders show how many files changed below them, plus totals, and <code>-L</code> collapses deeper folders into those totals. Any revision git accepts works, but a value starting with <code>-</code> is refused so it can't act as a git option.</p>
 
     <h2 id="git">--git: working tree status</h2>
     <table>
       <tr><th>Mark</th><th>Meaning</th></tr>
       <tr><td><code>M</code></td><td>Modified</td></tr>
       <tr><td><code>A</code></td><td>Added (staged)</td></tr>
-      <tr><td><code>D</code></td><td>Deleted. Shown where the file used to be.</td></tr>
+      <tr><td><code>D</code></td><td>Deleted, shown where the file used to be</td></tr>
       <tr><td><code>R</code></td><td>Renamed</td></tr>
       <tr><td><code>?</code></td><td>Untracked</td></tr>
       <tr><td><code>U</code></td><td>Merge conflict</td></tr>
     </table>
-    <p>Directories show <code>(N changed)</code>, so changes stay visible when <code>-L</code> collapses a folder. The header shows the current branch. This works from any subdirectory of a repository.</p>
+    <p>Folders show <code>(N changed)</code>, so changes stay visible when <code>-L</code> collapses a folder. This works from any subdirectory of a repository.</p>
 
     <h2 id="churn">--churn: hotspots</h2>
     <pre class="block">sprout --churn
 sprout --churn --since '90 days ago'
 sprout --churn --git -L 2</pre>
-    <p>Each path shows the number of commits that touched it, with a bar scaled against the busiest file. Directories are scaled against the busiest directory and count each commit once. Higher counts are colored yellow, then red. <code>--since</code> accepts any date git understands. Churn reads the history in a single <code>git log</code> pass. On very large histories, use <code>--since</code> to keep it quick.</p>
+    <p>This shows the number of commits that touched each path, with a bar scaled against the busiest file (folders against the busiest folder). High counts turn yellow, then red. For very large histories, add <code>--since</code>.</p>
 
     <h2 id="stats">--stats</h2>
-    <pre class="block">$ sprout --stats
-bubbletea/
-Project:        Go (go modules, go.mod)
-Files:          212
-Directories:    71
-Total size:     2.8 MB
-Ignored:        6 entries (--all to include)
-Languages:
-  Go             111 files
-  Markdown       42 files
-  …</pre>
+    <p>File and folder counts, total size (<code>KiB</code>/<code>MiB</code>, or <code>kB</code>/<code>MB</code> with <code>--si</code>), every detected stack, and a count of files per language.</p>
 
     <h2 id="json">--json</h2>
-    <p>This prints the tree, detected projects and summary as a single JSON document. It combines with every other flag: <code>--git</code> adds <code>status</code> and <code>changes</code>, <code>--churn</code> adds <code>churn</code>, and <code>--diff</code> adds <code>added</code> and <code>deleted</code>.</p>
-    <pre class="block">{
-  "schemaVersion": 1,
-  "name": "demo",
-  "root": "/home/you/demo",
-  "gitAware": true,
-  "projects": [{ "manifest": "go.mod", "language": "Go", "packageManager": "go modules" }],
-  "summary": { "directories": 1, "files": 2, "bytes": 30, "skipped": 1,
-               "languages": { "Go": 1, "Go modules": 1 } },
-  "tree": {
-    "name": "demo", "type": "directory",
-    "children": [
-      { "name": "go.mod", "path": "go.mod", "type": "file", "size": 12 },
-      { "name": "src", "path": "src", "type": "directory", "changes": 1,
-        "children": [
-          { "name": "main.go", "path": "src/main.go", "type": "file", "size": 18, "status": "M" }
-        ] }
-    ]
-  }
-}</pre>
+    <p>This prints the tree, detected projects and summary as one JSON document, and combines with every other flag. <code>schemaVersion</code> only changes when an existing field changes meaning or is removed. Adding fields doesn't change it.</p>
     <table>
       <tr><th>Node field</th><th>Notes</th></tr>
-      <tr><td><code>path</code></td><td>Relative to the root and always slash-separated, including on Windows. Omitted on the root node.</td></tr>
-      <tr><td><code>type</code></td><td><code>"file"</code> or <code>"directory"</code></td></tr>
-      <tr><td><code>size</code></td><td>Bytes, files only</td></tr>
-      <tr><td><code>truncated</code></td><td>A directory that wasn't expanded because of <code>--depth</code></td></tr>
-      <tr><td><code>error</code></td><td>A directory that couldn't be read, e.g. <code>"permission denied"</code>. The walk carries on past it.</td></tr>
+      <tr><td><code>name</code>, <code>path</code>, <code>type</code></td><td><code>path</code> is relative to the root and always uses <code>/</code>. <code>type</code> is <code>"file"</code> or <code>"directory"</code></td></tr>
+      <tr><td><code>size</code>, <code>modified</code></td><td>Bytes, and RFC 3339 UTC. Folders get their total with <code>--size</code>, and their newest file's time</td></tr>
+      <tr><td><code>truncated</code>, <code>moreFiles</code></td><td>Collapsed by <code>--depth</code>; files left out by <code>--max-files</code></td></tr>
+      <tr><td><code>error</code></td><td>An unreadable folder, e.g. <code>"permission denied"</code>. The walk carries on past it</td></tr>
       <tr><td><code>status</code>, <code>changes</code></td><td><code>--git</code> / <code>--diff</code></td></tr>
-      <tr><td><code>added</code>, <code>deleted</code></td><td><code>--diff</code> line counts, summed on directories</td></tr>
+      <tr><td><code>added</code>, <code>deleted</code></td><td><code>--diff</code> line counts, summed on folders</td></tr>
       <tr><td><code>churn</code></td><td><code>--churn</code> commit count</td></tr>
     </table>
-    <p>Empty fields are omitted, and <code>projects</code> is always an array. <code>schemaVersion</code> changes only when an existing field changes meaning or is removed, never when a field is added.</p>
+
+    <h2 id="remote">Remote repositories</h2>
+    <pre class="block">sprout github.com/charmbracelet/bubbletea --ai
+sprout https://gitlab.com/group/project --entry
+sprout git@github.com:acme/private.git --churn -L 2</pre>
+    <p>Any git URL (<code>https</code>, <code>ssh</code>, <code>git@host:path</code>, <code>file</code>) or <code>host/owner/repo</code> shorthand is cloned into a temporary folder, mapped, and removed, even if you press Ctrl-C. A path that exists on disk is always treated as local. Sprout fetches one commit by default. With <code>--git</code>, <code>--churn</code> or <code>--diff</code> it fetches the full history but not old file contents. Private repos use your usual git credentials. The cloned repo's <code>.sproutrc</code> is ignored.</p>
 
     <h2 id="mcp">MCP server for coding agents</h2>
-    <p><code>sprout mcp [root]</code> speaks the <a href="https://modelcontextprotocol.io">Model Context Protocol</a> over stdio. The root defaults to the directory it's started in.</p>
+    <p><code>sprout mcp [root]</code> speaks the <a href="https://modelcontextprotocol.io">Model Context Protocol</a> over stdio. The root defaults to the directory it starts in.</p>
     <h3>Claude Code</h3>
     <pre class="block">claude mcp add sprout -- sprout mcp</pre>
     <h3>Cursor, Claude Desktop and other clients</h3>
@@ -172,49 +218,84 @@ Languages:
     "sprout": { "command": "sprout", "args": ["mcp"] }
   }
 }</pre>
-    <p>Clients that don't start servers in the project directory can pass it explicitly: <code>"args": ["mcp", "/path/to/project"]</code>.</p>
-    <h3>Tools</h3>
+    <p>If your client doesn't start servers in the project directory, pass the path: <code>"args": ["mcp", "/path/to/project"]</code>.</p>
     <table>
       <tr><th>Tool</th><th>Arguments</th><th>Returns</th></tr>
-      <tr><td><code>project_map</code></td><td><code>path?</code>, <code>budget?</code></td><td>The <a href="#ai"><code>--ai</code></a> map. Its description tells agents to call it first.</td></tr>
-      <tr><td><code>tree</code></td><td><code>path?</code>, <code>depth?</code> (default 3), <code>all?</code>, <code>git?</code>, <code>churn?</code>, <code>since?</code></td><td>A tree of a subdirectory</td></tr>
+      <tr><td><code>project_map</code></td><td><code>path?</code>, <code>budget?</code></td><td>The <a href="#ai"><code>--ai</code></a> map, key files included. Agents are told to call it first</td></tr>
+      <tr><td><code>reading_order</code></td><td><code>path?</code></td><td>The <a href="#entry"><code>--entry</code></a> list</td></tr>
+      <tr><td><code>tree</code></td><td><code>path?</code>, <code>depth?</code> (default 3), <code>all?</code>, <code>git?</code>, <code>churn?</code>, <code>since?</code></td><td>A tree of a folder</td></tr>
       <tr><td><code>diff_tree</code></td><td><code>rev</code>, <code>path?</code>, <code>depth?</code></td><td>The <a href="#diff"><code>--diff</code></a> view</td></tr>
     </table>
     <h3>Safety</h3>
     <ul>
-      <li><code>path</code> must stay inside the root once <code>..</code> and symlinks are resolved. Absolute paths are refused.</li>
-      <li><code>rev</code> can never become a git option.</li>
-      <li>Tool output refers to paths relative to the root, never your home directory.</li>
-      <li>The server is read-only. Nothing it does writes to disk.</li>
+      <li><code>path</code> must stay inside the root once <code>..</code> and symlinks are resolved. Absolute paths and URLs are refused, so the server never clones anything.</li>
+      <li><code>rev</code> can't become a git option.</li>
+      <li>Output shows paths relative to the root, never your home directory.</li>
+      <li>The server is read-only.</li>
     </ul>
+
+    <h2 id="shell">Completions and man page</h2>
+    <pre class="block">sprout --completion bash > ~/.local/share/bash-completion/completions/sprout
+sprout --completion zsh  > "${fpath[1]}/_sprout"
+sprout --completion fish > ~/.config/fish/completions/sprout.fish
+sprout --completion powershell >> $PROFILE
+sprout --man | man -l -          # Linux; Homebrew installs `man sprout`</pre>
+    <p>Completions cover every flag, the <code>--sort</code> values, git branches and tags for <code>--diff</code>, and folders for the path. They're generated from the same definitions the binary parses, so they can't go out of date.</p>
+
+    <h2 id="speed">Performance</h2>
+    <p>These are measured on Kubernetes (31,412 files) on a laptop with a warm cache:</p>
+    <table>
+      <tr><th>Command</th><th>Time</th></tr>
+      <tr><td><code>sprout</code></td><td>0.47 s (<code>find</code>: 0.49 s)</td></tr>
+      <tr><td><code>sprout -L 2</code></td><td>0.25 s</td></tr>
+      <tr><td><code>sprout --size -L 1</code></td><td>0.57 s</td></tr>
+      <tr><td><code>sprout --entry</code></td><td>1.0 s</td></tr>
+      <tr><td><code>sprout --ai</code></td><td>1.1 s</td></tr>
+    </table>
+    <p>Sprout only reads file metadata when the output uses it, parses source files in parallel, and never reads tests or vendored code for the code graph. The repository's <code>bench_test.go</code> reproduces these numbers.</p>
 
     <h2 id="flags">All flags</h2>
     <table>
       <tr><th>Flag</th><th>Description</th></tr>
-      <tr><td><code>-L, --depth N</code></td><td>Limit depth (<code>-1</code>, the default, means unlimited)</td></tr>
+      <tr><td><code>-L, --depth N</code></td><td>Limit depth (<code>-1</code>, the default, is unlimited)</td></tr>
       <tr><td><code>-a, --all</code></td><td>Show hidden and ignored entries</td></tr>
       <tr><td><code>--hidden</code></td><td>Show dotfiles</td></tr>
-      <tr><td><code>--no-ignore</code></td><td>Skip <code>.gitignore</code> and the built-in ignore list</td></tr>
-      <tr><td><code>--ignore LIST</code></td><td>Extra names or globs to hide</td></tr>
+      <tr><td><code>--no-ignore</code></td><td>Skip <code>.gitignore</code>, <code>.sproutignore</code> and the built-in list</td></tr>
+      <tr><td><code>--ignore PATTERNS</code></td><td>Hide matches (gitignore syntax)</td></tr>
+      <tr><td><code>--only PATTERNS</code></td><td>Show only matching files</td></tr>
+      <tr><td><code>--changed-within AGE</code></td><td>Only files modified recently</td></tr>
+      <tr><td><code>--max-files N</code></td><td>At most N files per folder</td></tr>
+      <tr><td><code>--size</code></td><td>Sizes and true folder totals</td></tr>
+      <tr><td><code>--sort name|size|time</code></td><td>Entry order</td></tr>
+      <tr><td><code>-r, --reverse</code></td><td>Reverse the order</td></tr>
+      <tr><td><code>--dirs-first</code></td><td>Folders before files</td></tr>
+      <tr><td><code>--si</code></td><td>Powers of 1000 for sizes</td></tr>
+      <tr><td><code>--hyperlink</code></td><td>Clickable names in supporting terminals</td></tr>
       <tr><td><code>--ai</code></td><td>Project map for LLMs</td></tr>
       <tr><td><code>--budget N</code></td><td>Token budget for <code>--ai</code> (default 2000)</td></tr>
+      <tr><td><code>--entry</code></td><td>Suggested reading order</td></tr>
       <tr><td><code>--diff REV</code></td><td>Only paths changed in a revision range</td></tr>
-      <tr><td><code>--git</code></td><td>Mark working-tree changes</td></tr>
+      <tr><td><code>--git</code></td><td>Mark uncommitted changes</td></tr>
       <tr><td><code>--churn</code></td><td>Commits per path</td></tr>
       <tr><td><code>--since DATE</code></td><td>Window for <code>--churn</code></td></tr>
       <tr><td><code>--stats</code></td><td>Summary statistics</td></tr>
       <tr><td><code>--json</code></td><td>JSON output</td></tr>
-      <tr><td><code>--version</code></td><td>Print version</td></tr>
+      <tr><td><code>--no-config</code></td><td>Ignore config files</td></tr>
+      <tr><td><code>--completion SHELL</code></td><td>Print a completion script</td></tr>
+      <tr><td><code>--man</code></td><td>Print the man page</td></tr>
+      <tr><td><code>--version</code></td><td>Print the version</td></tr>
     </table>
-    <p>Exit codes: <code>0</code> success, <code>1</code> runtime error (missing path, not a git repository), <code>2</code> bad flags or arguments.</p>
+    <p>Exit codes: <code>0</code> success, <code>1</code> runtime error (missing path, not a git repository, failed clone), <code>2</code> invalid flags, arguments or config.</p>
 
     <h2 id="faq">FAQ</h2>
-    <h3>No colors?</h3>
-    <p>Colors only appear when the output goes to a terminal. They're turned off when <code>NO_COLOR</code> is set or <code>TERM=dumb</code>.</p>
+    <h3>Why are there no colors?</h3>
+    <p>Colors and links only appear when output goes to a terminal. <code>NO_COLOR</code> or <code>TERM=dumb</code> turns colors off.</p>
     <h3>I have a directory called <code>mcp</code></h3>
-    <p><code>sprout mcp</code> starts the server. Use <code>sprout ./mcp</code> to see the directory's tree.</p>
+    <p><code>sprout mcp</code> starts the server. Use <code>sprout ./mcp</code> for the directory.</p>
     <h3>How is this different from <code>tree</code>?</h3>
-    <p>For a plain listing it isn't very different, and that's deliberate: <code>sprout -L 2</code> works the way you'd expect. The difference is the defaults (<code>.gitignore</code>, counting what's hidden) and the views <code>tree</code> doesn't have: <code>--ai</code>, <code>--diff</code>, <code>--git</code>, <code>--churn</code> and MCP.</p>
+    <p>For a plain listing it isn't very different, and <code>sprout -L 2</code> behaves the way you'd expect. The difference is the defaults (<code>.gitignore</code>, counting what's hidden) and the views <code>tree</code> doesn't have: <code>--ai</code>, <code>--entry</code>, <code>--diff</code>, <code>--git</code>, <code>--churn</code>, remote repositories and MCP.</p>
+    <h3>Does <code>--ai</code> send my code anywhere?</h3>
+    <p>No. Sprout has no network access except when it clones a repository you asked for. <code>--ai</code> only prints text, and you decide where it goes.</p>
     <h3>Found a bug?</h3>
     <p><a href="https://github.com/Sprout-DevLabs/sprout/issues">Open an issue</a> and include <code>sprout --version</code>.</p>
   </article>
