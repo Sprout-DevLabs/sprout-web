@@ -17,6 +17,13 @@
   --leaf-soft: #e1f3e7;
   --glow: rgba(46, 186, 104, 0.18);
 
+  /* benchmark result categories: one colour each, never mixed */
+  --k-speed: #17924d;
+  --k-memory: #2f6fd6;
+  --k-allocation: #0f8a86;
+  --k-complexity: #7a4fd1;
+  --k-correctness: #b36b00;
+
   /* instrument panels */
   --term: #0d1511;
   --term-2: #121c17;
@@ -58,6 +65,11 @@
     --leaf-ink: #6ee09b;
     --leaf-soft: #13271b;
     --glow: rgba(79, 207, 130, 0.14);
+    --k-speed: #4fcf82;
+    --k-memory: #7fb2ff;
+    --k-allocation: #5fd0c8;
+    --k-complexity: #b79bff;
+    --k-correctness: #f1b84e;
     --term: #0c130f;
     --term-2: #111a15;
     --term-line: rgba(214, 238, 222, 0.09);
@@ -320,6 +332,14 @@ h3 {
 @media (max-width: 560px) {
   .nav-hide-sm {
     display: none;
+  }
+}
+@media (max-width: 380px) {
+  .nav .wrap {
+    gap: 2px;
+  }
+  .nav-link {
+    padding-inline: 8px;
   }
 }
 

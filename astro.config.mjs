@@ -50,6 +50,7 @@ export default defineConfig({
             { label: 'JSON output', slug: 'docs/reference/json' },
             { label: 'Completions, man page, exit codes', slug: 'docs/reference/shell' },
             { label: 'Performance', slug: 'docs/reference/performance' },
+            { label: 'Benchmark log', link: '/benchmarks/' },
           ],
         },
         { label: 'FAQ', slug: 'docs/faq' },

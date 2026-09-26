@@ -3,6 +3,8 @@ title: Performance
 description: How fast Sprout is on large repositories, and how to measure it.
 ---
 
+For controlled, versioned before/after measurements (including what didn't improve and how each run was measured), see the [benchmark log](/sprout-web/benchmarks/). The numbers below are a quick reference.
+
 Measured on Kubernetes (31,412 files) on a laptop with a warm cache:
 
 | Command | Time |

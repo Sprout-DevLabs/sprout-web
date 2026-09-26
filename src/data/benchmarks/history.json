@@ -1,0 +1,589 @@
+{
+  "phases": [
+    {
+      "id": "p1",
+      "number": 1,
+      "name": "Streaming JSON",
+      "from": "Recursive JSON materialization: every node marshalled into a temporary buffer, then the whole document re-indented",
+      "to": "One streaming writer that encodes each value once into a reused buffer; compact by default, --pretty opt-in",
+      "commit": "f1525e6",
+      "pr": 27,
+      "results": [
+        {
+          "metric": "json-wall-llvm"
+        },
+        {
+          "metric": "json-alloc-bytes-llvm"
+        },
+        {
+          "metric": "json-rss-llvm"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "number": 2,
+      "name": "Compact tree",
+      "from": "One heap allocation per node, plus a stored absolute path and a separate name string",
+      "to": "One allocation per directory, names sharing their relative path's bytes, and filesystem paths rebuilt on demand",
+      "commit": "58d2169",
+      "pr": 29,
+      "results": [
+        {
+          "metric": "tree-live-llvm"
+        },
+        {
+          "metric": "tree-objects-per-node-llvm"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "number": 3,
+      "name": "Dependency graph",
+      "from": "Per-file import maps, forward edges only, package-level Go resolution against the root module",
+      "to": "Integer file IDs with forward and reverse adjacency, test relationships, file-level Go edges and every go.mod in the tree",
+      "commit": "636d292",
+      "pr": 30,
+      "results": [
+        {
+          "metric": "graph-edges-k8s"
+        },
+        {
+          "metric": "dependents-lookup"
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "id": "2026-09-26-phases-1-3",
+      "date": "2026-09-26",
+      "title": "Phases 1–3: streaming JSON, compact tree, dependency graph",
+      "phases": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "baseline": {
+        "revision": "bc13e1e",
+        "label": "v0.2.0"
+      },
+      "current": {
+        "revision": "636d292",
+        "label": "main after #30"
+      },
+      "environment": {
+        "hardware": "Apple M4",
+        "cores": 10,
+        "memory": "16 GB",
+        "os": "macOS 26.6.2",
+        "go": "Go 1.26.5",
+        "cache": "warm filesystem cache",
+        "rounds": 5
+      },
+      "repositories": [
+        {
+          "name": "llvm-project",
+          "revision": "9f8d81253",
+          "files": 185509,
+          "role": "large heterogeneous repository"
+        },
+        {
+          "name": "kubernetes",
+          "revision": "dfd7b93a",
+          "files": 31412,
+          "role": "Go-heavy, multi-module"
+        },
+        {
+          "name": "sprout",
+          "revision": "636d292",
+          "files": 44,
+          "role": "small single-package Go"
+        },
+        {
+          "name": "ky",
+          "revision": "0d59458",
+          "files": 104,
+          "role": "small TypeScript control"
+        },
+        {
+          "name": "click",
+          "revision": "06b2a67",
+          "files": 178,
+          "role": "small Python control"
+        },
+        {
+          "name": "anyhow",
+          "revision": "c63b279",
+          "files": 54,
+          "role": "small Rust control"
+        }
+      ],
+      "headline": [
+        "json-wall-llvm",
+        "json-rss-llvm",
+        "json-alloc-bytes-llvm",
+        "tree-live-llvm",
+        "tree-objects-per-node-llvm",
+        "entry-rss-llvm"
+      ],
+      "metrics": [
+        {
+          "id": "json-wall-llvm",
+          "kind": "speed",
+          "verdict": "improved",
+          "label": "--json wall time",
+          "command": "sprout --json",
+          "repository": "llvm-project",
+          "before": 2.13,
+          "after": 1.3,
+          "unit": "s",
+          "change": -38.8,
+          "rounds": [
+            -46,
+            -38
+          ]
+        },
+        {
+          "id": "json-pretty-wall-llvm",
+          "kind": "speed",
+          "verdict": "improved",
+          "label": "--json --pretty wall time",
+          "command": "sprout --json --pretty",
+          "repository": "llvm-project",
+          "before": 2.11,
+          "after": 1.2,
+          "unit": "s",
+          "change": -40.3,
+          "rounds": [
+            -45,
+            -37
+          ],
+          "note": "Baseline has no --pretty flag; its --json was the indented form and is byte-identical to the current --json --pretty."
+        },
+        {
+          "id": "json-wall-k8s",
+          "kind": "speed",
+          "verdict": "improved",
+          "label": "--json wall time",
+          "command": "sprout --json",
+          "repository": "kubernetes",
+          "before": 0.56,
+          "after": 0.33,
+          "unit": "s",
+          "change": -39.3,
+          "rounds": [
+            -50,
+            -31
+          ]
+        },
+        {
+          "id": "json-pretty-wall-k8s",
+          "kind": "speed",
+          "verdict": "improved",
+          "label": "--json --pretty wall time",
+          "command": "sprout --json --pretty",
+          "repository": "kubernetes",
+          "before": 0.5,
+          "after": 0.3,
+          "unit": "s",
+          "change": -40.0,
+          "rounds": [
+            -43,
+            -39
+          ]
+        },
+        {
+          "id": "entry-wall-llvm",
+          "kind": "speed",
+          "verdict": "improved",
+          "label": "--entry wall time",
+          "command": "sprout --entry",
+          "repository": "llvm-project",
+          "before": 1.11,
+          "after": 1.04,
+          "unit": "s",
+          "change": -6.0,
+          "rounds": [
+            -15,
+            -1
+          ]
+        },
+        {
+          "id": "json-rss-llvm",
+          "kind": "memory",
+          "verdict": "improved",
+          "label": "--json peak RSS",
+          "command": "sprout --json",
+          "repository": "llvm-project",
+          "before": 547,
+          "after": 109,
+          "unit": "MB",
+          "change": -80.3,
+          "rounds": [
+            -84,
+            -77
+          ]
+        },
+        {
+          "id": "json-pretty-rss-llvm",
+          "kind": "memory",
+          "verdict": "improved",
+          "label": "--json --pretty peak RSS",
+          "command": "sprout --json --pretty",
+          "repository": "llvm-project",
+          "before": 622,
+          "after": 110,
+          "unit": "MB",
+          "change": -82.7,
+          "rounds": [
+            -84,
+            -74
+          ]
+        },
+        {
+          "id": "json-rss-k8s",
+          "kind": "memory",
+          "verdict": "improved",
+          "label": "--json peak RSS",
+          "command": "sprout --json",
+          "repository": "kubernetes",
+          "before": 136,
+          "after": 29,
+          "unit": "MB",
+          "change": -78.7,
+          "rounds": [
+            -82,
+            -77
+          ]
+        },
+        {
+          "id": "tree-rss-llvm",
+          "kind": "memory",
+          "verdict": "improved",
+          "label": "Tree peak RSS",
+          "command": "sprout",
+          "repository": "llvm-project",
+          "before": 139,
+          "after": 113,
+          "unit": "MB",
+          "change": -18.3,
+          "rounds": [
+            -20,
+            -15
+          ]
+        },
+        {
+          "id": "entry-rss-llvm",
+          "kind": "memory",
+          "verdict": "improved",
+          "label": "--entry peak RSS",
+          "command": "sprout --entry",
+          "repository": "llvm-project",
+          "before": 157,
+          "after": 115,
+          "unit": "MB",
+          "change": -26.7,
+          "rounds": [
+            -27,
+            -24
+          ]
+        },
+        {
+          "id": "ai-rss-llvm",
+          "kind": "memory",
+          "verdict": "improved",
+          "label": "--ai peak RSS",
+          "command": "sprout --ai",
+          "repository": "llvm-project",
+          "before": 235,
+          "after": 194,
+          "unit": "MB",
+          "change": -17.5,
+          "rounds": [
+            -21,
+            -16
+          ]
+        },
+        {
+          "id": "tree-live-llvm",
+          "kind": "memory",
+          "verdict": "improved",
+          "label": "Tree live memory",
+          "command": "in-process, 201,148 nodes",
+          "repository": "llvm-project",
+          "before": 88.3,
+          "after": 64.5,
+          "unit": "MB",
+          "change": -27.0
+        },
+        {
+          "id": "tree-bytes-per-node-llvm",
+          "kind": "memory",
+          "verdict": "improved",
+          "label": "Live bytes per node",
+          "command": "in-process",
+          "repository": "llvm-project",
+          "before": 460,
+          "after": 336,
+          "unit": "B",
+          "change": -27.0
+        },
+        {
+          "id": "tree-objects-per-node-llvm",
+          "kind": "memory",
+          "verdict": "improved",
+          "label": "Live heap objects per node",
+          "command": "in-process",
+          "repository": "llvm-project",
+          "before": 4.03,
+          "after": 1.17,
+          "unit": "",
+          "change": -71.1
+        },
+        {
+          "id": "tree-live-k8s",
+          "kind": "memory",
+          "verdict": "improved",
+          "label": "Tree live memory",
+          "command": "in-process, 37,183 nodes",
+          "repository": "kubernetes",
+          "before": 19.9,
+          "after": 13.2,
+          "unit": "MB",
+          "change": -33.6
+        },
+        {
+          "id": "json-alloc-bytes-llvm",
+          "kind": "allocation",
+          "verdict": "improved",
+          "label": "--json bytes allocated",
+          "command": "sprout --json",
+          "repository": "llvm-project",
+          "before": 1128,
+          "after": 231,
+          "unit": "MB",
+          "change": -79.5,
+          "note": "Baseline allocation varies about 2% between runs (encoding/json buffer growth)."
+        },
+        {
+          "id": "json-allocs-llvm",
+          "kind": "allocation",
+          "verdict": "improved",
+          "label": "--json allocations",
+          "command": "sprout --json",
+          "repository": "llvm-project",
+          "before": 2.52,
+          "after": 1.52,
+          "unit": "M",
+          "change": -39.8
+        },
+        {
+          "id": "tree-build-allocs-llvm",
+          "kind": "allocation",
+          "verdict": "improved",
+          "label": "Allocations to build the tree",
+          "command": "in-process",
+          "repository": "llvm-project",
+          "before": 1.21,
+          "after": 0.81,
+          "unit": "M",
+          "change": -33.1
+        },
+        {
+          "id": "graph-allocs-k8s",
+          "kind": "allocation",
+          "verdict": "improved",
+          "label": "Graph build allocations",
+          "command": "in-process, no tests",
+          "repository": "kubernetes",
+          "before": 16.55,
+          "after": 16.19,
+          "unit": "M",
+          "change": -2.2
+        },
+        {
+          "id": "graph-edges-k8s",
+          "kind": "correctness",
+          "verdict": "changed",
+          "label": "Dependency edges found",
+          "command": "graph, no tests",
+          "repository": "kubernetes",
+          "before": 27696,
+          "after": 47906,
+          "unit": "edges",
+          "display": {
+            "before": "~27.7k",
+            "after": "47,906"
+          },
+          "note": "More edges because nested Go modules now resolve and edges point at the file actually used. The baseline count varied between runs (27,692–27,702); the current count is the same every run."
+        },
+        {
+          "id": "dependents-lookup",
+          "kind": "complexity",
+          "verdict": "changed",
+          "label": "Dependents lookup",
+          "command": "in-memory microbenchmark",
+          "repository": "kubernetes",
+          "before": 108827,
+          "after": 0.7,
+          "unit": "ns",
+          "display": {
+            "before": "O(N) scan · 108,827 ns",
+            "after": "O(1) lookup · 0.7 ns"
+          },
+          "note": "Complexity improvement, not a measured user-facing speedup. v0.2.0 had no command that asked for dependents, and no current command's runtime is dominated by these lookups."
+        },
+        {
+          "id": "tree-wall-llvm",
+          "kind": "speed",
+          "verdict": "no-consistent-change",
+          "label": "Plain tree wall time",
+          "command": "sprout",
+          "repository": "llvm-project",
+          "before": 0.82,
+          "after": 0.76,
+          "unit": "s",
+          "rounds": [
+            -13,
+            4
+          ]
+        },
+        {
+          "id": "ai-wall-llvm",
+          "kind": "speed",
+          "verdict": "no-consistent-change",
+          "label": "--ai wall time",
+          "command": "sprout --ai",
+          "repository": "llvm-project",
+          "before": 2.2,
+          "after": 2.25,
+          "unit": "s",
+          "rounds": [
+            -14,
+            12
+          ]
+        },
+        {
+          "id": "graph-build-k8s",
+          "kind": "speed",
+          "verdict": "no-consistent-change",
+          "label": "Graph build time",
+          "command": "in-process, no tests",
+          "repository": "kubernetes",
+          "before": 294,
+          "after": 280,
+          "unit": "ms",
+          "rounds": [
+            -23,
+            8
+          ]
+        },
+        {
+          "id": "entry-wall-k8s",
+          "kind": "speed",
+          "verdict": "no-consistent-change",
+          "label": "--entry wall time",
+          "command": "sprout --entry",
+          "repository": "kubernetes",
+          "before": 0.64,
+          "after": 0.57,
+          "unit": "s",
+          "rounds": [
+            -23,
+            6
+          ],
+          "note": "Output differs after Phase 3 (more precise edges), so this compares different work."
+        }
+      ],
+      "notes": [
+        "Small repositories (sprout, ky, click, anyhow) finish in under 10 ms, below /usr/bin/time's resolution. In-process timings showed no consistent change.",
+        "With tests included, the Kubernetes graph has 13,003 files (4,348 tests) and 79,558 edges, and takes about 488 ms to build: the cost future impact and context queries will pay."
+      ],
+      "bottlenecks": [
+        {
+          "title": "Filesystem traversal",
+          "profile": "sprout --json, llvm-project (CPU)",
+          "shares": [
+            {
+              "label": "lstat",
+              "value": 50
+            },
+            {
+              "label": "ReadDir",
+              "value": 35
+            },
+            {
+              "label": "JSON writing",
+              "value": 3.8
+            }
+          ],
+          "unit": "% of CPU",
+          "note": "Reading directories is also 76% of CPU for the plain tree."
+        },
+        {
+          "title": "Git subprocesses in --ai, run one after another",
+          "profile": "sprout --ai, llvm-project (single indicative runs)",
+          "shares": [
+            {
+              "label": "git status",
+              "value": 0.6
+            },
+            {
+              "label": "git log (90 days, 9.8 MB)",
+              "value": 0.41
+            },
+            {
+              "label": "git ls-files",
+              "value": 0.36
+            }
+          ],
+          "unit": "s of a 2.25 s run",
+          "total": 2.25
+        },
+        {
+          "title": "Source reading and parsing",
+          "profile": "sprout --entry, kubernetes",
+          "shares": [
+            {
+              "label": "Reading files (CPU)",
+              "value": 43
+            },
+            {
+              "label": "Go parser (allocated bytes)",
+              "value": 58
+            },
+            {
+              "label": "Graph linking (CPU)",
+              "value": 1.4
+            }
+          ],
+          "unit": "%",
+          "note": "Shares come from separate CPU and allocation profiles, so they don't add up."
+        }
+      ],
+      "next": [
+        "Filesystem traversal: fewer syscalls per entry in the walk",
+        "Git context in --ai: run git status, log and ls-files concurrently instead of one after another",
+        "Graph-backed commands: less work reading and parsing source files"
+      ],
+      "methodology": [
+        "One controlled pass: same machine, same session, same inputs. Every revision was built with the same toolchain, and the same benchmark harness was added to each.",
+        "CLI runs used /usr/bin/time -l with output sent to /dev/null; output size and SHA-256 were recorded in a separate, untimed pass.",
+        "One warm-up per case, then 5 rounds. Within each round, every revision ran back to back, and their order rotated each round.",
+        "Speedup claims were only counted when the direction held across all 5 interleaved rounds. Timing is compared per round (current ÷ baseline), so machine-wide slowdowns cancel.",
+        "For timings, the percentage is the median per-round change (current ÷ baseline within each of the 5 rounds), shown with its range across rounds. The absolute before/after times are medians of the steady rounds 2–4; round 0 ran about 2× slower for every revision alike (a machine-wide warm-up effect), which pairing within rounds cancels.",
+        "Allocation and memory counts come from Go benchmarks (-benchmem) and in-process heap measurements. They vary little between runs; the spread is noted where it exceeds 1%."
+      ],
+      "limitations": [
+        "Warm page cache only. Every CLI run is a fresh process, but files were already in the OS cache; there are no cold-disk measurements.",
+        "One machine and one OS. System-call costs differ on Linux, so results there may differ.",
+        "Small repositories finish below the external timer's resolution, so only in-process timings apply to them.",
+        "The baseline had no --pretty flag: its --json was the indented form, and it is byte-identical to the current --json --pretty. The default --json is now compact (30.6 MB vs 68.6 MB on llvm-project) with identical decoded values.",
+        "Kubernetes --entry and --ai produce different output after Phase 3, so their timings compare different work.",
+        "Absolute times are not comparable to figures quoted in individual pull requests, which wrote output to disk and ran in other sessions."
+      ]
+    }
+  ]
+}

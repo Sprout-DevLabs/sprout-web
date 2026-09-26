@@ -1,0 +1,108 @@
+---
+// A headline result: the change as the big number, before → after, and two
+// bars drawn to scale (the "after" bar is after/before of the "before" bar).
+import KindTag from './KindTag.astro';
+import { fmt, changeText, roundsText, type Metric } from '../../lib/benchmarks';
+interface Props { m: Metric }
+const { m } = Astro.props;
+const ratio = Math.min(1, m.after / m.before);
+---
+<article class="card" data-kind={m.kind}>
+  <div class="top">
+    <KindTag kind={m.kind} />
+    <span class="repo">{m.repository}</span>
+  </div>
+  <p class="big">{changeText(m)}</p>
+  <h3>{m.label}</h3>
+  <div class="bars" aria-hidden="true">
+    <div class="bar"><span class="fill before" style="--w:1"></span></div>
+    <div class="bar"><span class="fill after" style={`--w:${ratio}`}></span></div>
+  </div>
+  <p class="vals">
+    <span class="b">{fmt(m, 'before')}</span>
+    <span class="arrow" aria-label="to">→</span>
+    <span class="a">{fmt(m, 'after')}</span>
+  </p>
+  {m.rounds && <p class="rounds">{roundsText(m)}</p>}
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    padding: 22px 22px 20px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    min-width: 0;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .repo {
+    font: 12px var(--mono);
+    color: var(--muted);
+  }
+  .big {
+    margin: 6px 0 0;
+    font: 700 clamp(44px, 5.4vw, 64px) / 1 var(--display);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  h3 {
+    font: 600 16px/1.3 var(--sans);
+    letter-spacing: 0;
+  }
+  .bars {
+    display: grid;
+    gap: 5px;
+    margin-top: 4px;
+  }
+  .bar {
+    height: 8px;
+    border-radius: 8px;
+    background: var(--bg-2);
+    overflow: hidden;
+  }
+  .fill {
+    display: block;
+    height: 100%;
+    border-radius: 8px;
+    transform: scaleX(var(--w));
+    transform-origin: left;
+  }
+  .fill.before {
+    background: var(--line-2);
+  }
+  .fill.after {
+    background: var(--k-color);
+  }
+  .card[data-kind='speed'] { --k-color: var(--k-speed); }
+  .card[data-kind='memory'] { --k-color: var(--k-memory); }
+  .card[data-kind='allocation'] { --k-color: var(--k-allocation); }
+  .vals {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+    font: 500 14px var(--mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .b {
+    color: var(--muted);
+  }
+  .arrow {
+    color: var(--muted);
+  }
+  .rounds {
+    margin: 0;
+    font: 12px var(--mono);
+    color: var(--muted);
+  }
+</style>
