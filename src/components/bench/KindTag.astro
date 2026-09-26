@@ -1,0 +1,34 @@
+---
+import { KINDS, type Kind } from '../../lib/benchmarks';
+interface Props { kind: Kind }
+const { kind } = Astro.props;
+---
+<span class={`kind kind-${kind}`}>{KINDS[kind].label}</span>
+
+<style>
+  .kind {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font: 500 12px var(--mono);
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+    justify-self: start;
+    width: fit-content;
+    line-height: 1.2;
+  }
+  .kind::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .kind-speed { color: var(--k-speed); }
+  .kind-memory { color: var(--k-memory); }
+  .kind-allocation { color: var(--k-allocation); }
+  .kind-complexity { color: var(--k-complexity); }
+  .kind-correctness { color: var(--k-correctness); }
+</style>

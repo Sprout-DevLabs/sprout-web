@@ -20,6 +20,7 @@ const max = Math.max(...rows.map((r) => r.s));
         files, takes about as long as <code>find</code>.
       </p>
       <p class="muted small">Timings on a laptop with a warm cache. <code>bench_test.go</code> in the repository reproduces them.</p>
+      <p class="small"><a class="bench-link" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/benchmarks/`}>Controlled before/after measurements, and what didn't improve</a></p>
     </div>
     <div class="chart" role="table" aria-label="Timings on Kubernetes">
       {
@@ -69,6 +70,11 @@ const max = Math.max(...rows.map((r) => r.s));
   }
   .small {
     font-size: 14.5px;
+  }
+  .bench-link {
+    color: var(--leaf-ink);
+    font-weight: 500;
+    text-underline-offset: 4px;
   }
   .chart {
     display: grid;

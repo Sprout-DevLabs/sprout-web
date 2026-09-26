@@ -1,0 +1,862 @@
+---
+import Base from '../layouts/Base.astro';
+import KindTag from '../components/bench/KindTag.astro';
+import MetricCard from '../components/bench/MetricCard.astro';
+import {
+  KINDS, current, runs, phases, metric, fmt, changeText, roundsText, shortDate, commitUrl, prUrl,
+  type Kind, type Metric,
+} from '../lib/benchmarks';
+
+const run = current;
+const env = run.environment;
+const primary = run.repositories[0];
+const headline = run.headline.map((id) => metric(run, id));
+const kindsInOrder: Kind[] = ['speed', 'memory', 'allocation', 'complexity', 'correctness'];
+const byKind = (k: Kind) => run.metrics.filter((m) => m.kind === k && m.verdict !== 'no-consistent-change');
+const noChange = run.metrics.filter((m) => m.verdict === 'no-consistent-change');
+
+// Range plots for "no consistent change": every row shares one axis.
+const span = Math.max(20, ...noChange.flatMap((m) => (m.rounds ?? [0, 0]).map(Math.abs)));
+const pos = (v: number) => ((v + span) / (2 * span)) * 100;
+const pct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v)}%`;
+const shareMax = (b: (typeof run.bottlenecks)[number]) => b.total ?? 100;
+---
+
+<Base
+  title="Sprout Benchmarks"
+  description="A versioned performance log for Sprout: what each architecture phase changed, what didn't improve, how it was measured, and what's expensive now."
+>
+  <section class="hero">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="wrap">
+      <p class="run-tag"><span class="dot" aria-hidden="true"></span> Latest run · {shortDate(run.date)}</p>
+      <h1>Sprout Benchmarks</h1>
+      <p class="motto">Performance is a feature. Architecture is measurable.</p>
+      <p class="lead">
+        What three architecture phases changed in Sprout, measured on <strong>{primary.name}</strong> ({primary.files.toLocaleString('en-US')} files) against
+        the {run.baseline.label} release. Speed claims count only when the result held in every one of {env.rounds} interleaved rounds.
+      </p>
+
+      <dl class="env">
+        <div><dt>Repository</dt><dd>{primary.name} · {primary.files.toLocaleString('en-US')} files</dd></div>
+        <div><dt>Machine</dt><dd>{env.hardware} · {env.cores} cores · {env.memory}</dd></div>
+        <div><dt>System</dt><dd>{env.os} · {env.go}</dd></div>
+        <div><dt>Method</dt><dd>{env.cache} · {env.rounds} interleaved rounds</dd></div>
+        <div class="revs">
+          <dt>Compared</dt>
+          <dd>
+            <a href={commitUrl(run.baseline.revision)}><code>{run.baseline.revision}</code></a> <span class="muted">{run.baseline.label}</span>
+            <span class="to" aria-label="to">→</span>
+            <a href={commitUrl(run.current.revision)}><code>{run.current.revision}</code></a> <span class="muted">{run.current.label}</span>
+          </dd>
+        </div>
+      </dl>
+
+      <div class="headline">
+        {headline.map((m) => <MetricCard m={m} />)}
+      </div>
+      <p class="jump"><a href="#methodology">How this was measured</a> · <a href="#didnt">What didn't improve</a></p>
+    </div>
+  </section>
+
+  <section class="section kinds-section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Five kinds of result, kept apart</h2>
+        <p class="lead">A faster command, a smaller heap, fewer allocations, a better algorithm and a more correct answer are different claims. Each result on this page carries exactly one of these labels.</p>
+      </div>
+      <ul class="kinds">
+        {kindsInOrder.map((k) => (
+          <li>
+            <KindTag kind={k} />
+            <span>{KINDS[k].blurb}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="phases">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Architecture timeline</h2>
+        <p class="lead">Three phases, each merged as its own pull request and measured against the same baseline.</p>
+      </div>
+      <ol class="timeline">
+        {phases.map((p) => (
+          <li class="phase">
+            <span class="node" aria-hidden="true">{p.number}</span>
+            <div class="phase-body">
+              <p class="phase-meta">
+                Phase {p.number} · <a href={prUrl(p.pr)}>#{p.pr}</a> · <a href={commitUrl(p.commit)}><code>{p.commit}</code></a>
+              </p>
+              <h3>{p.name}</h3>
+              <div class="fromto">
+                <p><span class="lbl">Before</span>{p.from}</p>
+                <p><span class="lbl">After</span>{p.to}</p>
+              </div>
+              <ul class="results">
+                {p.results.map((r) => {
+                  const m = metric(run, r.metric);
+                  return (
+                    <li class={`result result-${m.kind}`}>
+                      <KindTag kind={m.kind} />
+                      <span class="r-label">{m.label} <span class="muted">· {m.repository}</span></span>
+                      <span class="r-vals"><code>{fmt(m, 'before')}</code> → <code>{fmt(m, 'after')}</code></span>
+                      {m.change !== undefined && <span class="r-change">{changeText(m)}</span>}
+                      {(m.kind === 'complexity' || m.kind === 'correctness') && m.note && <p class="r-note">{m.note}</p>}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="results">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>All results</h2>
+        <p class="lead">Every measurement from this run, grouped by kind. Where a per-round range is shown (wall time, peak RSS), the change is the median of the paired per-round changes across all 5 rounds; absolute wall times are medians of steady rounds 2–4. Live-heap and allocation figures are near-deterministic, so their change follows directly from before and after.</p>
+      </div>
+      {kindsInOrder.map((k) => {
+        const rows = byKind(k);
+        if (!rows.length) return null;
+        return (
+          <div class="table-block">
+            <h3><KindTag kind={k} /> <span>{KINDS[k].blurb}</span></h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th scope="col">Measurement</th><th scope="col">Repository</th><th scope="col">Command</th><th scope="col" class="num">Baseline</th><th scope="col" class="num">Current</th><th scope="col" class="num">Change</th></tr>
+                </thead>
+                <tbody>
+                  {rows.map((m: Metric) => (
+                    <tr>
+                      <td>{m.label}{m.note && <span class="note">{m.note}</span>}</td>
+                      <td>{m.repository}</td>
+                      <td><code>{m.command}</code></td>
+                      <td class="num mono">{fmt(m, 'before')}</td>
+                      <td class="num mono">{fmt(m, 'after')}</td>
+                      <td class="num"><strong>{changeText(m)}</strong>{m.rounds && <span class="note">{roundsText(m)}</span>}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="section" id="didnt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>What didn't improve</h2>
+        <p class="lead">
+          Some changes were faster in some rounds and slower in others. When the rounds disagree, there is no claim: each range below crosses zero,
+          which is exactly why it isn't counted.
+        </p>
+      </div>
+      <ul class="nochange">
+        {noChange.map((m) => (
+          <li>
+            <div class="nc-text">
+              <h3>{m.label} <span class="muted">· {m.repository}</span></h3>
+              <p class="nc-vals"><code>{fmt(m, 'before')}</code> → <code>{fmt(m, 'after')}</code> <span class="verdict">No consistent performance change</span></p>
+              {m.note && <p class="note">{m.note}</p>}
+            </div>
+            <svg class="range" viewBox="0 0 100 28" preserveAspectRatio="none" role="img" aria-label={`Per-round change from ${pct(m.rounds![0])} to ${pct(m.rounds![1])}`}>
+              <line x1="0" x2="100" y1="14" y2="14" class="axis" />
+              <line x1={pos(0)} x2={pos(0)} y1="3" y2="25" class="zero" />
+              <rect x={pos(m.rounds![0])} width={pos(m.rounds![1]) - pos(m.rounds![0])} y="9" height="10" rx="3" class="span" />
+            </svg>
+            <p class="range-labels"><span>{pct(m.rounds![0])}</span><span>0</span><span>{pct(m.rounds![1])}</span></p>
+          </li>
+        ))}
+      </ul>
+      <ul class="notes">
+        {run.notes.map((n) => <li>{n}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="bottlenecks">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>The bottleneck moved</h2>
+        <p class="lead">
+          JSON serialization is no longer the interesting part of the profile. Filesystem traversal and Git work are now what cost the most. From
+          CPU and allocation profiles of the current revision:
+        </p>
+      </div>
+      <div class="bottlenecks">
+        {run.bottlenecks.map((b) => (
+          <article class="panel bn">
+            <div class="panel-bar"><span>{b.profile}</span></div>
+            <div class="bn-body">
+              <h3>{b.title}</h3>
+              <ul>
+                {b.shares.map((s) => (
+                  <li>
+                    <span class="bn-label">{s.label}</span>
+                    <span class="bn-track"><span class="bn-fill" style={`--w:${s.value / shareMax(b)}`}></span></span>
+                    <span class="bn-val">{b.total ? `${s.value.toFixed(2)} s` : `${s.value}%`}</span>
+                  </li>
+                ))}
+              </ul>
+              <p class="bn-unit">{b.total ? `seconds, out of a ${b.total} s run` : b.unit}</p>
+              {b.note && <p class="bn-note">{b.note}</p>}
+            </div>
+          </article>
+        ))}
+      </div>
+      <div class="next">
+        <h3>Being investigated next</h3>
+        <ul>{run.next.map((n) => <li>{n}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="log">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Benchmark log</h2>
+        <p class="lead">
+          Every controlled run, newest first. Runs are added to <code class="path">src/data/benchmarks/history.json</code>; the page is rebuilt from that file, and
+          the build fails if a percentage disagrees with its before/after values or per-round range, or if an "improved" claim didn't hold in every round.
+        </p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th scope="col">Date</th><th scope="col">Run</th><th scope="col">Compared</th><th scope="col">Repositories</th><th scope="col">Environment</th></tr>
+          </thead>
+          <tbody>
+            {runs.map((r, i) => (
+              <tr class={i === 0 ? 'latest' : ''}>
+                <td class="mono"><span class="nowrap">{r.date}</span>{i === 0 && <span class="latest-tag">latest</span>}</td>
+                <td>{r.title}</td>
+                <td class="mono"><a href={commitUrl(r.baseline.revision)}>{r.baseline.revision}</a> → <a href={commitUrl(r.current.revision)}>{r.current.revision}</a></td>
+                <td>{r.repositories.map((x) => x.name).join(', ')}</td>
+                <td>{r.environment.hardware}, {r.environment.os}, {r.environment.go}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="methodology">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Methodology and limitations</h2>
+        <p class="lead"><strong>Speedup claims were only counted when the direction held across all {env.rounds} interleaved rounds.</strong></p>
+      </div>
+      <details class="method" open>
+        <summary>How the {shortDate(run.date)} run was measured</summary>
+        <ul>{run.methodology.map((m) => <li>{m}</li>)}</ul>
+        <h3>Inputs</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Repository</th><th scope="col">Revision</th><th scope="col" class="num">Files</th><th scope="col">Role</th></tr></thead>
+            <tbody>
+              {run.repositories.map((r) => (
+                <tr><td>{r.name}</td><td class="mono">{r.revision}</td><td class="num mono">{r.files.toLocaleString('en-US')}</td><td>{r.role}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+      <details class="method">
+        <summary>Limitations</summary>
+        <ul>{run.limitations.map((l) => <li>{l}</li>)}</ul>
+      </details>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { animate, inView } from 'motion';
+
+  // Bars grow to scale once they're on screen; reduced motion shows them as they are.
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll<HTMLElement>('.bars, .bn-body ul').forEach((group) => {
+      const fills = [...group.querySelectorAll<HTMLElement>('.fill, .bn-fill')];
+      animate(fills, { scaleX: 0 }, { duration: 0 });
+      inView(group, () => {
+        fills.forEach((f, i) => {
+          const w = Number(getComputedStyle(f).getPropertyValue('--w')) || 0;
+          animate(f, { scaleX: w }, { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 + i * 0.08 });
+        });
+      }, { amount: 0.4 });
+    });
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    padding: clamp(40px, 6vw, 72px) 0 clamp(64px, 8vw, 104px);
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(to right, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size: 32px 32px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, #000 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, #000 30%, transparent 75%);
+    opacity: 0.6;
+  }
+  .run-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 20px;
+    font: 500 13px var(--mono);
+    color: var(--ink-2);
+    padding: 5px 12px 5px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    background: var(--surface);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--leaf);
+  }
+  h1 {
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+  }
+  .motto {
+    margin: 16px 0 0;
+    font: 500 clamp(18px, 2vw, 22px) var(--display);
+    color: var(--ink-2);
+    letter-spacing: -0.01em;
+  }
+  .hero .lead {
+    margin: 18px 0 0;
+  }
+  .env {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin: 28px 0 0;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .env div {
+    display: grid;
+    gap: 2px;
+  }
+  .env dt {
+    font: 12px var(--mono);
+    color: var(--muted);
+  }
+  .env dd {
+    margin: 0;
+    font: 500 13.5px var(--mono);
+  }
+  .env a {
+    text-decoration: none;
+  }
+  .env code {
+    font-size: 13px;
+  }
+  .to {
+    color: var(--muted);
+    margin: 0 4px;
+  }
+  .headline {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+  }
+  @media (max-width: 960px) {
+    .headline {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .headline {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .jump {
+    margin: 22px 0 0;
+    font-size: 15px;
+    color: var(--muted);
+  }
+  .jump a {
+    color: var(--leaf-ink);
+    text-underline-offset: 3px;
+  }
+
+  .kinds {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0;
+  }
+  .kinds li {
+    display: grid;
+    grid-template-columns: 9.5em minmax(0, 1fr);
+    gap: 16px;
+    align-items: center;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+    color: var(--ink-2);
+  }
+  @media (max-width: 560px) {
+    .kinds li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 6px;
+    }
+  }
+
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(var(--leaf), var(--line-2));
+  }
+  .phase {
+    position: relative;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 24px;
+    padding-bottom: 48px;
+  }
+  .phase:last-child {
+    padding-bottom: 0;
+  }
+  .node {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--bg);
+    font: 600 16px var(--mono);
+  }
+  .phase-body {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+  }
+  .phase-meta {
+    margin: 8px 0 0;
+    font: 13px var(--mono);
+    color: var(--muted);
+  }
+  .phase-meta a {
+    color: var(--ink-2);
+  }
+  .phase h3 {
+    font-size: 26px;
+  }
+  .fromto {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .fromto p {
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+  .lbl {
+    display: block;
+    font: 600 12px var(--mono);
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  @media (max-width: 760px) {
+    .fromto {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .results {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .result {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 8px 14px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--bg-2);
+  }
+  .r-label {
+    font-weight: 500;
+  }
+  .r-vals {
+    font: 13px var(--mono);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .r-vals code {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--ink);
+  }
+  .r-change {
+    font: 700 20px var(--display);
+    font-variant-numeric: tabular-nums;
+  }
+  .r-note {
+    grid-column: 1 / -1;
+    margin: 2px 0 0;
+    font-size: 14px;
+    color: var(--ink-2);
+    padding-left: 12px;
+    border-left: 3px solid var(--line-2);
+  }
+  .result-complexity .r-note,
+  .result-correctness .r-note {
+    border-left-color: currentColor;
+  }
+  .result-complexity .r-note {
+    color: var(--k-complexity);
+  }
+  .result-correctness .r-note {
+    color: var(--k-correctness);
+  }
+  @media (max-width: 760px) {
+    .result {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .r-label {
+      grid-column: 1 / -1;
+    }
+    .r-vals {
+      white-space: normal;
+    }
+  }
+
+  .table-block {
+    margin-top: 36px;
+  }
+  .table-block h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    font: 500 15px var(--sans);
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14.5px;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tr:last-child td {
+    border-bottom: 0;
+  }
+  th {
+    font: 600 12.5px var(--sans);
+    color: var(--muted);
+    background: var(--bg-2);
+    white-space: nowrap;
+  }
+  .num {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .mono {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 13.5px;
+  }
+  td code {
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  .note {
+    display: block;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--muted);
+    font-weight: 400;
+    max-width: 38em;
+    white-space: normal;
+  }
+  td.num .note {
+    font-family: var(--mono);
+    white-space: nowrap;
+  }
+
+  .nochange {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .nochange li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(160px, 260px);
+    grid-template-rows: auto auto;
+    column-gap: 28px;
+    align-items: center;
+    padding: 18px 20px;
+    border: 1px dashed var(--line-2);
+    border-radius: 14px;
+  }
+  .nc-text {
+    grid-row: 1 / 3;
+  }
+  .nochange h3 {
+    font: 600 17px var(--sans);
+  }
+  .nc-vals {
+    margin: 8px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+  .verdict {
+    font: 500 12.5px var(--mono);
+    color: var(--muted);
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--bg-2);
+  }
+  .range {
+    width: 100%;
+    height: 28px;
+    display: block;
+  }
+  .range .axis {
+    stroke: var(--line-2);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+  .range .zero {
+    stroke: var(--ink);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+  .range .span {
+    fill: var(--muted);
+    opacity: 0.35;
+  }
+  .range-labels {
+    margin: 2px 0 0;
+    display: flex;
+    justify-content: space-between;
+    font: 11.5px var(--mono);
+    color: var(--muted);
+  }
+  @media (max-width: 640px) {
+    .nochange li {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 12px;
+    }
+    .nc-text {
+      grid-row: auto;
+    }
+  }
+  .notes {
+    margin: 20px 0 0;
+    padding-left: 20px;
+    color: var(--ink-2);
+    display: grid;
+    gap: 8px;
+    font-size: 15px;
+  }
+
+  .bottlenecks {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  @media (max-width: 960px) {
+    .bottlenecks {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .bn {
+    font-family: var(--sans);
+  }
+  .bn .panel-bar {
+    font-family: var(--mono);
+  }
+  .bn-body {
+    padding: 18px 20px 20px;
+  }
+  .bn h3 {
+    color: #fff;
+    font: 600 18px var(--display);
+    margin-bottom: 16px;
+  }
+  .bn ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .bn li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+    align-items: baseline;
+  }
+  .bn-label {
+    font-size: 14px;
+    color: var(--term-fg);
+  }
+  .bn-val {
+    font: 600 14px var(--mono);
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+  .bn-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+  }
+  .bn-fill {
+    display: block;
+    height: 100%;
+    width: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, var(--term-mod), var(--term-del));
+    transform: scaleX(var(--w));
+    transform-origin: left;
+  }
+  .bn-unit,
+  .bn-note {
+    margin: 14px 0 0;
+    font-size: 12.5px;
+    color: var(--term-dim);
+  }
+  .bn-note {
+    margin-top: 6px;
+  }
+  .next {
+    margin-top: 32px;
+    padding: 22px 24px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+  }
+  .next h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  .next ul {
+    margin: 0;
+    padding-left: 20px;
+    display: grid;
+    gap: 6px;
+    color: var(--ink-2);
+  }
+
+  .latest td {
+    background: var(--leaf-soft);
+  }
+  .latest-tag {
+    margin-left: 8px;
+    font: 600 11px var(--mono);
+    color: var(--leaf-ink);
+  }
+  td a {
+    color: inherit;
+  }
+
+  .method {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    padding: 0 22px;
+    margin-bottom: 14px;
+  }
+  .method summary {
+    cursor: pointer;
+    padding: 18px 0;
+    font-weight: 600;
+    list-style-position: inside;
+  }
+  .method ul {
+    margin: 0 0 20px;
+    padding-left: 20px;
+    display: grid;
+    gap: 10px;
+    color: var(--ink-2);
+    max-width: 52em;
+  }
+  .method h3 {
+    font-size: 16px;
+    margin: 8px 0 12px;
+  }
+  .method .table-wrap {
+    margin-bottom: 22px;
+  }
+  .nowrap {
+    white-space: nowrap;
+  }
+  .path {
+    overflow-wrap: anywhere;
+  }
+</style>
