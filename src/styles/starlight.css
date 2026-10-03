@@ -56,10 +56,6 @@ h1#_top {
   letter-spacing: -0.02em;
 }
 
-/* code blocks read like the site's instrument panels */
-.expressive-code .frame {
-  --ec-frm-edBg: #0d1511;
-}
 .sl-markdown-content table {
   display: table;
   width: 100%;
