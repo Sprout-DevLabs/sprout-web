@@ -18,6 +18,23 @@ export default defineConfig({
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Sprout-DevLabs/sprout' }],
       editLink: { baseUrl: 'https://github.com/Sprout-DevLabs/sprout-web/edit/main/' },
       customCss: ['./src/styles/starlight.css'],
+      // Code blocks read like the site's instrument panels in both themes:
+      // one dark theme, on the panel colours from site.css.
+      expressiveCode: {
+        themes: ['github-dark-dimmed'],
+        styleOverrides: {
+          codeBackground: '#0d1511',
+          borderColor: 'rgba(214, 238, 222, 0.08)',
+          frames: {
+            editorTabBarBackground: '#121c17',
+            editorActiveTabBackground: '#0d1511',
+            terminalBackground: '#0d1511',
+            terminalTitlebarBackground: '#121c17',
+            terminalTitlebarBorderBottomColor: 'rgba(214, 238, 222, 0.08)',
+            frameBoxShadowCssValue: 'none',
+          },
+        },
+      },
       head: [
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
@@ -37,6 +54,9 @@ export default defineConfig({
             { label: 'The tree', slug: 'docs/guides/tree' },
             { label: 'AI context (--ai)', slug: 'docs/guides/ai' },
             { label: 'Reading order (--entry)', slug: 'docs/guides/entry' },
+            { label: 'Dependencies (deps, dependents)', slug: 'docs/guides/deps' },
+            { label: 'Impact of a change (impact)', slug: 'docs/guides/impact' },
+            { label: 'Context for one file (context)', slug: 'docs/guides/context' },
             { label: 'Git, diffs and hotspots', slug: 'docs/guides/git' },
             { label: 'Remote repositories', slug: 'docs/guides/remote' },
             { label: 'MCP for coding agents', slug: 'docs/guides/mcp' },
