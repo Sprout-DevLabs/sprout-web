@@ -52,13 +52,43 @@ const features = [
     border-top: 1px solid var(--line);
     text-decoration: none;
     color: inherit;
-    transition: border-color 0.3s;
+    position: relative;
   }
-  .feature:hover {
-    border-top-color: var(--leaf);
+  /* A green line sweeps along the row's top edge, and its example lights up. */
+  .feature::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--leaf);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.5s var(--ease);
   }
-  .feature:hover dt {
+  .feature:hover::before,
+  .feature:focus-visible::before {
+    transform: scaleX(1);
+  }
+  .feature:hover dt,
+  .feature:focus-visible dt {
     color: var(--leaf-ink);
+  }
+  .feature:focus-visible {
+    outline: none;
+  }
+  dd code {
+    transition:
+      color 0.25s,
+      background-color 0.25s,
+      transform 0.4s var(--ease);
+  }
+  .feature:hover dd code,
+  .feature:focus-visible dd code {
+    color: var(--leaf-ink);
+    background: var(--leaf-soft);
+    transform: translateX(4px);
   }
   dt {
     font: 500 15px var(--mono);
