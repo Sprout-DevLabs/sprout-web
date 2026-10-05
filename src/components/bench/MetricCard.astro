@@ -28,6 +28,26 @@ const ratio = Math.min(1, m.after / m.before);
 
 <style>
   .card {
+    /* translate, not transform: the entrance animation owns transform */
+    transition:
+      translate 0.45s var(--ease),
+      box-shadow 0.45s var(--ease),
+      border-color 0.3s;
+  }
+  .card:hover {
+    translate: 0 -4px;
+    border-color: var(--line-2);
+    box-shadow: 0 22px 40px -24px rgba(12, 26, 19, 0.35);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card {
+      transition: none;
+    }
+    .card:hover {
+      translate: none;
+    }
+  }
+  .card {
     position: relative;
     display: grid;
     gap: 10px;

@@ -1,9 +1,9 @@
 import { animate, inView, scroll, stagger } from 'motion';
 import { reducedMotion } from './stage';
 
-// Site-wide motion: section headings rise word by word, panels spring in
-// and carry a glow that follows the pointer, lists cascade, a progress line
-// tracks the page, and the logo grows. Only transform and opacity animate,
+// Site-wide motion: section headings rise word by word, panels spring in,
+// lists cascade, figures count up, a progress line tracks the page, the logo
+// grows, and a pill follows the pointer across the nav links. Only transform and opacity animate,
 // so it all runs on the compositor. With reduced motion, nothing moves.
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -18,7 +18,7 @@ export function setupMotion() {
   panels();
   cascades();
   counts();
-  glows();
+  navPill();
 }
 
 // A thin line under the nav fills as you read.
@@ -134,23 +134,29 @@ function counts() {
   });
 }
 
-// Dark panels carry a soft glow that follows the pointer.
-function glows() {
-  if (!matchMedia('(hover: hover)').matches) return;
-  document.querySelectorAll<HTMLElement>('main .panel').forEach((p) => {
-    const glow = document.createElement('span');
-    glow.className = 'glow';
-    glow.setAttribute('aria-hidden', 'true');
-    p.prepend(glow);
-    let frame = 0;
-    p.addEventListener('pointermove', (e) => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const r = p.getBoundingClientRect();
-        glow.style.transform = `translate(${e.clientX - r.left - 240}px, ${e.clientY - r.top - 240}px)`;
-      });
+// One pill glides between nav links under the pointer, instead of each
+// link lighting up on its own.
+function navPill() {
+  const wrap = document.querySelector<HTMLElement>('.nav .wrap');
+  if (!wrap || !matchMedia('(hover: hover)').matches) return;
+  const pill = document.createElement('span');
+  pill.className = 'nav-pill';
+  pill.setAttribute('aria-hidden', 'true');
+  wrap.prepend(pill);
+  wrap.classList.add('has-pill');
+  let shown = false;
+  const glide = { type: 'spring', stiffness: 520, damping: 40 } as const;
+  wrap.querySelectorAll<HTMLElement>('.nav-link').forEach((link) => {
+    link.addEventListener('pointerenter', () => {
+      const to = { x: link.offsetLeft, y: link.offsetTop, width: link.offsetWidth, height: link.offsetHeight };
+      if (!shown) animate(pill, to, { duration: 0 });
+      else animate(pill, to, glide);
+      animate(pill, { opacity: 1, scale: 1 }, { duration: 0.18 });
+      shown = true;
     });
-    p.addEventListener('pointerenter', () => animate(glow, { opacity: 1 }, { duration: 0.4 }));
-    p.addEventListener('pointerleave', () => animate(glow, { opacity: 0 }, { duration: 0.6 }));
+  });
+  wrap.addEventListener('pointerleave', () => {
+    shown = false;
+    animate(pill, { opacity: 0, scale: 0.92 }, { duration: 0.2 });
   });
 }

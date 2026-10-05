@@ -73,7 +73,11 @@ const platforms = [
   const move = (t: HTMLElement, instant = false) =>
     animate(ind, { x: t.offsetLeft, width: t.offsetWidth }, instant || reducedMotion() ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 36 });
 
+  let current = 0;
   function select(os: string, instant = false) {
+    const next = tabs.findIndex((t) => t.dataset.os === os);
+    const dir = Math.sign(next - current) || 1;
+    current = next;
     tabs.forEach((t) => {
       const on = t.dataset.os === os;
       t.setAttribute('aria-selected', String(on));
@@ -82,7 +86,7 @@ const platforms = [
       pane.hidden = !on;
       if (on) {
         move(t, instant);
-        if (!instant && !reducedMotion()) animate(pane, { opacity: [0, 1], y: [6, 0] }, { duration: 0.35, ease: [0.22, 1, 0.36, 1] });
+        if (!instant && !reducedMotion()) animate(pane, { opacity: [0, 1], x: [24 * dir, 0] }, { duration: 0.4, ease: [0.22, 1, 0.36, 1] });
       }
     });
   }
