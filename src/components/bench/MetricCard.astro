@@ -12,7 +12,7 @@ const ratio = Math.min(1, m.after / m.before);
     <KindTag kind={m.kind} />
     <span class="repo">{m.repository}</span>
   </div>
-  <p class="big">{changeText(m)}</p>
+  <p class="big" data-count>{changeText(m)}</p>
   <h3>{m.label}</h3>
   <div class="bars" aria-hidden="true">
     <div class="bar"><span class="fill before" style="--w:1"></span></div>

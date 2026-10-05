@@ -30,20 +30,29 @@ const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i 
 ---
 
 <section class="hero">
-  <svg class="topo" viewBox="0 0 1200 840" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    {rings.map((d) => <path d={d} />)}
-  </svg>
+  <div class="topo" aria-hidden="true">
+    <div class="rings">
+      {
+        [0, 1, 2].map((layer) => (
+          <svg class="layer" style={`--l:${layer}`} viewBox="0 0 1200 840" preserveAspectRatio="xMidYMid slice">
+            {rings.filter((_, i) => i % 3 === layer).map((d) => <path d={d} />)}
+          </svg>
+        ))
+      }
+    </div>
+  </div>
 
   <div class="wrap hero-copy">
     <a class="news" href="https://github.com/Sprout-DevLabs/sprout/releases/latest">
-      <span class="dot" aria-hidden="true"></span> New in v0.2: signatures for AI agents
+      <span class="dot" aria-hidden="true"></span> New in v0.3: see what a change breaks, before it does
     </a>
     <h1 aria-label={headline}>
       {words.map((w, i) => <span class="w" style={`--i:${i}`} aria-hidden="true">{w} </span>)}
     </h1>
     <p class="lead hero-lead">
-      Sprout is a tree command that understands projects. It respects your <code>.gitignore</code>, marks changes and
-      hotspots in place, shows a pull request as a tree, and hands your agent a compact map with real signatures.
+      Sprout is a tree command that understands projects. It respects your <code>.gitignore</code>, follows the imports
+      between your files, tells you what a change could break and which tests to run, and hands your agent a compact
+      map with real signatures.
     </p>
     <div class="actions">
       <CopyCommand command="brew install sprout-devlabs/tap/sprout" />
@@ -105,6 +114,11 @@ const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i 
       { duration: 0.8, ease, delay: stagger(0.08, { startDelay: 0.35 }) },
     );
     animate('.hero .tilt', { opacity: [0, 1], y: [40, 0] }, { duration: 1.1, ease, delay: 0.55 });
+    // The contours sit further away than the page: they drift up more slowly.
+    scroll(animate('.hero .rings', { y: [0, 220], scale: [1, 1.08] }, { ease: 'linear' }), {
+      target: document.querySelector('.hero')!,
+      offset: ['start start', 'end start'],
+    });
     // The panel starts tipped back and settles flat as it scrolls into view.
     scroll(animate('.hero .tilt', { rotateX: [16, 0], scale: [0.94, 1] }, { ease: 'linear' }), {
       target: document.querySelector('.hero-demo')!,
@@ -208,12 +222,40 @@ const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i 
     width: 100%;
     height: 900px;
     z-index: -1;
+    overflow: hidden;
     fill: none;
     stroke: var(--line-2);
     stroke-width: 1;
     opacity: 0.7;
     -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 20%, transparent 75%);
     mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 20%, transparent 75%);
+  }
+  /* The contours breathe in three layers, each on its own slow cycle, like
+     terrain under moving light. Whole layers turn, so the GPU just moves
+     bitmaps; animating single paths repainted the SVG every frame. */
+  .rings,
+  .layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .layer {
+    will-change: transform;
+    animation: breathe calc(11s + var(--l) * 4s) ease-in-out calc(var(--l) * -3s) infinite alternate;
+  }
+  @keyframes breathe {
+    from {
+      transform: rotate(calc(-0.9deg + var(--l) * 0.5deg)) scale(0.99);
+    }
+    to {
+      transform: rotate(calc(1.1deg - var(--l) * 0.6deg)) scale(1.025);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .layer {
+      animation: none;
+    }
   }
   .hero-copy {
     display: grid;
@@ -237,6 +279,35 @@ const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i 
     text-decoration: none;
     margin-bottom: 24px;
     transition: border-color 0.2s;
+  }
+  .news {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  /* A band of light sweeps across the chip every few seconds. */
+  .news::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(100deg, transparent 30%, var(--leaf-soft) 50%, transparent 70%);
+    transform: translateX(-100%);
+    animation: sweep 5.5s var(--ease) 1.6s infinite;
+  }
+  @keyframes sweep {
+    0% {
+      transform: translateX(-100%);
+    }
+    35%,
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .news::after {
+      animation: none;
+    }
   }
   .news:hover {
     border-color: var(--leaf);
