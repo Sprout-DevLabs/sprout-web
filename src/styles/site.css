@@ -512,3 +512,61 @@ h3 {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------- motion (src/scripts/motion.ts) ---------- */
+
+.progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--leaf), #4fcf82);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+.wm {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  /* room for descenders and the display face's tall ascenders */
+  padding: 0.08em 0.02em 0.14em;
+  margin: -0.08em -0.02em -0.14em;
+}
+.wi {
+  display: inline-block;
+  will-change: transform;
+}
+.brand svg path {
+  transform-box: fill-box;
+}
+.brand svg path:nth-child(2) {
+  transform-origin: 100% 100%;
+}
+.brand svg path:nth-child(3) {
+  transform-origin: 0% 100%;
+}
+.panel {
+  position: relative;
+}
+.panel .glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(95, 214, 141, 0.16), rgba(95, 214, 141, 0) 62%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

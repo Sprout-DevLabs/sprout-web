@@ -15,7 +15,7 @@ const curve = (a: (typeof demo.nodes)[number], b: (typeof demo.nodes)[number]) =
   const mx = (a.x + b.x) / 2;
   return `M${b.x},${b.y} C${mx},${b.y} ${mx},${a.y} ${a.x},${a.y}`;
 };
-const files = demo.nodes.filter((n) => !n.test).map((n) => n.path).sort();
+const files = demo.nodes.filter((n) => n.kind !== 'test').map((n) => n.path).sort();
 const short = demo.commit.slice(0, 7);
 ---
 
@@ -32,6 +32,7 @@ const short = demo.commit.slice(0, 7);
     <div class="panel explorer" data-start={start}>
       <div class="panel-bar">
         <span class="cmdline">sprout impact <span class="target">{start}</span></span>
+        <span class="touring" aria-hidden="true"><span class="pulse"></span>Touring · pick a file</span>
         <label class="pick">
           <span class="sr-only">File to change</span>
           <select aria-label="File to change">
@@ -52,17 +53,17 @@ const short = demo.commit.slice(0, 7);
             {
               demo.nodes.map((n, i) => (
                 <g
-                  class:list={['node', { test: n.test }]}
+                  class:list={['node', n.kind]}
                   data-i={i}
                   data-path={n.path}
                   transform={`translate(${n.x} ${n.y})`}
-                  tabindex={n.test ? undefined : 0}
-                  role={n.test ? undefined : 'button'}
-                  aria-label={n.test ? undefined : `Change ${n.path}`}
+                  tabindex={n.kind === 'test' ? undefined : 0}
+                  role={n.kind === 'test' ? undefined : 'button'}
+                  aria-label={n.kind === 'test' ? undefined : `Change ${n.path}`}
                 >
                   <title>{n.path}</title>
                   <circle class="ring" r="7" />
-                  <circle class="dot" r={n.test ? 4.5 : 5.5} />
+                  <circle class="dot" r={n.kind === 'code' ? 5.5 : 4.5} />
                   {n.above ? <text x="0" y="-11" text-anchor="middle">{n.label}</text> : <text x="11" y="4">{n.label}</text>}
                 </g>
               ))
@@ -82,18 +83,19 @@ const short = demo.commit.slice(0, 7);
 
     <p class="note muted">
       Real output of <code>sprout impact</code> on <a href={`https://github.com/${demo.repo}/tree/${demo.commit}/${demo.folder}`}>{demo.repo}</a>{' '}
-      ({demo.folder}/, {short}): {demo.nodes.length} files and {demo.edges.length} imports. Dependencies are on the left, tests on the right.
+      ({demo.folder}/, {short}), Sprout {demo.sprout}: {demo.nodes.length} files and {demo.edges.length} imports. What files build on is on the
+      left; tests are on the right, with test helpers dashed.
       <a class="more" href={`${base}/docs/guides/impact/`}>How impact works</a>
     </p>
   </div>
-  <script type="application/json" id="impact-data" set:html={JSON.stringify({ edges: demo.edges, impact: demo.impact, nodes: demo.nodes.map((n) => ({ path: n.path, test: n.test })) })} />
+  <script type="application/json" id="impact-data" set:html={JSON.stringify({ edges: demo.edges, impact: demo.impact, nodes: demo.nodes.map((n) => ({ path: n.path })) })} />
 </section>
 
 <script>
   import { animate, inView } from 'motion';
   import { reducedMotion } from '../scripts/stage';
 
-  type Data = { edges: [number, number][]; impact: Record<string, { text: string; affected: number; tests: number }>; nodes: { path: string; test: boolean }[] };
+  type Data = { edges: [number, number][]; impact: Record<string, { text: string; affected: number; tests: number }>; nodes: { path: string }[] };
   const root = document.querySelector<HTMLElement>('#impact .explorer')!;
   const data: Data = JSON.parse(document.getElementById('impact-data')!.textContent!);
   const nodes = [...root.querySelectorAll<SVGGElement>('.node')];
@@ -185,21 +187,50 @@ const short = demo.commit.slice(0, 7);
       });
   }
 
+  // While it's on screen and untouched, the explorer tours a few files with
+  // different reaches. The first thing you do ends the tour for good.
+  const tour = ['app/core/config.py', 'app/models.py', 'app/core/security.py', 'app/crud.py', 'app/api/deps.py'].filter((p) => index.has(p));
+  let touring = !reducedMotion();
+  let timer = 0;
+  const badge = root.querySelector<HTMLElement>('.touring')!;
+  const stopTour = () => {
+    if (!touring) return;
+    touring = false;
+    clearInterval(timer);
+    animate(badge, { opacity: 0, scale: 0.8 }, { duration: 0.3 }).then(() => badge.remove());
+  };
+  const pick = (path: string) => {
+    stopTour();
+    choose(path);
+  };
+
   nodes.forEach((n) => {
     if (n.classList.contains('test')) return;
-    n.addEventListener('click', () => choose(n.dataset.path!));
+    n.addEventListener('click', () => pick(n.dataset.path!));
     n.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        choose(n.dataset.path!);
+        pick(n.dataset.path!);
       }
     });
   });
-  select.addEventListener('change', () => choose(select.value));
+  select.addEventListener('change', () => pick(select.value));
+  select.addEventListener('pointerdown', stopTour);
+  out.addEventListener('pointerdown', stopTour);
 
-  // One orchestrated moment: the first ripple plays when the graph comes into view.
   out.textContent = data.impact[root.dataset.start!].text;
-  inView(root, () => choose(root.dataset.start!), { amount: 0.45 });
+  if (!touring) badge.remove();
+  inView(
+    root,
+    () => {
+      if (!touring) return;
+      let k = 0;
+      choose(tour[k]);
+      timer = window.setInterval(() => touring && choose(tour[(k = (k + 1) % tour.length)]), 4600);
+      return () => clearInterval(timer); // paused while off screen
+    },
+    { amount: 0.45 },
+  );
 </script>
 
 <style>
@@ -221,6 +252,36 @@ const short = demo.commit.slice(0, 7);
   }
   .pick {
     margin-left: auto;
+  }
+  .touring {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    color: var(--term-dim);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .touring + .pick {
+    margin-left: 0;
+  }
+  .pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--term-add);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    50% {
+      opacity: 0.25;
+      transform: scale(0.7);
+    }
+  }
+  @media (max-width: 640px) {
+    .touring {
+      display: none;
+    }
   }
   select {
     font: inherit;
@@ -327,6 +388,17 @@ const short = demo.commit.slice(0, 7);
     fill: var(--term-dir);
     stroke: var(--term-dir);
     stroke-dasharray: none;
+  }
+  .helper .dot {
+    stroke-dasharray: 1.5 2;
+  }
+  .reached.helper .dot {
+    fill: rgba(134, 200, 255, 0.35);
+    stroke: var(--term-dir);
+    stroke-dasharray: 1.5 2;
+  }
+  .reached.helper text {
+    fill: rgba(134, 200, 255, 0.75);
   }
   .reached.test text {
     fill: var(--term-dir);

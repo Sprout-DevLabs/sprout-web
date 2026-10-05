@@ -52,7 +52,7 @@ const shareMax = (b: (typeof run.bottlenecks)[number]) => b.total ?? 100;
         </div>
       </dl>
 
-      <div class="headline">
+      <div class="headline" data-cascade>
         {headline.map((m) => <MetricCard m={m} />)}
       </div>
       <p class="jump"><a href="#methodology">How this was measured</a> · <a href="#didnt">What didn't improve</a></p>
