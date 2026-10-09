@@ -4,7 +4,7 @@ description: What to know before editing a file, fitted to a token budget.
 ---
 
 ```sh
-sprout context FILE [--budget N]
+sprout context FILE [--budget N] [--json]
 ```
 
 `sprout context` is what to know before changing one file, in about `--budget` tokens (default 1500):
@@ -55,3 +55,19 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
 ```
 
 It's [`--ai`](/sprout-web/docs/guides/ai/) for one file: hand it to an agent before it edits, or read it yourself before touching code you don't know. Agents get it as the `context` [MCP tool](/sprout-web/docs/guides/mcp/).
+
+## JSON
+
+`--json` prints the same parts as one object, for scripts and agents:
+
+```json
+{
+  "schemaVersion": 1,
+  "command": "context",
+  "file": "b/b.go",
+  "dependencies": [{ "path": "a/a.go", "reason": "uses a.Hello", "signatures": ["func Hello() string"] }],
+  "users": [{ "path": "c/c.go", "reason": "uses b.B" }],
+  "tests": ["b/b_test.go"],
+  "declarations": ["func B() string"]
+}
+```

@@ -1,0 +1,30 @@
+Tour of click
+
+Purpose (README.md excerpt): Click is a Python package for creating beautiful command line interfaces
+178 files, 26 directories (1 entry ignored or skipped)
+Ecosystem: Python (pyproject.toml; pip/poetry/uv)
+Languages: Python 63%, Markdown 29%, YAML 6%, JSON 1%, Shell 1%
+
+Layout (top-level directories):
+  docs/ (41 files)
+  examples/ (39 files)
+  src/ (18 files)
+  tests/ (59 files)
+
+Start here:
+  1. README.md — project overview (README)
+  2. src/click/_compat.py — used by 9 files
+  3. src/click/utils.py — used by 9 files
+  4. src/click/core.py — used by 8 files
+  5. src/click/exceptions.py — used by 7 files
+  6. src/click/globals.py — used by 6 files
+  7. src/click/__init__.py — used by 3 files
+  8. src/click/formatting.py — used by 3 files
+  +9 reading candidates omitted; raise --limit (maximum 50).
+
+Next (run from the directory you toured; POSIX shell or PowerShell):
+  sprout context './src/click/_compat.py'
+  sprout --ai
+  sprout -L 2
+
+Note: suggestions are heuristics from static analysis, not runtime behavior.

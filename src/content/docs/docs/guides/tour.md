@@ -1,12 +1,9 @@
 ---
 title: Guided tour (tour)
+sidebar:
+  badge: New
 description: "A first-day overview of a codebase: what it is, how it's laid out, and what to read first."
 ---
-
-:::note
-`sprout tour` is on `main` and ships in the next release. Until then:
-`go install github.com/Sprout-DevLabs/sprout@main`.
-:::
 
 ```sh
 sprout tour                     # the current folder
