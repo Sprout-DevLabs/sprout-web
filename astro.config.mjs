@@ -53,6 +53,7 @@ export default defineConfig({
           items: [
             { label: 'The tree', slug: 'docs/guides/tree' },
             { label: 'AI context (--ai)', slug: 'docs/guides/ai' },
+            { label: 'Guided tour (tour)', slug: 'docs/guides/tour' },
             { label: 'Reading order (--entry)', slug: 'docs/guides/entry' },
             { label: 'Dependencies (deps, dependents)', slug: 'docs/guides/deps' },
             { label: 'Impact of a change (impact)', slug: 'docs/guides/impact' },
