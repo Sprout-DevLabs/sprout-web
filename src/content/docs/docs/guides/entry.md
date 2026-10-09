@@ -27,3 +27,5 @@ The order is:
 The list stops at 15 steps. Each step says why it's there.
 
 It's also available to agents as the `reading_order` [MCP tool](/sprout-web/docs/guides/mcp/).
+
+For the README's pitch, the layout and what to run next around this list, use [`sprout tour`](/sprout-web/docs/guides/tour/).

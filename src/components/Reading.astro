@@ -27,7 +27,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <span class="muted">Try it on any repo</span>
         <code>sprout github.com/owner/repo --entry</code>
       </div>
-      <a class="more" href={`${base}/docs/guides/entry/`}>How the ranking works</a>
+      <p class="muted">
+        New to a project? <code>sprout tour</code> wraps the same list with the README's pitch, the layout and what to run
+        next.
+      </p>
+      <div class="links">
+        <a class="more" href={`${base}/docs/guides/entry/`}>How the ranking works</a>
+        <a class="more" href={`${base}/docs/guides/tour/`}>Take the tour</a>
+      </div>
     </div>
 
     <div class="panel">
@@ -95,6 +102,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     width: fit-content;
     font-size: 14px;
     padding: 8px 12px;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
   }
   .more {
     width: fit-content;
