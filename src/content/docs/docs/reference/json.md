@@ -42,6 +42,17 @@ description: The --json schema for scripts, CI and PR bots.
 
 Empty fields are left out, and `projects` is always an array.
 
+## Commands
+
+Each command's `--json` has its own `schemaVersion` and a `command` field, and is documented with the command:
+
+| Command | Fields |
+|---|---|
+| [`tour`](/sprout-web/docs/guides/tour/#json) | `purpose`, `projects`, `layout`, `readingOrder`, `nextCommands`, `caveats`… |
+| [`deps`, `dependents`](/sprout-web/docs/guides/deps/) | each linked file with its reason |
+| [`impact`](/sprout-web/docs/guides/impact/) | `changed`, `affected`, `tests`, `goTestPackages`… |
+| [`context`](/sprout-web/docs/guides/context/#json) | `dependencies`, `users`, `tests`, `declarations` |
+
 ## Stability
 
 `schemaVersion` only changes when an existing field changes meaning or is removed. New fields can appear in any release, so scripts should ignore fields they don't know.
