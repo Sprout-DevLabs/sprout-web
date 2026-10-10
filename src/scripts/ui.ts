@@ -1,3 +1,4 @@
+import { REPO, formatStars } from '../lib/github';
 // Small page-wide behaviours: the nav's border once you scroll, and copy buttons.
 
 export function initNav() {
@@ -25,5 +26,38 @@ export function initCopy(root: ParentNode = document) {
         if (txt) getSelection()?.selectAllChildren(txt);
       }
     });
+  });
+}
+
+// The star count built into the page is up to 6 hours old: refresh it once
+// per visit. Below the threshold it stays hidden, and failures change nothing.
+export async function initStars() {
+  const btns = document.querySelectorAll<HTMLAnchorElement>('.star-btn');
+  if (!btns.length) return;
+  let n: number | undefined;
+  try {
+    const cached = sessionStorage.getItem('sprout-stars');
+    if (cached) n = Number(cached);
+  } catch {}
+  if (n === undefined) {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${REPO}`);
+      if (!res.ok) return;
+      n = (await res.json()).stargazers_count;
+      if (typeof n !== 'number') return;
+      try {
+        sessionStorage.setItem('sprout-stars', String(n));
+      } catch {}
+    } catch {
+      return;
+    }
+  }
+  btns.forEach((btn) => {
+    const count = btn.querySelector<HTMLElement>('[data-star-count]');
+    const text = btn.querySelector<HTMLElement>('[data-star-n]');
+    if (!count || !text || n === undefined || n < Number(btn.dataset.starThreshold ?? Infinity)) return;
+    text.textContent = formatStars(n);
+    count.hidden = false;
+    btn.setAttribute('aria-label', `Star on GitHub: ${n} stars`);
   });
 }

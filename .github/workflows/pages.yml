@@ -5,6 +5,8 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *" # the star count is read at build time
 
 permissions:
   contents: read
@@ -25,6 +27,8 @@ jobs:
       - run: npm ci
       # astro check (types) + astro build, including the docs search index
       - run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # for the star count, without the anonymous rate limit
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

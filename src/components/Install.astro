@@ -1,5 +1,6 @@
 ---
 import CopyCommand from './CopyCommand.astro';
+import StarButton from './StarButton.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const platforms = [
@@ -55,11 +56,14 @@ const platforms = [
       </div>
 
       <ol class="next">
-        <li><span class="n">1</span><div><b>Run it in a project</b><code>sprout</code></div></li>
-        <li><span class="n">2</span><div><b>Find your way in</b><code>sprout --entry</code></div></li>
+        <li><span class="n">1</span><div><b>Find your way in</b><code>sprout tour</code></div></li>
+        <li><span class="n">2</span><div><b>After an edit</b><code>sprout impact</code></div></li>
         <li><span class="n">3</span><div><b>Hand it to your agent</b><code>claude mcp add sprout -- sprout mcp</code></div></li>
       </ol>
-      <p class="docs-link"><a href={`${base}/docs/install/`}>All install options and verification</a></p>
+      <div class="foot-row">
+        <p class="docs-link"><a href={`${base}/docs/install/`}>All install options and verification</a></p>
+        <p class="star-ask muted">Useful? A star helps others find it. <StarButton size="sm" /></p>
+      </div>
     </div>
   </div>
 </section>
@@ -227,8 +231,23 @@ const platforms = [
     overflow-wrap: anywhere;
     font-size: 13px;
   }
+  .foot-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    margin-top: -12px;
+  }
   .docs-link {
-    margin: -12px 0 0;
+    margin: 0;
+  }
+  .star-ask {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 14.5px;
   }
   .docs-link a {
     color: var(--leaf-ink);
