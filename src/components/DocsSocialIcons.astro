@@ -1,0 +1,10 @@
+---
+// The docs header's icon slot: Star on GitHub, as on the rest of the site.
+import StarButton from './StarButton.astro';
+---
+<StarButton size="sm" />
+
+<script>
+  import { initStars } from '../scripts/ui.ts';
+  initStars();
+</script>

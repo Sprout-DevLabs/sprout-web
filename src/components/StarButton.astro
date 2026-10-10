@@ -21,3 +21,66 @@ const show = n !== null && n >= STAR_THRESHOLD;
     <span data-star-n>{show ? formatStars(n!) : ''}</span>
   </span>
 </a>
+
+<style is:global>
+/* "Star on GitHub", with the count once there's a count worth showing */
+.star-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid var(--line-2, var(--sl-color-gray-5));
+  background: var(--surface, var(--sl-color-bg-nav));
+  color: var(--ink, var(--sl-color-white));
+  font: 600 15px var(--sans, var(--sl-font));
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 0.2s var(--ease, ease),
+    border-color 0.2s;
+}
+.star-btn:hover {
+  border-color: var(--muted, var(--sl-color-gray-3));
+}
+.star-btn:active {
+  transform: scale(0.97);
+}
+.star-btn .gh {
+  width: 18px;
+  height: 18px;
+}
+.star-btn .star-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding-left: 10px;
+  border-left: 1px solid var(--line-2, var(--sl-color-gray-5));
+  color: var(--ink-2, var(--sl-color-gray-2));
+  font: 500 14px var(--mono, var(--sl-font-mono));
+}
+.star-btn .star-count[hidden] {
+  display: none;
+}
+.star-btn .star-count svg {
+  width: 14px;
+  height: 14px;
+  color: #e3b341;
+}
+.star-btn.star-sm {
+  height: 34px;
+  padding: 0 12px;
+  gap: 7px;
+  border-radius: 10px;
+  font-size: 13.5px;
+}
+.star-btn.star-sm .gh {
+  width: 16px;
+  height: 16px;
+}
+.star-btn.star-sm .star-count {
+  padding-left: 7px;
+  font-size: 12.5px;
+}
+</style>

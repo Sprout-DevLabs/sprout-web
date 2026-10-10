@@ -1,12 +1,12 @@
 ---
-// Real `sprout tour` output on pallets/click (2247b35), parsed at build time.
+// Real `sprout tour` output on pallets/click (2247b35), from Sprout v0.4.2, parsed at build time.
 import raw from '../data/tour.txt?raw';
 
 const lines = raw.split('\n');
 const after = (prefix: string) => lines.find((l) => l.startsWith(prefix))?.slice(prefix.length).trim() ?? '';
 const project = after('Tour of ');
 const purpose = after('Purpose (README.md excerpt): ');
-const [files] = lines.find((l) => /^\d+ files/.test(l))!.split(',');
+const files = raw.match(/(\d[\d,]*) files?\b/)?.[0] ?? '';
 const manifest = after('Ecosystem: ').match(/\(([^;]+);/)?.[1] ?? '';
 const language = after('Languages: ').split(',')[0];
 const layout = lines
