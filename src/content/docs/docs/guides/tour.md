@@ -8,6 +8,7 @@ description: "A first-day overview of a codebase: what it is, how it's laid out,
 ```sh
 sprout tour                     # the current folder
 sprout tour ./project --limit 12
+sprout tour github.com/charmbracelet/bubbletea   # no clone needed
 sprout tour --json
 ```
 
@@ -58,7 +59,7 @@ Note: suggestions are heuristics from static analysis, not runtime behavior.
 
 The tour reads files and runs `git ls-files`; it never runs the project's code. It respects `.gitignore` and `.sproutignore`, skips symlinks and special files, and turns off git's `fsmonitor` hook so a repository can't make git run anything. Terminal control characters in file names and README text are replaced before printing.
 
-Unlike the tree, it works on local folders only, and doesn't read your [config files](/sprout-web/docs/guides/config/). To map a folder named `tour`, write `sprout ./tour`.
+It works on a [repository you haven't cloned](/sprout-web/docs/guides/remote/) too: Sprout clones it into a temporary folder, tours it, and deletes the folder, so the suggested next steps are `sprout URL --ai` and `git clone` rather than paths into the clone. It doesn't read your [config files](/sprout-web/docs/guides/config/). To map a folder named `tour`, write `sprout ./tour`.
 
 ## JSON
 

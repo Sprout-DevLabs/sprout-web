@@ -4,6 +4,7 @@ description: Map any git repository without cloning it yourself.
 ---
 
 ```sh
+sprout tour github.com/charmbracelet/bubbletea
 sprout github.com/charmbracelet/bubbletea --ai
 sprout https://gitlab.com/group/project --entry
 sprout git@github.com:acme/private.git --churn -L 2
@@ -23,7 +24,7 @@ By default Sprout fetches only the latest commit, which is enough for the tree, 
 
 ## Private repositories
 
-Sprout uses your normal git credentials: ssh keys, credential helpers or a token in your git config. git may prompt you if it needs to.
+Sprout uses your normal git credentials: ssh keys, credential helpers or a token in your git config. It never stops to ask for a password: if a repository doesn't exist, is private without credentials set up, or can't be reached, Sprout says so and suggests `gh auth setup-git`.
 
 ## Safety
 
