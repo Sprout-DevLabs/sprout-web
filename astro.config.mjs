@@ -18,6 +18,7 @@ export default defineConfig({
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Sprout-DevLabs/sprout' }],
       editLink: { baseUrl: 'https://github.com/Sprout-DevLabs/sprout-web/edit/main/' },
       customCss: ['./src/styles/starlight.css'],
+      components: { SocialIcons: './src/components/DocsSocialIcons.astro' },
       // Code blocks read like the site's instrument panels in both themes:
       // one dark theme, on the panel colours from site.css.
       expressiveCode: {

@@ -11,7 +11,7 @@ sprout impact --commit HEAD        # one commit
 sprout impact src/a.ts src/b.ts    # these files
 ```
 
-`sprout impact` follows a change through every file that depends on it, directly or through others, and collects every test that reaches it.
+`sprout impact` follows a change through every file that depends on it, directly or through others, and collects every test that reaches it. It works on a local checkout: for a repository you haven't cloned, [`tour`, `--ai` and `--entry`](/sprout-web/docs/guides/remote/) work on the URL, and `impact` needs `git clone` first.
 
 ```
 $ sprout impact app/crud.py

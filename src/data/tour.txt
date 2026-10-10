@@ -1,7 +1,7 @@
 Tour of click
 
-Purpose (README.md excerpt): Click is a Python package for creating beautiful command line interfaces
-178 files, 26 directories (1 entry ignored or skipped)
+Purpose (README.md excerpt): Click is a Python package for creating beautiful command line interfaces in a composable way with as little code as necessary. It's the "Command Line Interface Creation Kit".
+26 directories, 178 files (7 entries ignored or skipped)
 Ecosystem: Python (pyproject.toml; pip/poetry/uv)
 Languages: Python 63%, Markdown 29%, YAML 6%, JSON 1%, Shell 1%
 
