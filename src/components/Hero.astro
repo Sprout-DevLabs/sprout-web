@@ -1,9 +1,12 @@
 ---
 import CopyCommand from './CopyCommand.astro';
+import StarButton from './StarButton.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const headline = 'The map of your codebase, for you and your AI agent.';
+const headline = 'Stop your coding agent grepping around. One call gives it the map.';
 const words = headline.split(' ');
+// The second sentence starts its own line, in green.
+const breakAt = words.findIndex((w) => w.endsWith('.')) + 1;
 
 // Views of the sample project, in the order the demo plays them.
 const tabs = [
@@ -47,16 +50,28 @@ const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i 
       <span class="dot" aria-hidden="true"></span> New in v0.4: a guided tour of any codebase
     </a>
     <h1 aria-label={headline}>
-      {words.map((w, i) => <span class="w" style={`--i:${i}`} aria-hidden="true">{w} </span>)}
+      {
+        words.map((w, i) => (
+          <>
+            <span class:list={['w', { em: i >= breakAt }]} style={`--i:${i}`} aria-hidden="true">{w} </span>
+            {i === breakAt - 1 && <br aria-hidden="true" />}
+          </>
+        ))
+      }
     </h1>
     <p class="lead hero-lead">
-      Sprout is a tree command that understands projects. It respects your <code>.gitignore</code>, follows the imports
-      between your files, tells you what a change could break and which tests to run, and hands your agent a compact
-      map with real signatures.
+      Sprout maps your codebase: where to start reading, how files depend on each other, what a change could break
+      and which tests to run. Your agent gets it over MCP instead of a dozen <code>ls</code> and <code>grep</code>
+      calls, and you get the same answers in your terminal.
     </p>
     <div class="actions">
       <CopyCommand command="brew install sprout-devlabs/tap/sprout" />
-      <a class="btn btn-ghost" href={`${base}/docs/`}>Read the docs</a>
+      <StarButton />
+    </div>
+    <div class="agent-line">
+      <span class="muted">Then, in Claude Code:</span>
+      <CopyCommand command="claude mcp add sprout -- sprout mcp" label="Copy: add Sprout to Claude Code" />
+      <a href={`${base}/docs/guides/mcp/`}>Cursor, VS Code, Claude Desktop</a>
     </div>
     <p class="also muted">
       Also on <a href={`${base}/docs/install/#scoop`}>Scoop</a>,{' '}
@@ -109,7 +124,7 @@ const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i 
   if (!reduced) {
     animate('.hero .w', { opacity: [0, 1], y: ['0.35em', 0] }, { duration: 0.9, ease, delay: stagger(0.045) });
     animate(
-      '.hero .news, .hero-lead, .hero .actions, .hero .also',
+      '.hero .news, .hero-lead, .hero .actions, .hero .agent-line, .hero .also',
       { opacity: [0, 1], y: [14, 0] },
       { duration: 0.8, ease, delay: stagger(0.08, { startDelay: 0.35 }) },
     );
@@ -320,11 +335,11 @@ const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i 
     box-shadow: 0 0 0 4px var(--leaf-soft);
   }
   h1 {
-    font-size: clamp(42px, 6.4vw, 82px);
-    line-height: 1;
+    font-size: clamp(40px, 5.6vw, 72px);
+    line-height: 1.02;
     letter-spacing: -0.032em;
     font-weight: 680;
-    max-width: min(100%, 17ch);
+    max-width: min(100%, 22ch);
   }
   .w {
     display: inline-block;
@@ -334,12 +349,38 @@ const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i 
     margin: 24px auto 0;
     max-width: min(100%, 38em);
   }
+  h1 .em {
+    color: var(--leaf-ink);
+  }
   .actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 12px;
     margin-top: 32px;
+  }
+  .agent-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 14px;
+    margin-top: 18px;
+    font-size: 14.5px;
+  }
+  .agent-line :global(.cmd) {
+    height: 40px;
+    border-radius: 11px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line-2);
+    box-shadow: none;
+    font-size: 13.5px;
+  }
+  .agent-line a {
+    color: var(--ink-2);
+    text-underline-offset: 3px;
+    text-decoration-color: var(--line-2);
   }
   .also {
     margin: 18px 0 0;
@@ -449,6 +490,7 @@ const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i 
   :global(.js) .hero .news,
   :global(.js) .hero-lead,
   :global(.js) .hero .actions,
+  :global(.js) .hero .agent-line,
   :global(.js) .hero .also,
   :global(.js) .hero .tilt {
     opacity: 0;
@@ -458,6 +500,7 @@ const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i 
     :global(.js) .hero .news,
     :global(.js) .hero-lead,
     :global(.js) .hero .actions,
+    :global(.js) .hero .agent-line,
     :global(.js) .hero .also,
     :global(.js) .hero .tilt {
       opacity: 1;

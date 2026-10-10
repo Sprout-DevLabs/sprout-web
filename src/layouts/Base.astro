@@ -1,11 +1,12 @@
 ---
 import '../styles/site.css';
 import Logo from '../components/Logo.astro';
+import StarButton from '../components/StarButton.astro';
 
 interface Props { title?: string; description?: string }
 const {
   title = 'Sprout: the map of your codebase',
-  description = 'Sprout is a tree command that understands projects. It respects .gitignore, marks changes and hotspots in place, shows pull requests as trees, suggests where to start reading, and gives AI agents a compact map with real signatures.',
+  description = 'Sprout maps your codebase for you and your coding agent: where to start reading, what a change could break and which tests to run, in one call over MCP or one command in your terminal.',
 } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -25,7 +26,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={new URL(`${base}/og.png`, Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Sprout: stop your coding agent grepping around. One call gives it the map." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={new URL(`${base}/og.png`, Astro.site)} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -42,9 +48,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         <a class="nav-link" href={`${base}/benchmarks/`}>Benchmarks</a>
         <a class="nav-link nav-hide-sm" href={`${base}/docs/guides/mcp/`}>For agents</a>
         <a class="nav-link nav-hide-sm" href="https://github.com/Sprout-DevLabs/sprout/releases">Releases</a>
-        <a class="nav-link" href="https://github.com/Sprout-DevLabs/sprout" aria-label="Sprout on GitHub">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
-        </a>
+        <StarButton size="sm" />
       </div>
       <span class="progress" aria-hidden="true"></span>
     </header>
@@ -56,6 +60,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         <div class="foot-brand">
           <a class="brand" href={`${base}/`}><Logo /> sprout</a>
           <p class="muted">The map of your codebase, for you and your AI agent. MIT licensed.</p>
+          <p class="muted">If Sprout saves you or your agent some digging, a star helps others find it.</p>
+          <StarButton />
         </div>
         <nav aria-label="Documentation">
           <p>Docs</p>
@@ -83,10 +89,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     </footer>
 
     <script>
-      import { initCopy, initNav } from '../scripts/ui.ts';
+      import { initCopy, initNav, initStars } from '../scripts/ui.ts';
       import { setupMotion } from '../scripts/motion.ts';
       initNav();
       initCopy();
+      initStars();
       setupMotion();
     </script>
     <style>

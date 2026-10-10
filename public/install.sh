@@ -111,7 +111,8 @@ main() {
 	*":$dir:"*) ;;
 	*) printf '\n%s is not on your PATH. Add this to your shell profile:\n  export PATH="%s:$PATH"\n' "$dir" "$dir" ;;
 	esac
-	printf '\nTry: sprout --ai | head -40\n'
+	printf '\nTry: sprout tour   (then: claude mcp add sprout -- sprout mcp)\n'
+	printf 'If Sprout helps, a star helps others find it: https://github.com/Sprout-DevLabs/sprout\n'
 }
 
 main "$@"
