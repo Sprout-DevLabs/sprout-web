@@ -1,0 +1,94 @@
+---
+// Real output on pallets/click (2247b35) from Sprout v0.4.2. tour.txt is
+// refreshed by the scheduled rebuild; impact and context are fixed samples.
+import Term from './Term.astro';
+import tour from '../data/tour.txt?raw';
+import impact from '../data/impact.txt?raw';
+import context from '../data/context.txt?raw';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const tourShort = tour
+  .split('\n')
+  .filter((l) => /^(Tour of|\d+ directories|Languages|Start here)/.test(l) || /^\s+[1-5]\. /.test(l))
+  .join('\n')
+  .replace(/ \(\d+ entries[^)]*\)/, '');
+
+const cards = [
+  { q: 'Where do I start?', what: "What the project is, how it's laid out, and what to read first. Works on a GitHub URL too.", cmd: 'sprout tour', out: tourShort, href: 'tour' },
+  { q: 'What will this break?', what: 'Every file a change reaches, and the exact tests to run: go test, pytest, vitest or jest.', cmd: 'sprout impact FILE', out: impact, max: 9, href: 'impact' },
+  { q: 'What do I need to know?', what: 'Before editing a file: the signatures it uses, who uses it and its tests, within a token budget.', cmd: 'sprout context FILE', out: context, max: 10, href: 'context' },
+];
+---
+
+<section class="section" id="questions">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>The three questions every agent asks first, answered in one call each.</h2>
+    </div>
+    <div class="cards" data-cascade>
+      {
+        cards.map((c) => (
+          <a class="card" href={`${base}/docs/guides/${c.href}/`}>
+            <h3>{c.q}</h3>
+            <p class="muted">{c.what}</p>
+            <code class="cmd-tag">{c.cmd}</code>
+            <div class="panel"><Term text={c.out} max={c.max} /></div>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    text-decoration: none;
+    transition:
+      border-color 0.25s,
+      transform 0.3s var(--ease);
+  }
+  .card:hover {
+    border-color: var(--line-2);
+    transform: translateY(-3px);
+  }
+  .card p {
+    margin: 8px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .cmd-tag {
+    width: fit-content;
+    margin: 20px 0 16px;
+    padding: 5px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--leaf-soft);
+    color: var(--leaf-ink);
+    font-size: 13.5px;
+  }
+  .card .panel {
+    flex: 1;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: none;
+  }
+  .card :global(.term) {
+    font-size: 11px;
+  }
+  @media (max-width: 960px) {
+    .cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -1,10 +1,5 @@
 ---
-// The seedling mark: a stem and two leaves.
-interface Props { size?: number }
-const { size = 26 } = Astro.props;
+// The sprout mark: two leaves above the ground line, roots below it.
+import Mark from '../assets/sprout-mark.svg';
 ---
-<svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-  <path d="M16 29V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none" />
-  <path d="M16 16C16 9 11 5 4 5c0 7 5 11 12 11Z" fill="#17924d" />
-  <path d="M16 19c0-6 4-10 12-10 0 6-4 10-12 10Z" fill="#4fcf82" />
-</svg>
+<Mark aria-hidden="true" />

@@ -1,0 +1,18 @@
+Impact of 1 file
+
+  src/click/core.py
+
+Affected: 12 files, 8 directly
+  src/click/__init__.py          imports .core
+  src/click/decorators.py        imports .core
+  src/click/exceptions.py        imports .core
+  src/click/globals.py           imports .core
+  src/click/parser.py            imports .core
+  src/click/shell_completion.py  imports .core
+  src/click/testing.py           imports .core
+  src/click/types.py             imports .core
+  … and 4 more files through them (--all lists them)
+
+Tests: 43 files
+  python -m pytest tests/test_abort_interrupt.py tests/test_arguments.py tests/test_basic.py tests/test_chain.py tests/test_command_decorators.py tests/test_commands.py tests/test_compat.py tests/test_context.py tests/test_custom_classes.py tests/test_defaults.py tests/test_deprecations.py tests/test_exceptions/test_FileError.py
+  (runs 12 of 43; --all prints the full command)

@@ -1,0 +1,27 @@
+---
+import { termLines } from '../lib/term';
+
+interface Props { text: string; max?: number; class?: string }
+const { text, max, class: cls } = Astro.props;
+---
+<pre class:list={['term', cls]}>{termLines(text, max).map((l) => <span class={`tl tl-${l.kind}`}>{l.text || ' '}</span>)}</pre>
+
+<style is:global>
+  .term {
+    margin: 0;
+    font: 400 12px/1.65 var(--mono);
+    color: var(--term-fg);
+    white-space: pre;
+    overflow: hidden;
+  }
+  .term .tl {
+    display: block;
+  }
+  .term .tl-head {
+    color: #fff;
+    font-weight: 600;
+  }
+  .term .tl-dim {
+    color: var(--term-dim);
+  }
+</style>

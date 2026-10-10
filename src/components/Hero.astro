@@ -1,525 +1,276 @@
 ---
 import CopyCommand from './CopyCommand.astro';
 import StarButton from './StarButton.astro';
+import Term from './Term.astro';
+import impact from '../data/impact.txt?raw';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const headline = 'Stop your coding agent grepping around. One call gives it the map.';
-const words = headline.split(' ');
-// The second sentence starts its own line, in green.
-const breakAt = words.findIndex((w) => w.endsWith('.')) + 1;
-
-// Views of the sample project, in the order the demo plays them.
-const tabs = [
-  { id: 'tree', label: 'Tree' },
-  { id: 'git', label: 'Changes' },
-  { id: 'churn', label: 'Hotspots' },
-  { id: 'size', label: 'Sizes' },
-  { id: 'diff', label: 'Pull request' },
-];
-
-// Topographic contours: closed wobbly rings, generated once at build time.
-function contour(r: number, seed: number) {
-  const pts: string[] = [];
-  const n = 72;
-  for (let i = 0; i <= n; i++) {
-    const a = (i / n) * Math.PI * 2;
-    const w =
-      1 + 0.09 * Math.sin(3 * a + seed) + 0.05 * Math.sin(5 * a + seed * 1.7) + 0.03 * Math.sin(8 * a - seed * 0.6);
-    pts.push(`${(600 + Math.cos(a) * r * w * 1.5).toFixed(1)},${(420 + Math.sin(a) * r * w).toFixed(1)}`);
-  }
-  return `M${pts.join('L')}Z`;
-}
-const rings = Array.from({ length: 11 }, (_, i) => contour(70 + i * 46, 0.9 + i * 0.35));
+// The first greps an agent runs to answer the same question on pallets/click
+// (2247b35): each finds the modules importing the last hit. 42 calls in all.
+const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_compat', 'formatting', '_winconsole', '_textwrap', 'shell_completion', 'parser', 'globals'];
 ---
 
 <section class="hero">
-  <div class="topo" aria-hidden="true">
-    <div class="rings">
-      {
-        [0, 1, 2].map((layer) => (
-          <svg class="layer" style={`--l:${layer}`} viewBox="0 0 1200 840" preserveAspectRatio="xMidYMid slice">
-            {rings.filter((_, i) => i % 3 === layer).map((d) => <path d={d} />)}
-          </svg>
-        ))
-      }
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <a class="news" href="https://github.com/Sprout-DevLabs/sprout/releases/latest">
+        <span class="dot" aria-hidden="true"></span> New in v0.4.2: tour any GitHub repo, no clone needed
+      </a>
+      <h1>Stop your coding agent grepping around. <span class="em">One call gives it the map.</span></h1>
+      <p class="lead">
+        Sprout maps how your project fits together: where to start reading, what a change could break and which tests to
+        run. Your agent asks once over MCP. You get the same answers in your terminal.
+      </p>
+      <div class="actions">
+        <CopyCommand command="brew install sprout-devlabs/tap/sprout" />
+        <StarButton />
+      </div>
+      <div class="agent-line">
+        <span class="muted">Then, in Claude Code:</span>
+        <CopyCommand command="claude mcp add sprout -- sprout mcp" label="Copy: add Sprout to Claude Code" />
+        <a href={`${base}/docs/guides/mcp/`}>Cursor, VS Code, Claude Desktop</a>
+      </div>
+      <p class="also muted">
+        Also on <a href={`${base}/docs/install/#scoop`}>Scoop</a>,{' '}
+        <a href={`${base}/docs/install/#linux-packages`}>apt, dnf and apk</a>,{' '}
+        <a href={`${base}/docs/install/#install-script`}>curl | sh</a> and <a href={`${base}/docs/install/#go`}>go install</a>.
+      </p>
     </div>
-  </div>
 
-  <div class="wrap hero-copy">
-    <a class="news" href="https://github.com/Sprout-DevLabs/sprout/releases/latest">
-      <span class="dot" aria-hidden="true"></span> New in v0.4.2: tour any GitHub repo, no clone needed
-    </a>
-    <h1 aria-label={headline}>
-      {
-        words.map((w, i) => (
-          <>
-            <span class:list={['w', { em: i >= breakAt }]} style={`--i:${i}`} aria-hidden="true">{w} </span>
-            {i === breakAt - 1 && <br aria-hidden="true" />}
-          </>
-        ))
-      }
-    </h1>
-    <p class="lead hero-lead">
-      Sprout maps your codebase: where to start reading, how files depend on each other, what a change could break
-      and which tests to run. Your agent gets it over MCP instead of a dozen <code>ls</code> and <code>grep</code>
-      calls, and you get the same answers in your terminal.
-    </p>
-    <div class="actions">
-      <CopyCommand command="brew install sprout-devlabs/tap/sprout" />
-      <StarButton />
-    </div>
-    <div class="agent-line">
-      <span class="muted">Then, in Claude Code:</span>
-      <CopyCommand command="claude mcp add sprout -- sprout mcp" label="Copy: add Sprout to Claude Code" />
-      <a href={`${base}/docs/guides/mcp/`}>Cursor, VS Code, Claude Desktop</a>
-    </div>
-    <p class="also muted">
-      Also on <a href={`${base}/docs/install/#scoop`}>Scoop</a>,{' '}
-      <a href={`${base}/docs/install/#linux-packages`}>apt, dnf and apk</a>,{' '}
-      <a href={`${base}/docs/install/#install-script`}>curl | sh</a> and <a href={`${base}/docs/install/#go`}>go install</a>.
-    </p>
-  </div>
-
-  <div class="wrap hero-demo">
-    <div class="tilt">
-      <div class="panel hero-panel">
-        <div class="panel-bar">
-          <div class="tabs" role="tablist" aria-label="Views of the sample project">
-            <span class="ind" aria-hidden="true"></span>
-            {
-              tabs.map((t, i) => (
-                <button role="tab" type="button" data-i={i} aria-selected={i === 0 ? 'true' : 'false'}>
-                  {t.label}
-                  <span class="prog" aria-hidden="true" />
-                </button>
-              ))
-            }
+    <div class="panel race">
+      <div class="race-q">
+        <span>Which tests run after I change <code>src/click/core.py</code>?</span>
+        <span class="repo">pallets/click</span>
+      </div>
+      <div class="lanes">
+        <div class="lane">
+          <div class="lane-name">grep, hit by hit</div>
+          <div class="nums slow"><b data-count>42</b> calls <b data-count>5,992</b> tokens</div>
+          <div class="greps" aria-hidden="true">
+            <div class="greps-roll">
+              {[0, 1].map(() => greps.map((g) => <div><span class="t-dim">$</span> grep -rnE "import .*\b{g}\b" .</div>))}
+            </div>
           </div>
-          <span class="repo">trailhead</span>
+          <p class="note">One grep finds none of the tests: they import <code>click</code>, not <code>core</code>.</p>
         </div>
-        <div class="panel-body">
-          <div class="prompt"><span class="sigil">$</span><span><span id="hero-cmd"></span><span class="caret"></span></span></div>
-          <div class="stage" id="hero-stage" aria-live="off"></div>
+        <div class="lane win">
+          <div class="lane-name">sprout impact</div>
+          <div class="nums fast"><b>1</b> call <b data-count>225</b> tokens</div>
+          <Term text={impact} max={15} class="out" />
+          <p class="note">All 43 tests, and the command to run them.</p>
         </div>
       </div>
-      <p class="caption muted">
-        Real output of <code>sprout</code> on a sample Go and React project, partway through a feature branch.
-      </p>
+      <p class="race-foot">Measured with Sprout v0.4.2. Tokens are characters ÷ 4 on both sides.</p>
     </div>
   </div>
 </section>
 
-<script>
-  import { animate, scroll, stagger } from 'motion';
-  import demo from '../data/demo.json';
-  import { Stage, typeInto, reducedMotion, type Line } from '../scripts/stage';
-  import { flatten, churnScale, label, esc, type TreeNode } from '../scripts/tree';
-
-  type Mode = { id: string; cmd: string; header: string; tree: TreeNode; summary: string; size?: boolean };
-  const modes = demo.modes as Mode[];
-  const reduced = reducedMotion();
-  const ease = [0.22, 1, 0.36, 1] as const;
-
-  // Headline, lead and actions rise in once on load.
-  if (!reduced) {
-    animate('.hero .w', { opacity: [0, 1], y: ['0.35em', 0] }, { duration: 0.9, ease, delay: stagger(0.045) });
-    animate(
-      '.hero .news, .hero-lead, .hero .actions, .hero .agent-line, .hero .also',
-      { opacity: [0, 1], y: [14, 0] },
-      { duration: 0.8, ease, delay: stagger(0.08, { startDelay: 0.35 }) },
-    );
-    animate('.hero .tilt', { opacity: [0, 1], y: [40, 0] }, { duration: 1.1, ease, delay: 0.55 });
-    // The contours sit further away than the page: they drift up more slowly.
-    scroll(animate('.hero .rings', { y: [0, 220], scale: [1, 1.08] }, { ease: 'linear' }), {
-      target: document.querySelector('.hero')!,
-      offset: ['start start', 'end start'],
-    });
-    // The panel starts tipped back and settles flat as it scrolls into view.
-    scroll(animate('.hero .tilt', { rotateX: [16, 0], scale: [0.94, 1] }, { ease: 'linear' }), {
-      target: document.querySelector('.hero-demo')!,
-      offset: ['start end', 'start 0.18'],
-    });
-  }
-
-  const linesFor = (m: Mode): Line[] => {
-    const rows = flatten(m.tree);
-    const scale = churnScale(rows);
-    const [dir, ...rest] = m.header.split(' ');
-    return [
-      { key: 'head', html: `<span class="t-head">${esc(dir)}</span>${rest.length ? ` <span class="t-dim">${esc(rest.join(' '))}</span>` : ''}` },
-      ...rows.map((r) => ({ key: r.key, html: `<span class="t-conn">${r.conn}</span>${label(r.node, scale, m.size)}` })),
-      { key: 'gap', html: ' ' },
-      { key: 'summary', html: `<span class="t-dim">${esc(m.summary)}</span>` },
-    ];
-  };
-
-  const stageEl = document.getElementById('hero-stage')!;
-  const cmdEl = document.getElementById('hero-cmd')!;
-  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.hero [role="tab"]')];
-  const ind = document.querySelector<HTMLElement>('.hero .ind')!;
-  const maxRows = Math.max(...modes.map((m) => linesFor(m).length));
-  const stage = new Stage(stageEl, maxRows);
-
-  let current = -1;
-  let busy = Promise.resolve();
-
-  function moveIndicator(i: number, instant = false) {
-    const t = tabs[i];
-    const opts = instant || reduced ? { duration: 0 } : { type: 'spring' as const, stiffness: 420, damping: 36 };
-    animate(ind, { x: t.offsetLeft, width: t.offsetWidth }, opts);
-  }
-
-  function show(i: number) {
-    if (i === current) return busy;
-    current = i;
-    tabs.forEach((t, j) => t.setAttribute('aria-selected', String(j === i)));
-    moveIndicator(i);
-    const m = modes[i];
-    busy = typeInto(cmdEl, m.cmd).then(() => {
-      if (current === i) stage.render(linesFor(m));
-    });
-    return busy;
-  }
-
-  // Autoplay while the panel is on screen, until the visitor picks a view.
-  const DWELL = 5200;
-  let auto = !reduced;
-  let visible = false;
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const root = document.querySelector<HTMLElement>('.hero-panel')!;
-
-  function schedule() {
-    clearTimeout(timer);
-    root.style.setProperty('--dwell', `${DWELL}ms`);
-    root.classList.toggle('auto', auto && visible);
-    if (!auto || !visible) return;
-    timer = setTimeout(() => show((current + 1) % modes.length).then(schedule), DWELL);
-  }
-
-  tabs.forEach((t, i) =>
-    t.addEventListener('click', () => {
-      auto = false;
-      schedule();
-      show(i);
-    }),
-  );
-  tabs.forEach((t, i) =>
-    t.addEventListener('keydown', (e) => {
-      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-      if (!d) return;
-      const n = (i + d + tabs.length) % tabs.length;
-      tabs[n].focus();
-      tabs[n].click();
-    }),
-  );
-
-  new IntersectionObserver(([e]) => {
-    visible = e.isIntersecting;
-    schedule();
-  }, { threshold: 0.3 }).observe(root);
-
-  addEventListener('resize', () => current >= 0 && moveIndicator(current, true));
-  document.fonts.ready.then(() => moveIndicator(Math.max(current, 0), true));
-
-  // Start once the headline has landed.
-  setTimeout(() => show(0).then(schedule), reduced ? 0 : 700);
-</script>
-
 <style>
   .hero {
-    position: relative;
-    padding: clamp(40px, 6vw, 76px) 0 clamp(80px, 10vw, 140px);
-    isolation: isolate;
+    padding: clamp(56px, 8vw, 104px) 0 clamp(72px, 9vw, 128px);
+    background: radial-gradient(60% 50% at 80% 30%, var(--glow), transparent 70%);
   }
-  .topo {
-    position: absolute;
-    inset: -80px 0 auto 0;
-    width: 100%;
-    height: 900px;
-    z-index: -1;
-    overflow: hidden;
-    fill: none;
-    stroke: var(--line-2);
-    stroke-width: 1;
-    opacity: 0.7;
-    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 20%, transparent 75%);
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 38%, #000 20%, transparent 75%);
-  }
-  /* The contours breathe in three layers, each on its own slow cycle, like
-     terrain under moving light. Whole layers turn, so the GPU just moves
-     bitmaps; animating single paths repainted the SVG every frame. */
-  .rings,
-  .layer {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-  .layer {
-    will-change: transform;
-    animation: breathe calc(11s + var(--l) * 4s) ease-in-out calc(var(--l) * -3s) infinite alternate;
-  }
-  @keyframes breathe {
-    from {
-      transform: rotate(calc(-0.9deg + var(--l) * 0.5deg)) scale(0.99);
-    }
-    to {
-      transform: rotate(calc(1.1deg - var(--l) * 0.6deg)) scale(1.025);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .layer {
-      animation: none;
-    }
-  }
-  .hero-copy {
+  .hero-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    text-align: center;
-  }
-  .hero-copy > * {
-    min-width: 0;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: clamp(40px, 5vw, 64px);
+    align-items: center;
   }
   .news {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 6px 14px 6px 10px;
+    gap: 8px;
+    padding: 6px 14px;
     border-radius: 999px;
     border: 1px solid var(--line-2);
     background: var(--surface);
-    font-size: 14px;
     color: var(--ink-2);
+    font-size: 13.5px;
     text-decoration: none;
-    margin-bottom: 24px;
-    transition: border-color 0.2s;
-  }
-  .news {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-  }
-  /* A band of light sweeps across the chip every few seconds. */
-  .news::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(100deg, transparent 30%, var(--leaf-soft) 50%, transparent 70%);
-    transform: translateX(-100%);
-    animation: sweep 5.5s var(--ease) 1.6s infinite;
-  }
-  @keyframes sweep {
-    0% {
-      transform: translateX(-100%);
-    }
-    35%,
-    100% {
-      transform: translateX(100%);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .news::after {
-      animation: none;
-    }
   }
   .news:hover {
-    border-color: var(--leaf);
+    border-color: var(--muted);
   }
-  .news .dot {
+  .dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     background: var(--leaf);
-    box-shadow: 0 0 0 4px var(--leaf-soft);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    50% {
+      opacity: 0.35;
+    }
   }
   h1 {
-    font-size: clamp(40px, 5.6vw, 72px);
-    line-height: 1.02;
-    letter-spacing: -0.032em;
-    font-weight: 680;
-    max-width: min(100%, 22ch);
-  }
-  .w {
-    display: inline-block;
-    white-space: pre;
-  }
-  .hero-lead {
-    margin: 24px auto 0;
-    max-width: min(100%, 38em);
+    margin: 28px 0 0;
+    font: 800 clamp(42px, 5.6vw, 68px) / 0.98 var(--display);
+    letter-spacing: -0.035em;
+    text-wrap: balance;
   }
   h1 .em {
-    color: var(--leaf-ink);
+    display: block;
+    margin-top: 8px;
+    color: var(--leaf);
   }
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 32px;
+  .lead {
+    margin: 28px 0 0;
   }
+  .actions,
   .agent-line {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: 10px 14px;
-    margin-top: 18px;
+    gap: 12px;
+  }
+  .actions {
+    margin-top: 36px;
+  }
+  .agent-line {
+    margin-top: 20px;
     font-size: 14.5px;
   }
   .agent-line :global(.cmd) {
     height: 40px;
-    border-radius: 11px;
-    background: var(--surface);
-    color: var(--ink);
-    border: 1px solid var(--line-2);
-    box-shadow: none;
-    font-size: 13.5px;
+    font-size: 13px;
+    padding-left: 14px;
   }
-  .agent-line a {
-    color: var(--ink-2);
-    text-underline-offset: 3px;
-    text-decoration-color: var(--line-2);
+  .agent-line :global(.cmd .copy-ic) {
+    width: 28px;
+    height: 28px;
   }
-  .also {
-    margin: 18px 0 0;
-    font-size: 14.5px;
-  }
+  .agent-line a,
   .also a {
     color: var(--ink-2);
-    text-underline-offset: 3px;
     text-decoration-color: var(--line-2);
+    text-underline-offset: 4px;
   }
+  .agent-line a:hover,
   .also a:hover {
     text-decoration-color: var(--leaf);
   }
+  .also {
+    margin: 14px 0 0;
+    font-size: 14px;
+  }
 
-  .hero-demo {
-    margin-top: clamp(48px, 6vw, 72px);
-    perspective: 1600px;
+  .race {
+    padding: 20px;
+    font-family: var(--sans);
+    line-height: 1.5;
   }
-  .tilt {
-    transform-origin: 50% 0%;
-    position: relative;
-    will-change: transform;
-  }
-  .tilt::before {
-    content: '';
-    position: absolute;
-    inset: 8% 10% -6%;
-    background: radial-gradient(closest-side, var(--glow), transparent);
-    filter: blur(40px);
-    z-index: -1;
-  }
-  .hero-panel .panel-body {
-    padding-top: 20px;
-  }
-  .repo {
-    margin-left: auto;
-    font: 500 12.5px var(--mono);
-    color: var(--term-dim);
-  }
-  .tabs {
-    position: relative;
+  .race-q {
     display: flex;
-    gap: 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 4px 16px;
+    font-size: 13.5px;
   }
-  .tabs::-webkit-scrollbar {
-    display: none;
-  }
-  .tabs button {
-    position: relative;
-    z-index: 1;
-    flex: none;
-    font: 500 13px var(--sans);
-    color: var(--term-dim);
+  .race code {
     background: none;
     border: 0;
-    padding: 7px 13px;
-    border-radius: 8px;
-    cursor: pointer;
-    overflow: hidden;
-    transition: color 0.25s;
-  }
-  .tabs button:hover {
-    color: var(--term-fg);
-  }
-  .tabs button[aria-selected='true'] {
+    padding: 0;
     color: #fff;
   }
-  .ind {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 0;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  .repo,
+  .race-foot {
+    color: var(--term-dim);
+    font: 11.5px var(--mono);
   }
-  .prog {
-    position: absolute;
-    left: 10px;
-    right: 10px;
-    bottom: 3px;
-    height: 2px;
-    border-radius: 2px;
-    background: var(--term-add);
-    transform: scaleX(0);
-    transform-origin: left;
-    opacity: 0;
+  .race-foot {
+    margin: 16px 4px 0;
+    font-family: var(--sans);
   }
-  .hero-panel.auto [aria-selected='true'] .prog {
-    opacity: 0.8;
-    animation: fill var(--dwell) linear forwards;
+  .lanes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
-  @keyframes fill {
+  .lane {
+    min-width: 0;
+    padding: 16px;
+    border-radius: 12px;
+    background: var(--term-2);
+    border: 1px solid var(--term-line);
+  }
+  .lane.win {
+    border-color: rgba(79, 207, 130, 0.28);
+  }
+  .lane-name {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .nums {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .nums b {
+    font: 600 30px var(--mono);
+    margin-left: 10px;
+  }
+  .nums b:first-child {
+    margin-left: 0;
+  }
+  .slow b {
+    color: var(--term-mod);
+  }
+  .fast b {
+    color: var(--term-add);
+  }
+  .greps,
+  .lane :global(.out) {
+    position: relative;
+    height: 220px;
+    margin-top: 12px;
+    font: 11.5px/1.7 var(--mono);
+    color: #b9cbb3;
+    overflow: hidden;
+  }
+  .lane :global(.out) {
+    font-size: 11px;
+  }
+  .greps div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .greps-roll {
+    animation: roll 16s linear infinite;
+  }
+  @keyframes roll {
     to {
-      transform: scaleX(1);
+      transform: translateY(-50%);
     }
   }
-  .caption {
-    text-align: center;
-    font-size: 14px;
-    margin: 20px 0 0;
+  .greps::after,
+  .lane :global(.out)::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 56px;
+    background: linear-gradient(transparent, var(--term-2));
   }
-  :global(.js) .hero .w,
-  :global(.js) .hero .news,
-  :global(.js) .hero-lead,
-  :global(.js) .hero .actions,
-  :global(.js) .hero .agent-line,
-  :global(.js) .hero .also,
-  :global(.js) .hero .tilt {
-    opacity: 0;
+  .note {
+    margin: 12px 0 0;
+    font-size: 12.5px;
+    color: var(--muted);
   }
-  @media (prefers-reduced-motion: reduce) {
-    :global(.js) .hero .w,
-    :global(.js) .hero .news,
-    :global(.js) .hero-lead,
-    :global(.js) .hero .actions,
-    :global(.js) .hero .agent-line,
-    :global(.js) .hero .also,
-    :global(.js) .hero .tilt {
-      opacity: 1;
+  @media (max-width: 960px) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
-  @media (max-width: 640px) {
-    .repo {
-      display: none;
+  @media (max-width: 560px) {
+    .lanes {
+      grid-template-columns: minmax(0, 1fr);
     }
-    .hero-copy {
-      text-align: left;
-      justify-items: start;
-    }
-    .actions {
-      justify-content: flex-start;
-      width: 100%;
-    }
-    .actions :global(.cmd) {
-      width: 100%;
+    .greps,
+    .lane :global(.out) {
+      height: 150px;
     }
   }
 </style>
