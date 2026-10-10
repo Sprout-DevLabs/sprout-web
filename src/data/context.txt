@@ -1,0 +1,38 @@
+# src/click/decorators.py
+3 dependencies · 2 direct users · 12 affected through them · 43 tests reach it
+
+## depends on (and what it uses from each)
+src/click/core.py — imports .core
+  class Context
+  class Command
+  class Group(Command)
+  class Parameter(ABC)
+  +2 more
+src/click/globals.py — imports .globals
+  def get_current_context(silent: t.Literal[False] = False) -> Context: ...
+  def get_current_context(silent: bool = ...) -> Context | None: ...
+  def get_current_context(silent: bool = False) -> Context | None
+src/click/utils.py — imports .utils
+  def echo(…)
+
+## used by
+src/click/__init__.py — imports .decorators
+src/click/core.py — imports .decorators
+
+## tests that reach it
+tests/test_context.py
+tests/test_abort_interrupt.py
+tests/test_arguments.py
+tests/test_basic.py
+tests/test_chain.py
+tests/test_command_decorators.py
+tests/test_commands.py
++2 more
+
+## declares
+def pass_context(f: t.Callable[te.Concatenate[Context, P], R]) -> t.Callable[P, R]
+def pass_obj(f: t.Callable[te.Concatenate[T, P], R]) -> t.Callable[P, R]
+def make_pass_decorator(…)
+def pass_meta_key(…)
+def command(name: _AnyCallable) -> Command: ...
++16 more

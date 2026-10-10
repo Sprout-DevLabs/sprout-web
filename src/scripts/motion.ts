@@ -1,19 +1,19 @@
 import { animate, inView, scroll, stagger } from 'motion';
-import { reducedMotion } from './stage';
 
 // Site-wide motion: section headings rise word by word, panels spring in,
-// lists cascade, figures count up, a progress line tracks the page, the logo
-// grows, and a pill follows the pointer across the nav links. Only transform and opacity animate,
+// lists cascade, figures count up, a progress line tracks the page,
+// and a pill follows the pointer across the nav links. Only transform and opacity animate,
 // so it all runs on the compositor. With reduced motion, nothing moves.
 
 const ease = [0.22, 1, 0.36, 1] as const;
 const spring = { type: 'spring', stiffness: 170, damping: 24, mass: 1 } as const;
 
+export const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 export function setupMotion() {
   if (reducedMotion()) return;
   document.documentElement.classList.add('moving');
   progress();
-  growLogos();
   headings();
   panels();
   cascades();
@@ -26,21 +26,6 @@ function progress() {
   const bar = document.querySelector<HTMLElement>('.progress');
   if (!bar) return;
   scroll(animate(bar, { scaleX: [0, 1] }, { ease: 'linear' }));
-}
-
-// The seedling in the nav and footer grows from a seed: stem, then leaves.
-function growLogos() {
-  document.querySelectorAll<SVGSVGElement>('.brand svg').forEach((svg, n) => {
-    const [stem, left, right] = svg.querySelectorAll('path');
-    if (!stem || !left || !right) return;
-    const play = () => {
-      animate(stem, { pathLength: [0, 1] }, { duration: 0.6, ease });
-      animate(left, { scale: [0, 1], rotate: [-35, 0] }, { ...spring, delay: 0.35 });
-      animate(right, { scale: [0, 1], rotate: [35, 0] }, { ...spring, delay: 0.5 });
-    };
-    if (n === 0) play();
-    else inView(svg, play, { amount: 1 });
-  });
 }
 
 // Headings rise out of a mask, one word after another, then their lead.

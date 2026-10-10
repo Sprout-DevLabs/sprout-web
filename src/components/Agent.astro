@@ -1,164 +1,96 @@
 ---
-import demo from '../data/demo.json';
 import CopyCommand from './CopyCommand.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-// What the agent actually receives: the start of the real --ai map and
-// --entry list for the sample project.
-const mapHead = demo.ai[demo.ai.length - 1].text.split('\n').slice(0, 9);
-const orderHead = demo.entry.split('\n').filter((l) => /^\s*\d+\./.test(l)).slice(0, 5);
-
 const tools = [
-  { name: 'project_map', what: 'The --ai map with key signatures. Agents are told to call it first.' },
+  { name: 'project_map', what: 'The map, key files and signatures. Agents are told to call it first.' },
   { name: 'reading_order', what: 'Where to start, and why.' },
-  { name: 'tree', what: 'Any folder, optionally with git status or churn.' },
-  { name: 'diff_tree', what: 'What a branch changed, as a tree.' },
-  { name: 'context', what: 'Before editing a file: the signatures it uses, its users and tests.' },
-  { name: 'dependents', what: 'What relies on a file, and why. deps goes the other way.' },
-  { name: 'impact', what: 'After editing: what the change could break, and the tests to run.' },
+  { name: 'impact', what: 'After editing: what could break, and the tests to run.' },
+  { name: 'context', what: 'Before editing a file: what it uses, its users and tests.' },
+  { name: 'deps · dependents', what: 'What a file uses, and what uses it.' },
+  { name: 'tree · diff_tree', what: 'Any folder, or what a branch changed, as a tree.' },
 ];
 ---
 
 <section class="section" id="agents">
-  <div class="wrap">
+  <div class="wrap split">
     <div class="section-head">
-      <h2>Give your coding agent the map</h2>
+      <h2>One line, and your agent stops guessing.</h2>
       <p class="lead">
-        Agents burn a large share of their context finding their way around, one <code>ls</code>, <code>grep</code> and file
-        read at a time. Sprout runs as an MCP server, so they get oriented in a single call.
+        Sprout is an MCP server. Claude Code, Cursor, VS Code and Claude Desktop call it instead of spending their context
+        on <code>ls -R</code> and <code>grep</code>. Every call reads the disk again, so files your agent just wrote are in
+        the next answer.
       </p>
-    </div>
-
-    <div class="grid">
       <div class="setup">
         <CopyCommand command="claude mcp add sprout -- sprout mcp" />
-        <p class="muted small">Or add <code>{'{ "command": "sprout", "args": ["mcp"] }'}</code> to any MCP client.</p>
-        <ul class="tools">
-          {
-            tools.map((t) => (
-              <li>
-                <code class="name">{t.name}</code>
-                <span>{t.what}</span>
-              </li>
-            ))
-          }
-        </ul>
-        <p class="muted small">
-          Read-only. Paths stay inside the project, symlinks included, and the server never clones.{' '}
-          <a href={`${base}/docs/guides/mcp/`}>Setup and safety</a>
-        </p>
+        <CopyCommand command="sprout mcp --print-config cursor" />
       </div>
-
-      <div class="panel convo" aria-label="What an agent receives from sprout">
-        <div class="panel-bar"><span>What your agent receives</span></div>
-        <div class="panel-body">
-          <div class="msg call"><span class="who">agent</span><span class="t-dir">project_map</span><span class="t-dim">(budget: 1250)</span></div>
-          <pre class="msg resp">{mapHead.join('\n')}<span class="t-dim">{'\n…'}</span></pre>
-          <div class="msg call"><span class="who">agent</span><span class="t-dir">reading_order</span><span class="t-dim">()</span></div>
-          <pre class="msg resp">{orderHead.join('\n')}<span class="t-dim">{'\n…'}</span></pre>
-        </div>
-      </div>
+      <p class="muted small">
+        Read-only. Paths stay inside the project and the server never clones.
+        <a href={`${base}/docs/guides/mcp/`}>Setup and safety</a>
+      </p>
     </div>
+    <ul class="tools" data-cascade>
+      {
+        tools.map((t) => (
+          <li>
+            <code>{t.name}</code>
+            <span class="muted">{t.what}</span>
+          </li>
+        ))
+      }
+    </ul>
   </div>
 </section>
 
-<script>
-  import { animate, inView, stagger } from 'motion';
-  import { reducedMotion } from '../scripts/stage';
-
-  const msgs = document.querySelectorAll('#agents .msg');
-  if (!reducedMotion()) {
-    animate(msgs, { opacity: 0, y: 12 }, { duration: 0 });
-    inView('#agents .convo', () => {
-      animate(msgs, { opacity: 1, y: 0 }, { duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: stagger(0.35) });
-    }, { amount: 0.35 });
-  }
-</script>
-
 <style>
-  .grid {
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: clamp(40px, 6vw, 88px);
-    align-items: start;
+  .section-head {
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr);
   }
   .setup {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 22px;
-  }
-  .setup :global(.cmd) {
-    width: fit-content;
-    max-width: 100%;
+    gap: 10px;
+    justify-items: start;
   }
   .small {
-    font-size: 14.5px;
+    font-size: 14px;
     margin: 0;
   }
   .small a {
-    color: var(--leaf-ink);
-    text-underline-offset: 3px;
+    color: var(--ink-2);
   }
   .tools {
     list-style: none;
-    margin: 6px 0;
+    margin: 0;
     padding: 0;
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-self: center;
   }
   .tools li {
     display: grid;
-    gap: 4px;
-    padding: 16px 0;
-    border-top: 1px solid var(--line);
+    gap: 6px;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 14px;
+    line-height: 1.5;
   }
-  .tools li:last-child {
-    border-bottom: 1px solid var(--line);
-  }
-  .tools .name {
+  .tools code {
     width: fit-content;
-    color: var(--leaf-ink);
-    background: var(--leaf-soft);
-    border-color: transparent;
-    font-weight: 500;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
   }
-  .tools span {
-    color: var(--ink-2);
-  }
-  .convo .panel-body {
-    display: grid;
-    gap: 14px;
-  }
-  .msg {
-    margin: 0;
-    line-height: 1.6;
-    font: inherit;
-  }
-  .call {
-    display: flex;
-    gap: 10px;
-    align-items: baseline;
-  }
-  .who {
-    font: 500 11px var(--sans);
-    text-transform: lowercase;
-    color: var(--term-bg, #0d1511);
-    background: var(--term-add);
-    padding: 2px 8px;
-    border-radius: 999px;
-  }
-  .resp {
-    padding: 14px 16px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.035);
-    border: 1px solid var(--term-line);
-    white-space: pre;
-    overflow-x: auto;
-    color: var(--term-fg);
-    font-size: 12.5px;
-    line-height: 1.7;
-  }
-  @media (max-width: 960px) {
-    .grid {
+  @media (max-width: 560px) {
+    .tools {
       grid-template-columns: minmax(0, 1fr);
     }
   }
