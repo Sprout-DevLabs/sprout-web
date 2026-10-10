@@ -13,7 +13,7 @@ export default defineConfig({
     starlight({
       title: 'Sprout',
       description: 'The map of your codebase, for you and your AI agent.',
-      logo: { src: './src/assets/logo.svg' },
+      logo: { light: './src/assets/logo-light.svg', dark: './src/assets/logo-dark.svg' },
       favicon: '/icon.svg',
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Sprout-DevLabs/sprout' }],
       editLink: { baseUrl: 'https://github.com/Sprout-DevLabs/sprout-web/edit/main/' },
