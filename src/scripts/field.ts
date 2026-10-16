@@ -1,22 +1,22 @@
 // The hero's background: a dot grid, like survey paper, that ripples in from
-// the logo on load. Traces wander across it like signals through an import
-// graph, and dots near the pointer light up. One canvas, about 2,000 dots per
+// the logo on load. A few dots glow softly and fade, like lights on a map,
+// and dots near the pointer light up. One canvas, about 2,000 dots per
 // frame; it pauses when the hero is off screen, and draws one still frame
 // with reduced motion.
 
 const GAP = 28;
 const DOT = [198, 213, 190]; // sage
 const LEAF = [79, 207, 130];
-const GROW = 1100, HOLD = 500, FADE = 900; // trace lifetime, ms
+const GLOW = 3200; // how long one dot takes to brighten and fade, ms
 
-type Trace = { pts: [number, number][]; born: number };
+type Glint = { i: number; j: number; born: number };
 
 export function field(canvas: HTMLCanvasElement, still: boolean) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   let w = 0, h = 0, cols = 0, rows = 0, ox = 0, oy = 0;
   let mx = -1e4, my = -1e4;
-  let traces: Trace[] = [];
+  let glints: Glint[] = [];
   let lastSpawn = 0, raf = 0, running = false;
   const t0 = performance.now();
 
@@ -33,24 +33,8 @@ export function field(canvas: HTMLCanvasElement, still: boolean) {
     oy = (h - (rows - 1) * GAP) / 2;
   }
 
-  // A walk along the grid that mostly keeps its heading, like a root.
   function spawn(now: number) {
-    let c = Math.floor(Math.random() * cols), r = Math.floor(Math.random() * rows);
-    const dirs: [number, number][] = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-    let d = dirs[Math.floor(Math.random() * 4)];
-    const pts: [number, number][] = [[c, r]];
-    const steps = 6 + Math.floor(Math.random() * 10);
-    for (let i = 0; i < steps; i++) {
-      if (Math.random() < 0.35) {
-        const turn = dirs.filter(([x, y]) => x !== -d[0] || y !== -d[1]);
-        d = turn[Math.floor(Math.random() * turn.length)];
-      }
-      c += d[0];
-      r += d[1];
-      if (c < 0 || r < 0 || c >= cols || r >= rows) break;
-      pts.push([c, r]);
-    }
-    if (pts.length > 3) traces.push({ pts, born: now });
+    glints.push({ i: Math.floor(Math.random() * cols), j: Math.floor(Math.random() * rows), born: now });
   }
 
   function draw(now: number) {
@@ -59,6 +43,9 @@ export function field(canvas: HTMLCanvasElement, still: boolean) {
     // ripple out from the logo, which sits near the top centre
     const cx = w / 2, cy = Math.min(h * 0.22, 190);
     const reach = still ? 1e9 : t * 1.1;
+    glints = glints.filter((g) => now - g.born < GLOW);
+    const lit = new Map<number, number>();
+    for (const g of glints) lit.set(g.i * 100000 + g.j, Math.sin(((now - g.born) / GLOW) * Math.PI));
     for (let i = 0; i < cols; i++) {
       for (let j = 0; j < rows; j++) {
         const x = ox + i * GAP, y = oy + j * GAP;
@@ -68,41 +55,15 @@ export function field(canvas: HTMLCanvasElement, still: boolean) {
         // the wavefront itself is brighter as it passes
         const crest = still ? 0 : Math.max(0, 1 - Math.abs(reach - d) / 90) * Math.max(0, 1 - t / 2600);
         const near = Math.max(0, 1 - Math.hypot(x - mx, y - my) / 170);
-        const a = 0.16 * shown + 0.35 * crest + 0.55 * near * near;
-        const col = near > 0.05 || crest > 0.05 ? LEAF : DOT;
+        const glow = (lit.get(i * 100000 + j) ?? 0) * shown;
+        const a = 0.16 * shown + 0.35 * crest + 0.55 * near * near + 0.6 * glow;
+        const col = near > 0.05 || crest > 0.05 || glow > 0.05 ? LEAF : DOT;
         ctx!.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${a.toFixed(3)})`;
-        const s = 1.6 + 1.6 * near;
+        const s = 1.6 + 1.6 * Math.max(near, glow);
         ctx!.fillRect(x - s / 2, y - s / 2, s, s);
       }
     }
-    // traces grow, hold, and fade
-    traces = traces.filter((tr) => now - tr.born < GROW + HOLD + FADE);
-    ctx!.lineCap = 'round';
-    ctx!.lineJoin = 'round';
-    for (const tr of traces) {
-      const age = now - tr.born;
-      const grown = Math.min(1, age / GROW) * (tr.pts.length - 1);
-      const fade = age > GROW + HOLD ? 1 - (age - GROW - HOLD) / FADE : 1;
-      const whole = Math.floor(grown);
-      const at = (k: number): [number, number] => [ox + tr.pts[k][0] * GAP, oy + tr.pts[k][1] * GAP];
-      ctx!.beginPath();
-      ctx!.moveTo(...at(0));
-      for (let k = 1; k <= whole; k++) ctx!.lineTo(...at(k));
-      let head = at(whole);
-      if (whole < tr.pts.length - 1) {
-        const [ax, ay] = at(whole), [bx, by] = at(whole + 1), f = grown - whole;
-        head = [ax + (bx - ax) * f, ay + (by - ay) * f];
-        ctx!.lineTo(...head);
-      }
-      ctx!.strokeStyle = `rgba(${LEAF[0]},${LEAF[1]},${LEAF[2]},${(0.4 * fade).toFixed(3)})`;
-      ctx!.lineWidth = 1.4;
-      ctx!.stroke();
-      ctx!.fillStyle = `rgba(${LEAF[0]},${LEAF[1]},${LEAF[2]},${(0.9 * fade).toFixed(3)})`;
-      ctx!.beginPath();
-      ctx!.arc(head[0], head[1], 2.4, 0, Math.PI * 2);
-      ctx!.fill();
-    }
-    if (!still && t > 1400 && now - lastSpawn > 650 && traces.length < 8) {
+    if (!still && t > 1400 && now - lastSpawn > 260 && glints.length < 14) {
       spawn(now);
       lastSpawn = now;
     }
