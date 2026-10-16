@@ -44,10 +44,12 @@ Restart the client after editing its config.
 ## Which folder it serves
 
 1. The folder you pass: `sprout mcp /path/to/project`.
-2. Otherwise, the folder your client says is open, if it supports MCP *roots* (VS Code does, for one).
+2. Otherwise, the folder your client says is open, if it supports MCP *roots* (VS Code and Claude Code do). When the client says it changed, the server follows.
 3. Otherwise, the folder it was started in.
 
-Started in `/` or your home folder with nothing better to go on, which desktop apps can do, the tools refuse and say how to fix it, instead of mapping hundreds of thousands of files. Pass the home folder explicitly if you really mean it.
+In `/` or your home folder, whether the server started there or the client is open there (Claude Code launched from `~`, say), the tools refuse and say how to fix it, instead of mapping hundreds of thousands of files, private ones included. Start the agent inside the project, or pass the project path. Pass the home folder explicitly if you really mean it.
+
+Any single call can also name its project with `root`, an absolute path. The agent can then work on a repository other than the open folder, even while that folder is refused.
 
 ## Tools
 
@@ -62,6 +64,8 @@ Started in `/` or your home folder with nothing better to go on, which desktop a
 | `impact` | `files?` or `staged?`, `rev?`, `commit?`; `all?` | What a change could break, and the tests to run ([`impact`](/sprout-web/docs/guides/impact/)). Uncommitted changes by default |
 | `context` | `file`, `budget?` | What to know before editing a file ([`context`](/sprout-web/docs/guides/context/)) |
 
+Every tool also takes `root?`, the project's absolute path, for that call only.
+
 The tool descriptions tell agents when to reach for each: `project_map` first in a new repository, `context` or `dependents` before editing a file, `impact` after editing.
 
 ## Safety
@@ -69,13 +73,14 @@ The tool descriptions tell agents when to reach for each: `project_map` first in
 An agent's arguments are untrusted input, so:
 
 - `path`, `file` and `files` must stay inside the root once `..` and symlinks are resolved. Absolute paths and URLs are refused, so the server never clones anything.
+- `root` must be an absolute path to a project folder (one with `.git` or a manifest like `go.mod` or `package.json`). It can't be a hidden folder, `/` or your home folder, and if you gave the server a folder, it must be inside that folder.
 - `rev` and `commit` can't become git options.
-- Output uses paths relative to the root, never your home directory.
+- Output uses paths relative to the root. The one exception: when a file isn't found, the error names the folder being served, because a wrong folder is the usual cause.
 - The server is read-only.
 
 ## If it doesn't work
 
 - **No sprout tools show up:** restart the client. Then run `sprout mcp` in a terminal: it should print `MCP server on stdio, root …` and wait. If the client's MCP log says the command wasn't found, it can't see your `PATH`: use the full path from `which sprout`.
-- **The map is of the wrong folder:** pass the project path, as in the examples above.
+- **The map is of the wrong folder:** start the agent inside the project, or pass the project path as in the examples above. When a file isn't found, the error says which folder the server is on.
 - **The agent doesn't use the tools:** the server tells agents when each tool beats searching by hand, but asking helps: "use sprout's impact tool on what you changed".
 - **Stale answers:** there aren't any. Every call reads the disk again, so files your agent just wrote are in the next answer.
