@@ -1,23 +1,42 @@
-// The hero's background: a dot grid, like survey paper, that ripples in from
-// the logo on load. A few dots glow softly and fade, like lights on a map,
-// and dots near the pointer light up. One canvas, about 2,000 dots per
-// frame; it pauses when the hero is off screen, and draws one still frame
-// with reduced motion.
+// The hero's background: a living topographic map. Contour lines are traced
+// (marching squares) through a slowly drifting noise field, so the terrain
+// breathes; every fourth line is a brighter index contour, as on a survey
+// sheet. The pointer raises a hill the lines wrap around, and on load the map
+// unfolds outward from the logo. ~30 fps on one canvas, paused off screen;
+// with reduced motion it draws one still frame.
 
-const GAP = 28;
-const DOT = [198, 213, 190]; // sage
-const LEAF = [79, 207, 130];
-const GLOW = 3200; // how long one dot takes to brighten and fade, ms
+const STEP = 16; // grid cell, css px
+const LEVELS = 13;
+const SAGE = '198,213,190';
+const LEAF = '79,207,130';
 
-type Glint = { i: number; j: number; born: number };
+// Smooth 3D value noise: hashed lattice values, smoothstep-blended.
+function hash(x: number, y: number, z: number) {
+  let h = (x * 374761393 + y * 668265263 + z * 2147483647) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
+}
+function noise(x: number, y: number, z: number) {
+  const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z);
+  const fx = x - xi, fy = y - yi, fz = z - zi;
+  const u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy), w = fz * fz * (3 - 2 * fz);
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+  const plane = (zz: number) =>
+    lerp(
+      lerp(hash(xi, yi, zz), hash(xi + 1, yi, zz), u),
+      lerp(hash(xi, yi + 1, zz), hash(xi + 1, yi + 1, zz), u),
+      v,
+    );
+  return lerp(plane(zi), plane(zi + 1), w);
+}
 
 export function field(canvas: HTMLCanvasElement, still: boolean) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
-  let w = 0, h = 0, cols = 0, rows = 0, ox = 0, oy = 0;
-  let mx = -1e4, my = -1e4;
-  let glints: Glint[] = [];
-  let lastSpawn = 0, raf = 0, running = false;
+  let w = 0, h = 0, cols = 0, rows = 0;
+  let vals = new Float32Array(0);
+  let mx = 0, my = 0, hx = 0, hy = 0, on = 0, lift = 0; // pointer, the hill easing after it, and its height
+  let raf = 0, running = false, last = 0;
   const t0 = performance.now();
 
   function resize() {
@@ -27,50 +46,88 @@ export function field(canvas: HTMLCanvasElement, still: boolean) {
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cols = Math.ceil(w / GAP) + 1;
-    rows = Math.ceil(h / GAP) + 1;
-    ox = (w - (cols - 1) * GAP) / 2;
-    oy = (h - (rows - 1) * GAP) / 2;
+    cols = Math.ceil(w / STEP) + 2;
+    rows = Math.ceil(h / STEP) + 2;
+    vals = new Float32Array(cols * rows);
   }
 
-  function spawn(now: number) {
-    glints.push({ i: Math.floor(Math.random() * cols), j: Math.floor(Math.random() * rows), born: now });
+  function sample(now: number) {
+    const z = (now - t0) * 0.000045;
+    hx += (mx - hx) * 0.08;
+    hy += (my - hy) * 0.08;
+    lift += (on - lift) * 0.06; // the hill rises under the pointer and sinks when it leaves
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < cols; i++) {
+        const x = i * STEP, y = j * STEP;
+        let v = 0.65 * noise(x * 0.0032, y * 0.0032, z) + 0.35 * noise(x * 0.0071 + 40, y * 0.0071, z * 1.6);
+        const d2 = (x - hx) ** 2 + (y - hy) ** 2;
+        v += 0.32 * lift * Math.exp(-d2 / 26000);
+        vals[j * cols + i] = v;
+      }
+    }
+  }
+
+  // One contour level through the grid, as line segments in one path.
+  function contour(level: number) {
+    ctx!.beginPath();
+    for (let j = 0; j < rows - 1; j++) {
+      for (let i = 0; i < cols - 1; i++) {
+        const a = vals[j * cols + i], b = vals[j * cols + i + 1];
+        const c = vals[(j + 1) * cols + i + 1], d = vals[(j + 1) * cols + i];
+        const k = (a > level ? 8 : 0) | (b > level ? 4 : 0) | (c > level ? 2 : 0) | (d > level ? 1 : 0);
+        if (k === 0 || k === 15) continue;
+        const x = i * STEP, y = j * STEP;
+        const top = () => [x + STEP * ((level - a) / (b - a)), y] as const;
+        const right = () => [x + STEP, y + STEP * ((level - b) / (c - b))] as const;
+        const bottom = () => [x + STEP * ((level - d) / (c - d)), y + STEP] as const;
+        const left = () => [x, y + STEP * ((level - a) / (d - a))] as const;
+        const seg = (p: readonly [number, number], q: readonly [number, number]) => {
+          ctx!.moveTo(p[0], p[1]);
+          ctx!.lineTo(q[0], q[1]);
+        };
+        switch (k) {
+          case 1: case 14: seg(left(), bottom()); break;
+          case 2: case 13: seg(bottom(), right()); break;
+          case 3: case 12: seg(left(), right()); break;
+          case 4: case 11: seg(top(), right()); break;
+          case 6: case 9: seg(top(), bottom()); break;
+          case 7: case 8: seg(left(), top()); break;
+          case 5: seg(left(), top()); seg(bottom(), right()); break;
+          case 10: seg(top(), right()); seg(left(), bottom()); break;
+        }
+      }
+    }
   }
 
   function draw(now: number) {
-    const t = now - t0;
+    sample(now);
     ctx!.clearRect(0, 0, w, h);
-    // ripple out from the logo, which sits near the top centre
-    const cx = w / 2, cy = Math.min(h * 0.22, 190);
-    const reach = still ? 1e9 : t * 1.1;
-    glints = glints.filter((g) => now - g.born < GLOW);
-    const lit = new Map<number, number>();
-    for (const g of glints) lit.set(g.i * 100000 + g.j, Math.sin(((now - g.born) / GLOW) * Math.PI));
-    for (let i = 0; i < cols; i++) {
-      for (let j = 0; j < rows; j++) {
-        const x = ox + i * GAP, y = oy + j * GAP;
-        const d = Math.hypot(x - cx, y - cy);
-        const shown = Math.min(1, Math.max(0, (reach - d) / 140));
-        if (!shown) continue;
-        // the wavefront itself is brighter as it passes
-        const crest = still ? 0 : Math.max(0, 1 - Math.abs(reach - d) / 90) * Math.max(0, 1 - t / 2600);
-        const near = Math.max(0, 1 - Math.hypot(x - mx, y - my) / 170);
-        const glow = (lit.get(i * 100000 + j) ?? 0) * shown;
-        const a = 0.16 * shown + 0.35 * crest + 0.55 * near * near + 0.6 * glow;
-        const col = near > 0.05 || crest > 0.05 || glow > 0.05 ? LEAF : DOT;
-        ctx!.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${a.toFixed(3)})`;
-        const s = 1.6 + 1.6 * Math.max(near, glow);
-        ctx!.fillRect(x - s / 2, y - s / 2, s, s);
-      }
+    // the map unfolds from the logo, near the top centre
+    const t = now - t0;
+    const reach = still ? 1e9 : t * 0.9;
+    ctx!.save();
+    if (reach < Math.hypot(w, h)) {
+      ctx!.beginPath();
+      ctx!.arc(w / 2, Math.min(h * 0.22, 190), reach, 0, Math.PI * 2);
+      ctx!.clip();
     }
-    if (!still && t > 1400 && now - lastSpawn > 260 && glints.length < 14) {
-      spawn(now);
-      lastSpawn = now;
+    ctx!.lineJoin = 'round';
+    for (let n = 1; n <= LEVELS; n++) {
+      const level = 0.12 + (n / (LEVELS + 1)) * 0.95;
+      const index = n % 4 === 0;
+      ctx!.strokeStyle = index ? `rgba(${LEAF},0.34)` : `rgba(${SAGE},0.13)`;
+      ctx!.lineWidth = index ? 1.3 : 1;
+      contour(level);
+      ctx!.stroke();
     }
+    ctx!.restore();
   }
 
   function loop(now: number) {
-    draw(now);
+    if (now - last > 33) {
+      draw(now);
+      last = now;
+    }
     raf = requestAnimationFrame(loop);
   }
   const start = () => { if (!running) { running = true; raf = requestAnimationFrame(loop); } };
@@ -78,13 +135,15 @@ export function field(canvas: HTMLCanvasElement, still: boolean) {
 
   resize();
   addEventListener('resize', () => { resize(); if (still) draw(performance.now()); });
-  if (still) return draw(t0);
+  if (still) return draw(t0 + 1);
   const host = canvas.parentElement!;
   host.addEventListener('pointermove', (e) => {
     const b = canvas.getBoundingClientRect();
     mx = e.clientX - b.left;
     my = e.clientY - b.top;
+    if (!on && lift < 0.02) { hx = mx; hy = my; }
+    on = 1;
   });
-  host.addEventListener('pointerleave', () => { mx = my = -1e4; });
+  host.addEventListener('pointerleave', () => { on = 0; });
   new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop())).observe(canvas);
 }
