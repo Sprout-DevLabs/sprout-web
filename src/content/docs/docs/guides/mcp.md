@@ -73,7 +73,7 @@ The tool descriptions tell agents when to reach for each: `project_map` first in
 An agent's arguments are untrusted input, so:
 
 - `path`, `file` and `files` must stay inside the root once `..` and symlinks are resolved. Absolute paths and URLs are refused, so the server never clones anything.
-- `root` must be an existing folder given as an absolute path, and not `/` or your home folder.
+- `root` must be an absolute path to a project folder (one with `.git` or a manifest like `go.mod` or `package.json`). It can't be a hidden folder, `/` or your home folder, and if you gave the server a folder, it must be inside that folder.
 - `rev` and `commit` can't become git options.
 - Output uses paths relative to the root. The one exception: when a file isn't found, the error names the folder being served, because a wrong folder is the usual cause.
 - The server is read-only.
