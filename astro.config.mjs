@@ -37,6 +37,9 @@ export default defineConfig({
         },
       },
       head: [
+        // PNG fallbacks for browsers without SVG favicons (Safari), and for iOS home screens.
+        { tag: 'link', attrs: { rel: 'icon', href: '/sprout-web/favicon-32.png', type: 'image/png', sizes: '32x32' } },
+        { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/sprout-web/apple-touch-icon.png' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
         { tag: 'link', attrs: { rel: 'stylesheet', href: fonts } },

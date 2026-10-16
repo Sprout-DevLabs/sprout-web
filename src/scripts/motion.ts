@@ -19,6 +19,7 @@ export function setupMotion() {
   cascades();
   counts();
   navPill();
+  spotlight();
 }
 
 // A thin line under the nav fills as you read.
@@ -143,5 +144,17 @@ function navPill() {
   wrap.addEventListener('pointerleave', () => {
     shown = false;
     animate(pill, { opacity: 0, scale: 0.92 }, { duration: 0.2 });
+  });
+}
+
+// Cards light up where the pointer is: the CSS draws the glow at --mx/--my.
+function spotlight() {
+  if (!matchMedia('(hover: hover)').matches) return;
+  document.querySelectorAll<HTMLElement>('[data-spot]').forEach((el) => {
+    el.addEventListener('pointermove', (e) => {
+      const b = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${e.clientX - b.left}px`);
+      el.style.setProperty('--my', `${e.clientY - b.top}px`);
+    });
   });
 }
