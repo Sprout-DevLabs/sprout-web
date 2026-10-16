@@ -66,7 +66,11 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
+  /* survey paper: a faint dot grid under everything (the hero draws its own, live) */
+  background-color: var(--bg);
+  background-image: radial-gradient(rgba(198, 213, 190, 0.075) 1px, transparent 1.5px);
+  background-size: 28px 28px;
+  background-position: 14px 14px;
   color: var(--ink);
   font: 400 17px/1.65 var(--sans);
   -webkit-font-smoothing: antialiased;
@@ -592,4 +596,46 @@ h3 {
   @view-transition {
     navigation: none;
   }
+}
+
+/* Film grain over the whole page, so the dark reads as soil rather than flat black. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Spotlight cards (motion.ts sets --mx/--my): a glow follows the pointer
+   along the border, with a faint wash inside. */
+[data-spot] {
+  position: relative;
+}
+[data-spot]::before,
+[data-spot]::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+[data-spot]::before {
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(79, 207, 130, 0.07), transparent 45%);
+}
+[data-spot]::after {
+  padding: 1px;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(79, 207, 130, 0.65), transparent 60%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+[data-spot]:hover::before,
+[data-spot]:hover::after {
+  opacity: 1;
 }

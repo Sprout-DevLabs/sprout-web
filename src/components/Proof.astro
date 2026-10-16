@@ -13,7 +13,7 @@ const stats = [
   <div class="wrap stats" data-cascade>
     {
       stats.map((s) => (
-        <div class="stat">
+        <div class="stat" data-spot>
           <div class="n"><span data-count>{s.n}</span><small>{s.unit}</small></div>
           <p>{s.what}</p>
           <a href={s.href}>{s.link}</a>

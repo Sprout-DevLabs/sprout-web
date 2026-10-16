@@ -28,7 +28,7 @@ const cards = [
     <div class="cards" data-cascade>
       {
         cards.map((c) => (
-          <a class="card" href={`${base}/docs/guides/${c.href}/`}>
+          <a class="card" data-spot href={`${base}/docs/guides/${c.href}/`}>
             <h3>{c.q}</h3>
             <p class="muted">{c.what}</p>
             <code class="cmd-tag">{c.cmd}</code>
