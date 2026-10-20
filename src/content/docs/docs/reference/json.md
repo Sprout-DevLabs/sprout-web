@@ -50,7 +50,7 @@ Each command's `--json` has its own `schemaVersion` and a `command` field, and i
 |---|---|
 | [`tour`](/sprout-web/docs/guides/tour/#json) | `purpose`, `projects`, `layout`, `readingOrder`, `nextCommands`, `caveats`… |
 | [`deps`, `dependents`](/sprout-web/docs/guides/deps/) | each linked file with its reason |
-| [`impact`](/sprout-web/docs/guides/impact/) | `changed`, `affected`, `tests`, `goTestPackages`… |
+| [`impact`](/sprout-web/docs/guides/impact/) | `changed`, `affected`, `tests`, `goTestPackages`, `goTestRun`, `testCommands`… |
 | [`context`](/sprout-web/docs/guides/context/#json) | `dependencies`, `users`, `tests`, `declarations` |
 
 ## Stability

@@ -15,11 +15,19 @@ sprout mcp --print-config claude-code     # or cursor, vscode, claude-desktop
 
 Or copy it from here.
 
-**Claude Code**, in your project:
+**Claude Code**: install the plugin. It adds the server, and a skill that tells Claude when Sprout answers better than grep:
+
+```
+/plugin install sprout --marketplace Sprout-DevLabs/sprout
+```
+
+It runs the `sprout` on your PATH. Or add just the server, in your project:
 
 ```sh
 claude mcp add sprout -- sprout mcp
 ```
+
+Use one or the other: with both, Claude sees every tool twice (`claude mcp remove sprout` removes the server).
 
 **Cursor**: `.cursor/mcp.json` in your project, or `~/.cursor/mcp.json` for every project. Cursor fills in `${workspaceFolder}`:
 
@@ -55,13 +63,13 @@ Any single call can also name its project with `root`, an absolute path. The age
 
 | Tool | Arguments | Returns |
 |---|---|---|
-| `project_map` | `path?`, `budget?` | The [`--ai`](/sprout-web/docs/guides/ai/) map with key files. Its description tells agents to call it first |
+| `project_map` | `path?`, `budget?` | The [`--ai`](/sprout-web/docs/guides/ai/) map with key files, at a 1000-token budget unless the agent asks for more. Its description tells agents to call it first |
 | `reading_order` | `path?` | The [`--entry`](/sprout-web/docs/guides/entry/) list |
 | `tree` | `path?`, `depth?` (default 3), `all?`, `git?`, `churn?`, `since?` | A tree of a folder |
 | `diff_tree` | `rev`, `path?`, `depth?` | The [`--diff`](/sprout-web/docs/guides/git/#diff-a-pull-request-as-a-tree) view |
 | `dependents` | `file`, `depth?`, `noTests?` | What depends on a file, and why ([`dependents`](/sprout-web/docs/guides/deps/)) |
 | `deps` | `file`, `depth?` | What a file depends on, and why |
-| `impact` | `files?` or `staged?`, `rev?`, `commit?`; `all?` | What a change could break, and the tests to run ([`impact`](/sprout-web/docs/guides/impact/)). Uncommitted changes by default |
+| `impact` | `files?` or `staged?`, `rev?`, `commit?`; `all?`, `symbol?` | What a change could break, and the tests to run ([`impact`](/sprout-web/docs/guides/impact/)). Uncommitted changes by default; `symbol` with one Go file narrows it to one function, method, type or variable |
 | `context` | `file`, `budget?` | What to know before editing a file ([`context`](/sprout-web/docs/guides/context/)) |
 
 Every tool also takes `root?`, the project's absolute path, for that call only.
