@@ -17,7 +17,7 @@ const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_com
   <div class="wrap hero-copy">
     <div class="seed" aria-hidden="true"><Mark /></div>
     <a class="news" href="https://github.com/Sprout-DevLabs/sprout/releases/latest">
-      <span class="dot" aria-hidden="true"></span> New in v0.4.3: a safer MCP server, and a root argument for any project
+      <span class="dot" aria-hidden="true"></span> New in v0.5.0: the tests to run for one function, and a Claude Code plugin
     </a>
     <h1 aria-label={lines.join(' ')}>
       {
@@ -263,8 +263,9 @@ const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_com
       opacity: 1;
     }
     to {
-      /* past the edges, so the glow isn't clipped once it has grown */
-      clip-path: inset(-60% -60% -60% -60%);
+      /* far past the edges: the mark is ~30px wide and its glow spreads
+         28px, so a tighter inset cuts the glow into a visible box */
+      clip-path: inset(-300%);
       transform: none;
     }
   }
