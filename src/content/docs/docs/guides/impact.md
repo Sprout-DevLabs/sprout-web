@@ -73,4 +73,12 @@ Files that aren't source code (docs, configs) are listed as not traced. Deleted 
 sprout impact --diff origin/main...HEAD --json | jq -r '.goTestPackages[]' | xargs go test
 ```
 
+CI checkouts are shallow by default, so the branch's base isn't there. In GitHub Actions, check out with `fetch-depth: 0` (or `2` for `--commit HEAD`):
+
+```yaml
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 0
+```
+
 Agents get it as the `impact` [MCP tool](/sprout-web/docs/guides/mcp/), which tells them to call it after editing, before running tests or opening a pull request.
