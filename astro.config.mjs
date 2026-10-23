@@ -61,6 +61,7 @@ export default defineConfig({
             { label: 'Reading order (--entry)', slug: 'docs/guides/entry' },
             { label: 'Dependencies (deps, dependents)', slug: 'docs/guides/deps' },
             { label: 'Impact of a change (impact)', slug: 'docs/guides/impact' },
+            { label: 'Architecture rules (check)', slug: 'docs/guides/check' },
             { label: 'Context for one file (context)', slug: 'docs/guides/context' },
             { label: 'Git, diffs and hotspots', slug: 'docs/guides/git' },
             { label: 'Remote repositories', slug: 'docs/guides/remote' },
