@@ -37,15 +37,19 @@ const runs = [
     </h1>
     <p class="lead rise" style="--d:1.05s">The dependency map of your codebase, for you and your coding agent.</p>
     <div class="actions rise" style="--d:1.2s">
-      <CopyCommand command="brew install sprout-devlabs/tap/sprout" primary />
+      <a class="pill pill-light" href={`${base}/docs/install/`}>
+        Get started
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+      </a>
       <StarButton />
     </div>
-    <p class="also rise" style="--d:1.32s">
-      <a href={`${base}/docs/install/`}>Other installs</a><span aria-hidden="true">·</span><a href={`${base}/docs/guides/mcp/`}>MCP setup</a><span aria-hidden="true">·</span><a href={`${base}/docs/`}>Docs</a>
-    </p>
+    <div class="quick rise" style="--d:1.32s">
+      <CopyCommand command="brew install sprout-devlabs/tap/sprout" />
+    </div>
   </div>
 
   <div class="wrap race-wrap rise" style="--d:1.5s">
+    <div class="frame">
     <figure class="panel race">
       <figcaption class="race-q">
         <span><span class="k">query</span> tests covering <code>src/click/core.py</code></span>
@@ -69,6 +73,7 @@ const runs = [
       </div>
       <p class="race-foot">Sprout v0.4.2 · tokens = characters ÷ 4</p>
     </figure>
+    </div>
   </div>
 </section>
 
@@ -106,7 +111,7 @@ const runs = [
     inset: 0 0 auto;
     height: 760px;
     z-index: -1;
-    background: radial-gradient(42% 46% at 50% 16%, rgba(79, 207, 130, 0.09), transparent 70%);
+    background: radial-gradient(42% 46% at 50% 16%, rgba(255, 255, 255, 0.06), transparent 70%);
     pointer-events: none;
   }
   .hero-copy {
@@ -177,10 +182,7 @@ const runs = [
     margin-top: 0.08em;
   }
   h1 .em .wi {
-    background: linear-gradient(180deg, var(--leaf-ink), #3a9e63);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--muted);
   }
   .lead {
     margin: 22px auto 0;
@@ -200,19 +202,23 @@ const runs = [
     min-width: 0;
     max-width: 100%;
   }
-  .also {
-    display: flex;
-    gap: 12px;
-    margin: 18px 0 0;
-    font: 12.5px var(--mono);
-    color: var(--muted);
+  .quick {
+    margin-top: 22px;
   }
-  .also a {
+  .quick :global(.cmd) {
+    height: 40px;
+    padding-left: 16px;
+    border-radius: 12px;
+    background: transparent;
+    border-color: var(--line);
+    box-shadow: none;
     color: var(--ink-2);
-    text-decoration: none;
+    font-size: 13px;
   }
-  .also a:hover {
-    color: var(--leaf);
+  .quick :global(.cmd .copy-ic) {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.06);
   }
   .race-wrap {
     max-width: calc(1040px + 2 * var(--gutter));

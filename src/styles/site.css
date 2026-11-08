@@ -4,14 +4,14 @@
    Geist Mono every tree. */
 
 :root {
-  --bg: #0a0f0c;
-  --bg-2: #0e1511;
-  --surface: #111914;
-  --ink: #e8efe9;
-  --ink-2: #c3cec6;
-  --muted: #8b998f;
-  --line: rgba(220, 240, 228, 0.07);
-  --line-2: rgba(220, 240, 228, 0.12);
+  --bg: #09090b;
+  --bg-2: #101012;
+  --surface: #111113;
+  --ink: #fafafa;
+  --ink-2: #d4d4d8;
+  --muted: #85858f;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-2: rgba(255, 255, 255, 0.12);
   --leaf: #4fcf82;
   --leaf-ink: #6ee09b;
   --leaf-soft: #13271b;
@@ -27,11 +27,11 @@
   --k-correctness: #f1b84e;
 
   /* instrument panels */
-  --term: #0c130f;
-  --term-2: #111a15;
-  --term-line: rgba(214, 238, 222, 0.09);
-  --term-fg: #d7e4db;
-  --term-dim: #6c8174;
+  --term: #0b0b0d;
+  --term-2: #111113;
+  --term-line: rgba(255, 255, 255, 0.07);
+  --term-fg: #e4e4e7;
+  --term-dim: #6b6b74;
   --term-dir: #86c8ff;
   --term-add: #5fd68d;
   --term-mod: #f1c24e;
@@ -327,7 +327,7 @@ h3 {
   position: absolute;
   inset: 0 0 auto;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--line-2) 20%, rgba(79, 207, 130, 0.35) 50%, var(--line-2) 80%, transparent);
+  background: linear-gradient(90deg, transparent, var(--line) 20%, var(--line-2) 50%, var(--line) 80%, transparent);
 }
 .section-head {
   display: grid;
@@ -666,4 +666,89 @@ body::after {
 }
 .cmd.primary .copy-ic {
   background: rgba(10, 15, 12, 0.08);
+}
+
+/* ---------- the system: rails, pills, two-tone type, framed showcases ---------- */
+
+/* Hairline rails down both edges of the content column. */
+main {
+  background:
+    linear-gradient(var(--line), var(--line)) calc(50% - var(--wrap) / 2 - 1px) 0 / 1px 100% no-repeat,
+    linear-gradient(var(--line), var(--line)) calc(50% + var(--wrap) / 2) 0 / 1px 100% no-repeat;
+}
+@media (max-width: 1260px) {
+  main {
+    background: none;
+  }
+}
+
+/* Headings in two tones: the claim in white, the rest in grey. */
+.dim {
+  color: var(--muted);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font: 500 15px var(--sans);
+  text-decoration: none;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    transform 0.2s var(--ease);
+}
+.pill:active {
+  transform: scale(0.97);
+}
+.pill-light {
+  background: var(--ink);
+  color: #09090b;
+}
+.pill-light:hover {
+  background: #e4e4e7;
+}
+.pill svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.2s var(--ease);
+}
+.pill:hover svg {
+  transform: translateX(2px);
+}
+.star-btn {
+  border-radius: 999px !important;
+}
+
+/* A showcase sits in a bezel: an outer frame, a little air, then the panel. */
+.frame {
+  padding: 8px;
+  border-radius: 26px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.015);
+  box-shadow: 0 40px 120px -40px rgba(0, 0, 0, 0.9);
+}
+.frame > .panel {
+  border-radius: 18px;
+  box-shadow: none;
+}
+
+.arrow-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.arrow-link::after {
+  content: '→';
+  transition: transform 0.2s var(--ease);
+}
+.arrow-link:hover::after {
+  transform: translateX(3px);
 }
