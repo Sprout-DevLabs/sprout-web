@@ -3,9 +3,9 @@
 // /benchmarks page. Accuracy: tools/accuracy in the sprout repo.
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const stats = [
-  { n: '0.23', unit: ' s', what: 'to map Kubernetes, all 31,412 files, with a warm cache.', link: 'Benchmark log', href: `${base}/benchmarks/` },
-  { n: '100%', unit: '', what: "of in-repo imports found on click, ky and fastapi-template, checked against each language's own tooling.", link: "How it's measured", href: 'https://github.com/Sprout-DevLabs/sprout/tree/main/tools/accuracy' },
-  { n: '7', unit: ' languages', what: 'Go, TypeScript, JavaScript, Python, Rust, Java and Kotlin. One binary, Go standard library only, MIT licensed.', link: 'Read the source', href: 'https://github.com/Sprout-DevLabs/sprout' },
+  { n: '0.23', unit: ' s', what: 'to map Kubernetes: 31,412 files, warm cache.', link: 'Benchmark log', href: `${base}/benchmarks/` },
+  { n: '100%', unit: '', what: "of in-repo imports found, checked against each language's own tooling.", link: "How it's measured", href: 'https://github.com/Sprout-DevLabs/sprout/tree/main/tools/accuracy' },
+  { n: '7', unit: ' languages', what: 'Go, TypeScript, JavaScript, Python, Rust, Java, Kotlin. One binary, MIT.', link: 'Read the source', href: 'https://github.com/Sprout-DevLabs/sprout' },
 ];
 ---
 
@@ -31,16 +31,23 @@ const stats = [
   }
   .stat {
     padding: 28px;
-    border-radius: 18px;
+    border-radius: 14px;
     border: 1px solid var(--line);
     background: var(--surface);
   }
   .n {
-    font: 800 56px/1 var(--display);
-    letter-spacing: -0.03em;
+    font: 600 52px/1 var(--display);
+    letter-spacing: -0.05em;
+    width: fit-content;
+    background: linear-gradient(180deg, #fff 20%, var(--leaf-ink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
   .n small {
-    font-size: 26px;
+    margin-left: 4px;
+    font-size: 22px;
+    letter-spacing: -0.02em;
   }
   .stat p {
     margin: 14px 0 0;

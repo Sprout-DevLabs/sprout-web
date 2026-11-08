@@ -37,7 +37,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
     />
     <script is:inline>document.documentElement.classList.add('js')</script>
   </head>
@@ -51,7 +51,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         <a class="nav-link nav-hide-sm" href="https://github.com/Sprout-DevLabs/sprout/releases">Releases</a>
         <StarButton size="sm" />
       </div>
-      <span class="progress" aria-hidden="true"></span>
     </header>
 
     <main id="main"><slot /></main>
@@ -67,7 +66,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             <a href="https://github.com/ManasDasri">GitHub</a>
             <a href="https://x.com/ManasDmg9">Twitter</a>
           </div>
-          <p class="muted">If Sprout saves you or your agent some digging, a star helps others find it.</p>
           <StarButton />
         </div>
         <nav aria-label="Documentation">
@@ -106,7 +104,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <style>
       .foot {
         border-top: 1px solid var(--line);
-        padding: 72px 0 88px;
+        padding: 56px 0 72px;
         font-size: 15px;
       }
       .foot-grid {

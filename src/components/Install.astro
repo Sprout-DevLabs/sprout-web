@@ -14,24 +14,26 @@ import Mark from '../assets/sprout-mark.svg';
         <CopyCommand command="scoop bucket add sprout https://github.com/Sprout-DevLabs/scoop-bucket; scoop install sprout" label="Copy: install with Scoop" />
         <CopyCommand command="go install github.com/Sprout-DevLabs/sprout@latest" />
       </div>
-      <div class="ask">
-        <span>If Sprout saves you or your agent some digging, a star helps others find it.</span>
-        <StarButton />
-      </div>
+      <div class="ask"><StarButton /></div>
     </div>
   </div>
 </section>
 
 <style>
   .install {
-    padding-bottom: var(--section);
+    padding-bottom: clamp(64px, 8vw, 112px);
   }
   .band {
     position: relative;
     overflow: hidden;
     padding: clamp(36px, 6vw, 64px);
     border-radius: 24px;
-    background: var(--forest);
+    border: 1px solid rgba(79, 207, 130, 0.22);
+    background:
+      radial-gradient(70% 120% at 88% 110%, rgba(79, 207, 130, 0.3), transparent 60%),
+      radial-gradient(50% 80% at 0% 0%, rgba(198, 213, 190, 0.08), transparent 70%),
+      linear-gradient(155deg, #1d2f22, #0f1913 70%);
+    box-shadow: var(--shadow-panel);
     color: #eef4ea;
   }
   .bg-mark {
@@ -41,7 +43,8 @@ import Mark from '../assets/sprout-mark.svg';
     height: 340px;
     width: auto;
     color: var(--sage);
-    opacity: 0.12;
+    opacity: 0.16;
+    filter: drop-shadow(0 0 40px rgba(79, 207, 130, 0.5));
     pointer-events: none;
   }
   h2 {
@@ -70,5 +73,13 @@ import Mark from '../assets/sprout-mark.svg';
     margin-top: 32px;
     color: var(--sage);
     font-size: 15px;
+  }
+  @media (max-width: 560px) {
+    .band {
+      padding: 28px 16px;
+    }
+    .cmds {
+      justify-items: stretch;
+    }
   }
 </style>

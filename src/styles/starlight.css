@@ -41,7 +41,7 @@
 .sl-markdown-content h2,
 .sl-markdown-content h3,
 h1#_top {
-  font-family: 'Bricolage Grotesque', var(--sl-font);
+  font-family: 'Geist', var(--sl-font);
   letter-spacing: -0.025em;
   font-weight: 650;
 }
@@ -51,7 +51,7 @@ h1#_top {
 }
 .site-title {
   color: var(--sl-color-white);
-  font-family: 'Bricolage Grotesque', var(--sl-font);
+  font-family: 'Geist', var(--sl-font);
   font-weight: 700;
   letter-spacing: -0.02em;
 }

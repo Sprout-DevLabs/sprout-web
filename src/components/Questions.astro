@@ -14,16 +14,17 @@ const tourShort = tour
   .replace(/ \(\d+ entries[^)]*\)/, '');
 
 const cards = [
-  { q: 'Where do I start?', what: "What the project is, how it's laid out, and what to read first. Works on a GitHub URL too.", cmd: 'sprout tour', out: tourShort, href: 'tour' },
-  { q: 'What will this break?', what: 'Every file a change reaches, and the exact tests to run: go test, pytest, vitest or jest.', cmd: 'sprout impact FILE', out: impact, max: 9, href: 'impact' },
-  { q: 'What do I need to know?', what: 'Before editing a file: the signatures it uses, who uses it and its tests, within a token budget.', cmd: 'sprout context FILE', out: context, max: 10, href: 'context' },
+  { q: 'Where do I start?', what: 'Layout, languages and what to read first.', cmd: 'sprout tour', out: tourShort, href: 'tour' },
+  { q: 'What will this break?', what: 'Every file a change reaches, and the tests to run.', cmd: 'sprout impact FILE', out: impact, max: 9, href: 'impact' },
+  { q: 'What do I need to know?', what: 'Signatures, users and tests for one file.', cmd: 'sprout context FILE', out: context, max: 10, href: 'context' },
 ];
 ---
 
 <section class="section" id="questions">
   <div class="wrap">
     <div class="section-head">
-      <h2>The three questions every agent asks first, answered in one call each.</h2>
+      <p class="eyebrow">01 / Questions</p>
+      <h2>Three questions, one call each.</h2>
     </div>
     <div class="cards" data-cascade>
       {
@@ -50,7 +51,7 @@ const cards = [
     display: flex;
     flex-direction: column;
     padding: 24px;
-    border-radius: 18px;
+    border-radius: 14px;
     border: 1px solid var(--line);
     background: var(--surface);
     text-decoration: none;
@@ -71,10 +72,10 @@ const cards = [
     width: fit-content;
     margin: 20px 0 16px;
     padding: 5px 12px;
-    border: 0;
-    border-radius: 10px;
-    background: var(--leaf-soft);
-    color: var(--leaf-ink);
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink-2);
     font-size: 13.5px;
   }
   .card .panel {
@@ -85,6 +86,8 @@ const cards = [
   }
   .card :global(.term) {
     font-size: 11px;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
   @media (max-width: 960px) {
     .cards {
