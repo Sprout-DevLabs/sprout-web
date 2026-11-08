@@ -3,31 +3,27 @@ import CopyCommand from './CopyCommand.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const tools = [
-  { name: 'project_map', what: 'The map, key files and signatures. Agents are told to call it first.' },
+  { name: 'project_map', what: 'The map, key files and signatures.' },
   { name: 'reading_order', what: 'Where to start, and why.' },
-  { name: 'impact', what: 'After editing: what could break, and the tests to run.' },
-  { name: 'context', what: 'Before editing a file: what it uses, its users and tests.' },
+  { name: 'impact', what: 'What could break, and the tests to run.' },
+  { name: 'context', what: 'What a file uses, its users and tests.' },
   { name: 'deps · dependents', what: 'What a file uses, and what uses it.' },
-  { name: 'tree · diff_tree', what: 'Any folder, or what a branch changed, as a tree.' },
+  { name: 'tree · diff_tree', what: 'A folder, or a branch diff, as a tree.' },
 ];
 ---
 
 <section class="section" id="agents">
   <div class="wrap split">
     <div class="section-head">
+      <p class="eyebrow">02 / MCP</p>
       <h2>One line, and your agent stops guessing.</h2>
-      <p class="lead">
-        Sprout is an MCP server. Claude Code, Cursor, VS Code and Claude Desktop call it instead of spending their context
-        on <code>ls -R</code> and <code>grep</code>. Every call reads the disk again, so files your agent just wrote are in
-        the next answer.
-      </p>
+      <p class="lead">An MCP server for Claude Code, Cursor, VS Code and Claude Desktop. Read-only, and always current.</p>
       <div class="setup">
         <CopyCommand command="claude mcp add sprout -- sprout mcp" />
         <CopyCommand command="sprout mcp --print-config cursor" />
       </div>
       <p class="muted small">
-        Read-only. Paths stay inside the project and the server never clones.
-        <a href={`${base}/docs/guides/mcp/`}>Setup and safety</a>
+        <a href={`${base}/docs/guides/mcp/`}>Setup and safety →</a>
       </p>
     </div>
     <ul class="tools" data-cascade>

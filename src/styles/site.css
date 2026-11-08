@@ -658,3 +658,12 @@ body::after {
     inset 0 1px 0 rgba(255, 255, 255, 0.045),
     0 24px 48px -32px rgba(0, 0, 0, 0.8);
 }
+
+/* Section labels: a quiet index, in the terminal's voice. */
+.eyebrow {
+  margin: 0;
+  font: 500 12px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--leaf);
+}

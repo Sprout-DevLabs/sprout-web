@@ -7,9 +7,12 @@ import Mark from '../assets/sprout-mark.svg';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const lines = ['Stop your coding agent grepping around.', 'One call gives it the map.'];
-// The first greps an agent runs to answer the same question on pallets/click
-// (2247b35): each finds the modules importing the last hit. 42 calls in all.
-const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_compat', 'formatting', '_winconsole', '_textwrap', 'shell_completion', 'parser', 'globals'];
+// The same question on pallets/click (2247b35), answered by an agent
+// grepping hit by hit and by one sprout impact call.
+const runs = [
+  { who: 'grep', calls: 42, tokens: 5992, cls: 'slow' },
+  { who: 'sprout', calls: 1, tokens: 225, cls: 'fast' },
+];
 ---
 
 <section class="hero">
@@ -17,7 +20,7 @@ const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_com
   <div class="wrap hero-copy">
     <div class="seed" aria-hidden="true"><Mark /></div>
     <a class="news" href="https://github.com/Sprout-DevLabs/sprout/releases/latest">
-      <span class="dot" aria-hidden="true"></span> New in v0.6.0: architecture rules for CI with sprout check, and a faster Sprout
+      <span class="dot" aria-hidden="true"></span> v0.6.0 <span class="news-sep" aria-hidden="true">/</span> sprout check
     </a>
     <h1 aria-label={lines.join(' ')}>
       {
@@ -32,52 +35,40 @@ const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_com
         ))
       }
     </h1>
-    <p class="lead rise" style="--d:1.05s">
-      Sprout maps how your project fits together: where to start reading, what a change could break and which tests to
-      run. Your agent asks once over MCP. You get the same answers in your terminal.
-    </p>
+    <p class="lead rise" style="--d:1.05s">The dependency map of your codebase, for you and your coding agent.</p>
     <div class="actions rise" style="--d:1.2s">
       <CopyCommand command="brew install sprout-devlabs/tap/sprout" />
       <StarButton />
     </div>
-    <div class="agent-line rise" style="--d:1.32s">
-      <span class="muted">Then, in Claude Code:</span>
-      <CopyCommand command="claude mcp add sprout -- sprout mcp" label="Copy: add Sprout to Claude Code" />
-      <a href={`${base}/docs/guides/mcp/`}>Cursor, VS Code, Claude Desktop</a>
-    </div>
-    <p class="also muted rise" style="--d:1.4s">
-      Also on <a href={`${base}/docs/install/#scoop`}>Scoop</a>,{' '}
-      <a href={`${base}/docs/install/#linux-packages`}>apt, dnf and apk</a>,{' '}
-      <a href={`${base}/docs/install/#install-script`}>curl | sh</a> and <a href={`${base}/docs/install/#go`}>go install</a>.
+    <p class="also rise" style="--d:1.32s">
+      <a href={`${base}/docs/install/`}>Other installs</a><span aria-hidden="true">·</span><a href={`${base}/docs/guides/mcp/`}>MCP setup</a><span aria-hidden="true">·</span><a href={`${base}/docs/`}>Docs</a>
     </p>
   </div>
 
   <div class="wrap race-wrap rise" style="--d:1.5s">
-    <div class="panel race">
-      <div class="race-q">
-        <span>Which tests run after I change <code>src/click/core.py</code>?</span>
+    <figure class="panel race">
+      <figcaption class="race-q">
+        <span><span class="k">query</span> tests covering <code>src/click/core.py</code></span>
         <span class="repo">pallets/click</span>
-      </div>
-      <div class="lanes">
-        <div class="lane">
-          <div class="lane-name">grep, hit by hit</div>
-          <div class="nums slow"><b data-count>42</b> calls <b data-count>5,992</b> tokens</div>
-          <div class="greps" aria-hidden="true">
-            <div class="greps-roll">
-              {[0, 1].map(() => greps.map((g) => <div><span class="t-dim">$</span> grep -rnE "import .*\b{g}\b" .</div>))}
+      </figcaption>
+      <div class="bars">
+        {
+          runs.map((r) => (
+            <div class:list={['run', r.cls]}>
+              <span class="who">{r.who}</span>
+              <span class="track"><span class="bar" style={`--w:${(r.tokens / runs[0].tokens) * 100}%`} /></span>
+              <span class="fig"><b>{r.calls}</b> {r.calls === 1 ? 'call' : 'calls'}</span>
+              <span class="fig"><b>{r.tokens.toLocaleString('en-US')}</b> tokens</span>
             </div>
-          </div>
-          <p class="note">One grep finds none of the tests: they import <code>click</code>, not <code>core</code>.</p>
-        </div>
-        <div class="lane win">
-          <div class="lane-name">sprout impact</div>
-          <div class="nums fast"><b>1</b> call <b data-count>225</b> tokens</div>
-          <Term text={impact} max={15} class="out" />
-          <p class="note">All 43 tests, and the command to run them.</p>
-        </div>
+          ))
+        }
       </div>
-      <p class="race-foot">Measured with Sprout v0.4.2. Tokens are characters ÷ 4 on both sides.</p>
-    </div>
+      <div class="out-wrap">
+        <div class="prompt-line"><span class="sigil">$</span> sprout impact src/click/core.py</div>
+        <Term text={impact} max={14} class="out" />
+      </div>
+      <p class="race-foot">Sprout v0.4.2 · tokens = characters ÷ 4</p>
+    </figure>
   </div>
 </section>
 
@@ -148,8 +139,12 @@ const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_com
     background: color-mix(in srgb, var(--surface) 80%, transparent);
     backdrop-filter: blur(6px);
     color: var(--ink-2);
-    font-size: 13.5px;
+    font: 500 12.5px var(--mono);
+    white-space: nowrap;
     text-decoration: none;
+  }
+  .news-sep {
+    color: var(--muted);
   }
   .news:hover {
     border-color: var(--muted);
@@ -187,8 +182,7 @@ const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_com
     margin: 22px auto 0;
     max-width: 34em;
   }
-  .actions,
-  .agent-line {
+  .actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -198,37 +192,23 @@ const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_com
   .actions {
     margin-top: 30px;
   }
-  .actions > :global(*),
-  .agent-line > :global(*) {
+  .actions > :global(*) {
     min-width: 0;
     max-width: 100%;
   }
-  .agent-line {
-    margin-top: 20px;
-    font-size: 14.5px;
+  .also {
+    display: flex;
+    gap: 12px;
+    margin: 18px 0 0;
+    font: 12.5px var(--mono);
+    color: var(--muted);
   }
-  .agent-line :global(.cmd) {
-    height: 40px;
-    font-size: 13px;
-    padding-left: 14px;
-  }
-  .agent-line :global(.cmd .copy-ic) {
-    width: 28px;
-    height: 28px;
-  }
-  .agent-line a,
   .also a {
     color: var(--ink-2);
-    text-decoration-color: var(--line-2);
-    text-underline-offset: 4px;
+    text-decoration: none;
   }
-  .agent-line a:hover,
   .also a:hover {
-    text-decoration-color: var(--leaf);
-  }
-  .also {
-    margin: 14px 0 0;
-    font-size: 14px;
+    color: var(--leaf);
   }
   .race-wrap {
     max-width: calc(1040px + 2 * var(--gutter));
@@ -282,64 +262,83 @@ const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_com
   }
 
   .race {
-    padding: 20px;
+    margin: 0;
     font-family: var(--sans);
-    line-height: 1.5;
   }
   .race-q {
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    padding: 0 4px 16px;
-    font-size: 13.5px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--term-line);
+    background: var(--term-2);
+    font: 12.5px/1.5 var(--mono);
+    color: var(--term-fg);
+  }
+  .k {
+    margin-right: 10px;
+    color: var(--term-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11px;
   }
   .race code {
     background: none;
     border: 0;
     padding: 0;
     color: #fff;
+    font-size: inherit;
   }
   .repo,
   .race-foot {
     color: var(--term-dim);
     font: 11.5px var(--mono);
   }
-  .race-foot {
-    margin: 16px 4px 0;
-    font-family: var(--sans);
-  }
-  .lanes {
+  .bars {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 14px;
+    padding: 22px 20px;
+    border-bottom: 1px solid var(--term-line);
   }
-  .lane {
-    min-width: 0;
-    padding: 16px;
-    border-radius: 12px;
-    background: var(--term-2);
-    border: 1px solid var(--term-line);
+  .run {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) 92px 120px;
+    align-items: center;
+    gap: 16px;
+    font: 12.5px var(--mono);
+    color: var(--term-dim);
   }
-  .lane.win {
-    border-color: rgba(79, 207, 130, 0.28);
+  .who {
+    color: var(--term-fg);
   }
-  .lane-name {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
+  .track {
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(214, 238, 222, 0.05);
+    overflow: hidden;
   }
-  .nums {
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--muted);
+  .bar {
+    display: block;
+    height: 100%;
+    width: max(var(--w), 6px);
+    border-radius: inherit;
+    transform-origin: left;
   }
-  .nums b {
-    font: 600 30px var(--mono);
-    margin-left: 10px;
+  .slow .bar {
+    background: linear-gradient(90deg, rgba(241, 194, 78, 0.35), var(--term-mod));
   }
-  .nums b:first-child {
-    margin-left: 0;
+  .fast .bar {
+    background: var(--term-add);
+    box-shadow: 0 0 12px rgba(95, 214, 141, 0.7);
+  }
+  .fig {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .fig b {
+    font-weight: 600;
+    font-size: 15px;
+    margin-right: 4px;
   }
   .slow b {
     color: var(--term-mod);
@@ -347,51 +346,65 @@ const greps = ['core', 'types', 'utils', 'termui', 'core', '_termui_impl', '_com
   .fast b {
     color: var(--term-add);
   }
-  .greps,
-  .lane :global(.out) {
+  .out-wrap {
+    padding: 18px 20px 4px;
+  }
+  .prompt-line {
+    font: 12.5px/1.65 var(--mono);
+    color: var(--term-fg);
+    margin-bottom: 10px;
+  }
+  .sigil {
+    color: var(--term-add);
+    margin-right: 6px;
+  }
+  .race :global(.out) {
     position: relative;
-    height: 220px;
-    margin-top: 12px;
-    font: 11.5px/1.7 var(--mono);
-    color: #b9cbb3;
-    overflow: hidden;
+    font: 12px/1.65 var(--mono);
+    overflow-x: auto;
+    scrollbar-width: none;
   }
-  .lane :global(.out) {
-    font-size: 11px;
+  .race-foot {
+    margin: 0;
+    padding: 12px 20px 16px;
+    text-align: right;
   }
-  .greps div {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .greps-roll {
-    animation: roll 16s linear infinite;
-  }
-  @keyframes roll {
-    to {
-      transform: translateY(-50%);
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .bar {
+      animation: grow 1.2s var(--ease) 1.9s both;
     }
   }
-  .greps::after,
-  .lane :global(.out)::after {
-    content: '';
-    position: absolute;
-    inset: auto 0 0;
-    height: 56px;
-    background: linear-gradient(transparent, var(--term-2));
-  }
-  .note {
-    margin: 12px 0 0;
-    font-size: 12.5px;
-    color: var(--muted);
-  }
-  @media (max-width: 560px) {
-    .lanes {
-      grid-template-columns: minmax(0, 1fr);
+  @keyframes grow {
+    from {
+      transform: scaleX(0);
     }
-    .greps,
-    .lane :global(.out) {
-      height: 150px;
+  }
+  @media (max-width: 640px) {
+    .race-q {
+      flex-direction: column;
+      gap: 2px;
+      padding: 12px 16px;
+    }
+    .bars {
+      padding: 18px 16px;
+    }
+    .run {
+      grid-template-columns: 1fr auto auto;
+      gap: 6px 14px;
+    }
+    .track {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+    .out-wrap {
+      padding: 16px 16px 4px;
+    }
+    .race :global(.out) {
+      font-size: 11px;
+    }
+    .race-foot {
+      padding: 10px 16px 14px;
+      text-align: left;
     }
   }
 </style>

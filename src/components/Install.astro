@@ -14,10 +14,7 @@ import Mark from '../assets/sprout-mark.svg';
         <CopyCommand command="scoop bucket add sprout https://github.com/Sprout-DevLabs/scoop-bucket; scoop install sprout" label="Copy: install with Scoop" />
         <CopyCommand command="go install github.com/Sprout-DevLabs/sprout@latest" />
       </div>
-      <div class="ask">
-        <span>If Sprout saves you or your agent some digging, a star helps others find it.</span>
-        <StarButton />
-      </div>
+      <div class="ask"><StarButton /></div>
     </div>
   </div>
 </section>
@@ -76,5 +73,13 @@ import Mark from '../assets/sprout-mark.svg';
     margin-top: 32px;
     color: var(--sage);
     font-size: 15px;
+  }
+  @media (max-width: 560px) {
+    .band {
+      padding: 28px 16px;
+    }
+    .cmds {
+      justify-items: stretch;
+    }
   }
 </style>
