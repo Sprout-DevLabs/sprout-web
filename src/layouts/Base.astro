@@ -45,11 +45,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <header class="nav" id="nav">
       <div class="wrap">
         <a class="brand" href={`${base}/`} aria-label="Sprout home"><Logo /> sprout</a>
-        <a class="nav-link" href={`${base}/docs/`}>Docs</a>
-        <a class="nav-link" href={`${base}/benchmarks/`}>Benchmarks</a>
-        <a class="nav-link nav-hide-sm" href={`${base}/docs/guides/mcp/`}>For agents</a>
-        <a class="nav-link nav-hide-sm" href="https://github.com/Sprout-DevLabs/sprout/releases">Releases</a>
+        <div class="nav-links">
+          <a class="nav-link" href={`${base}/docs/`}>Docs</a>
+          <a class="nav-link" href={`${base}/benchmarks/`}>Benchmarks</a>
+          <a class="nav-link" href={`${base}/docs/guides/mcp/`}>For agents</a>
+          <a class="nav-link" href="https://github.com/Sprout-DevLabs/sprout/releases">Releases</a>
+        </div>
+        <a class="nav-search nav-hide-sm" href={`${base}/docs/`} data-search>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5" /><path d="m10.5 10.5 3 3" /></svg>
+          Search <kbd>⌘K</kbd>
+        </a>
         <StarButton size="sm" />
+        <a class="btn btn-solid btn-sm" href={`${base}/docs/install/`}>Get Sprout</a>
       </div>
     </header>
 
@@ -66,7 +73,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             <a href="https://github.com/ManasDasri">GitHub</a>
             <a href="https://x.com/ManasDmg9">Twitter</a>
           </div>
-          <StarButton />
         </div>
         <nav aria-label="Documentation">
           <p>Docs</p>
@@ -91,21 +97,43 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           <a href={`${base}/docs/install/#linux-packages`}>Linux packages</a>
         </nav>
       </div>
+      <div class="wrap"><p class="wordmark" aria-hidden="true">sprout</p></div>
     </footer>
 
     <script>
-      import { initCopy, initNav, initStars } from '../scripts/ui.ts';
+      import { initCopy, initNav, initStars, initTabs } from '../scripts/ui.ts';
       import { setupMotion } from '../scripts/motion.ts';
       initNav();
       initCopy();
       initStars();
+      initTabs();
+      // ⌘K / Ctrl+K opens the docs, where search lives.
+      addEventListener('keydown', (e) => {
+        if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          document.querySelector<HTMLAnchorElement>('[data-search]')?.click();
+        }
+      });
       setupMotion();
     </script>
     <style>
       .foot {
         border-top: 1px solid var(--line);
-        padding: 56px 0 72px;
+        padding: 64px 0 0;
         font-size: 15px;
+        overflow: hidden;
+      }
+      /* The name in dots, cut off by the page's edge. */
+      .wordmark {
+        margin: 72px 0 -0.24em;
+        font: 800 clamp(96px, 24vw, 320px) / 0.8 var(--display);
+        letter-spacing: -0.06em;
+        text-align: center;
+        color: transparent;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.16) 1.2px, transparent 1.6px) 0 0 / 7px 7px;
+        -webkit-background-clip: text;
+        background-clip: text;
+        user-select: none;
       }
       .foot-grid {
         display: grid;

@@ -1,0 +1,97 @@
+---
+// Answers from the docs (faq.md, install.mdx, README); nothing new is claimed here.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const qa = [
+  ['Does Sprout send my code anywhere?', 'No. It makes no network requests except to clone a repository you asked it to map. The map holds names and signatures, never function bodies.'],
+  ['How is it different from grep?', 'grep finds text. Sprout resolves imports the way each language does, so it knows which files depend on which, including tests that reach a file through other files.'],
+  ['Which languages does it read?', 'Go, TypeScript, JavaScript, Python, Rust, Java and Kotlin. Any other file still shows in the tree.'],
+  ['Does it work with my agent?', 'Any MCP client: Claude Code, Cursor, VS Code and Claude Desktop have one-line setups. Without MCP, paste sprout --ai into any chat.'],
+  ['What does it cost?', 'Nothing. Sprout is MIT licensed, a single binary with no account and no telemetry.'],
+];
+---
+
+<section class="section" id="faq">
+  <div class="wrap faq">
+    <div>
+      <h2>Questions</h2>
+      <p class="muted">More in the <a href={`${base}/docs/faq/`}>FAQ</a>.</p>
+    </div>
+    <div class="list">
+      {
+        qa.map(([q, a], i) => (
+          <details open={i === 0}>
+            <summary>{q}</summary>
+            <p>{a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 40px;
+  }
+  .faq > div > p {
+    margin: 14px 0 0;
+  }
+  .faq a {
+    color: var(--ink);
+  }
+  .list {
+    display: grid;
+    gap: 8px;
+  }
+  details {
+    border-radius: 14px;
+    border: 1px solid transparent;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+  }
+  details[open] {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--line);
+  }
+  summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px;
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::after {
+    content: '+';
+    color: var(--muted);
+    font-size: 20px;
+    line-height: 1;
+    transition: rotate 0.2s var(--ease);
+  }
+  details[open] summary::after {
+    rotate: 45deg;
+  }
+  details:not([open]) {
+    border-bottom-color: var(--line);
+    border-radius: 0;
+  }
+  details p {
+    margin: 0;
+    padding: 0 20px 20px;
+    color: var(--muted);
+    font-size: 15.5px;
+    max-width: 38em;
+  }
+  @media (max-width: 860px) {
+    .faq {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,559 @@
+{
+    "schemaVersion": 1,
+    "command": "impact",
+    "source": "files",
+    "changed": [
+        "src/click/core.py"
+    ],
+    "affected": [
+        {
+            "path": "src/click/__init__.py",
+            "depth": 1,
+            "reason": "imports .core"
+        },
+        {
+            "path": "src/click/decorators.py",
+            "depth": 1,
+            "reason": "imports .core"
+        },
+        {
+            "path": "src/click/exceptions.py",
+            "depth": 1,
+            "reason": "imports .core"
+        },
+        {
+            "path": "src/click/globals.py",
+            "depth": 1,
+            "reason": "imports .core"
+        },
+        {
+            "path": "src/click/parser.py",
+            "depth": 1,
+            "reason": "imports .core"
+        },
+        {
+            "path": "src/click/shell_completion.py",
+            "depth": 1,
+            "reason": "imports .core"
+        },
+        {
+            "path": "src/click/testing.py",
+            "depth": 1,
+            "reason": "imports .core"
+        },
+        {
+            "path": "src/click/types.py",
+            "depth": 1,
+            "reason": "imports .core"
+        },
+        {
+            "path": "tests/test_context.py",
+            "depth": 1,
+            "reason": "imports click.Context",
+            "test": true
+        },
+        {
+            "path": "tests/test_defaults.py",
+            "depth": 1,
+            "reason": "imports click.core",
+            "test": true
+        },
+        {
+            "path": "tests/test_deprecations.py",
+            "depth": 1,
+            "reason": "imports click.core",
+            "test": true
+        },
+        {
+            "path": "tests/test_options.py",
+            "depth": 1,
+            "reason": "imports click.Option",
+            "test": true
+        },
+        {
+            "path": "tests/test_shell_completion.py",
+            "depth": 1,
+            "reason": "imports click.core",
+            "test": true
+        },
+        {
+            "path": "src/click/_termui_impl.py",
+            "depth": 2,
+            "via": "src/click/exceptions.py",
+            "reason": "imports .exceptions"
+        },
+        {
+            "path": "src/click/formatting.py",
+            "depth": 2,
+            "via": "src/click/parser.py",
+            "reason": "imports .parser"
+        },
+        {
+            "path": "src/click/termui.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports ."
+        },
+        {
+            "path": "src/click/utils.py",
+            "depth": 2,
+            "via": "src/click/exceptions.py",
+            "reason": "imports .exceptions"
+        },
+        {
+            "path": "tests/conftest.py",
+            "depth": 2,
+            "via": "src/click/testing.py",
+            "reason": "imports click.testing",
+            "test": true
+        },
+        {
+            "path": "tests/test_abort_interrupt.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_arguments.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_basic.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_chain.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_command_decorators.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_commands.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_compat.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_custom_classes.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_exceptions/test_FileError.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_formatting.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_imports.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_info_dict.py",
+            "depth": 2,
+            "via": "src/click/types.py",
+            "reason": "imports click.types",
+            "test": true
+        },
+        {
+            "path": "tests/test_normalization.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_parser.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_stream_lifecycle.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_termui.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_testing.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_types/test_Choice.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_types/test_File.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_types/test_FloatRange.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_types/test_FuncParamType.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_types/test_IntRange.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_types/test_ParamType.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_types/test_Path.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_types/test_convert_type.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_KeepOpenFile.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_LazyFile.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test__detect_program_name.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test__expand_args.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_confirm.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_echo_via_pager.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_format_filename.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_make_default_short_help.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_open_file.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_prompt.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_sentinel.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_style.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_aliased_group.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_confirmation_option.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_edit.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_group_kw_options.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_help_option.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_options.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_password_option.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_path.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_progressbar.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_prompt.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_simple_example.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/typing/typing_version_option.py",
+            "depth": 2,
+            "via": "src/click/__init__.py",
+            "reason": "imports click",
+            "test": true
+        },
+        {
+            "path": "tests/test_utils/test_echo.py",
+            "depth": 3,
+            "via": "src/click/_termui_impl.py",
+            "reason": "imports click._termui_impl",
+            "test": true
+        }
+    ],
+    "tests": [
+        "tests/test_abort_interrupt.py",
+        "tests/test_arguments.py",
+        "tests/test_basic.py",
+        "tests/test_chain.py",
+        "tests/test_command_decorators.py",
+        "tests/test_commands.py",
+        "tests/test_compat.py",
+        "tests/test_context.py",
+        "tests/test_custom_classes.py",
+        "tests/test_defaults.py",
+        "tests/test_deprecations.py",
+        "tests/test_exceptions/test_FileError.py",
+        "tests/test_formatting.py",
+        "tests/test_imports.py",
+        "tests/test_info_dict.py",
+        "tests/test_normalization.py",
+        "tests/test_options.py",
+        "tests/test_parser.py",
+        "tests/test_shell_completion.py",
+        "tests/test_stream_lifecycle.py",
+        "tests/test_termui.py",
+        "tests/test_testing.py",
+        "tests/test_types/test_Choice.py",
+        "tests/test_types/test_File.py",
+        "tests/test_types/test_FloatRange.py",
+        "tests/test_types/test_FuncParamType.py",
+        "tests/test_types/test_IntRange.py",
+        "tests/test_types/test_ParamType.py",
+        "tests/test_types/test_Path.py",
+        "tests/test_types/test_convert_type.py",
+        "tests/test_utils/test_KeepOpenFile.py",
+        "tests/test_utils/test_LazyFile.py",
+        "tests/test_utils/test__detect_program_name.py",
+        "tests/test_utils/test__expand_args.py",
+        "tests/test_utils/test_confirm.py",
+        "tests/test_utils/test_echo.py",
+        "tests/test_utils/test_echo_via_pager.py",
+        "tests/test_utils/test_format_filename.py",
+        "tests/test_utils/test_make_default_short_help.py",
+        "tests/test_utils/test_open_file.py",
+        "tests/test_utils/test_prompt.py",
+        "tests/test_utils/test_sentinel.py",
+        "tests/test_utils/test_style.py"
+    ],
+    "testCommands": [
+        {
+            "dir": ".",
+            "argv": [
+                "python",
+                "-m",
+                "pytest",
+                "tests/test_abort_interrupt.py",
+                "tests/test_arguments.py",
+                "tests/test_basic.py",
+                "tests/test_chain.py",
+                "tests/test_command_decorators.py",
+                "tests/test_commands.py",
+                "tests/test_compat.py",
+                "tests/test_context.py",
+                "tests/test_custom_classes.py",
+                "tests/test_defaults.py",
+                "tests/test_deprecations.py",
+                "tests/test_exceptions/test_FileError.py",
+                "tests/test_formatting.py",
+                "tests/test_imports.py",
+                "tests/test_info_dict.py",
+                "tests/test_normalization.py",
+                "tests/test_options.py",
+                "tests/test_parser.py",
+                "tests/test_shell_completion.py",
+                "tests/test_stream_lifecycle.py",
+                "tests/test_termui.py",
+                "tests/test_testing.py",
+                "tests/test_types/test_Choice.py",
+                "tests/test_types/test_File.py",
+                "tests/test_types/test_FloatRange.py",
+                "tests/test_types/test_FuncParamType.py",
+                "tests/test_types/test_IntRange.py",
+                "tests/test_types/test_ParamType.py",
+                "tests/test_types/test_Path.py",
+                "tests/test_types/test_convert_type.py",
+                "tests/test_utils/test_KeepOpenFile.py",
+                "tests/test_utils/test_LazyFile.py",
+                "tests/test_utils/test__detect_program_name.py",
+                "tests/test_utils/test__expand_args.py",
+                "tests/test_utils/test_confirm.py",
+                "tests/test_utils/test_echo.py",
+                "tests/test_utils/test_echo_via_pager.py",
+                "tests/test_utils/test_format_filename.py",
+                "tests/test_utils/test_make_default_short_help.py",
+                "tests/test_utils/test_open_file.py",
+                "tests/test_utils/test_prompt.py",
+                "tests/test_utils/test_sentinel.py",
+                "tests/test_utils/test_style.py"
+            ]
+        }
+    ]
+}
