@@ -20,14 +20,48 @@ const qa = [
       {
         qa.map(([q, a], i) => (
           <details open={i === 0}>
-            <summary>{q}</summary>
-            <p>{a}</p>
+            <summary>{q}<span class="ic" aria-hidden="true" /></summary>
+            <div class="a"><p>{a}</p></div>
           </details>
         ))
       }
     </div>
   </div>
 </section>
+
+<script>
+  import { animate } from 'motion';
+  import { reducedMotion } from '../../scripts/motion';
+
+  // Open and close by animating the height, one answer at a time.
+  const ease = [0.22, 1, 0.36, 1] as const;
+  const all = [...document.querySelectorAll<HTMLDetailsElement>('#faq details')];
+  const close = (d: HTMLDetailsElement) => {
+    const summary = d.querySelector('summary')!;
+    d.classList.remove('opening');
+    animate(d, { height: [`${d.offsetHeight}px`, `${summary.offsetHeight}px`] }, { duration: 0.35, ease }).then(() => {
+      d.open = false;
+      d.style.height = '';
+    });
+  };
+  const open = (d: HTMLDetailsElement) => {
+    const start = d.offsetHeight;
+    d.open = true;
+    d.classList.add('opening');
+    const end = d.offsetHeight;
+    animate(d, { height: [`${start}px`, `${end}px`] }, { duration: 0.45, ease }).then(() => (d.style.height = ''));
+    animate(d.querySelector('.a')!, { opacity: [0, 1], y: [-8, 0] }, { duration: 0.4, delay: 0.08, ease });
+  };
+  all.forEach((d) =>
+    d.querySelector('summary')!.addEventListener('click', (e) => {
+      if (reducedMotion()) return;
+      e.preventDefault();
+      if (d.open) return close(d);
+      all.filter((o) => o !== d && o.open).forEach(close);
+      open(d);
+    }),
+  );
+</script>
 
 <style>
   .faq {
@@ -46,48 +80,87 @@ const qa = [
     gap: 8px;
   }
   details {
-    border-radius: 14px;
+    overflow: hidden;
+    border-radius: 16px;
     border: 1px solid transparent;
+    border-bottom-color: var(--line);
     transition:
-      background-color 0.2s,
-      border-color 0.2s;
+      background-color 0.35s,
+      border-color 0.35s,
+      border-radius 0.35s;
   }
   details[open] {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: var(--line);
+    background: rgba(255, 255, 255, 0.035);
+    border-color: var(--line-2);
+  }
+  details:not([open]) {
+    border-radius: 0;
   }
   summary {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 16px;
     padding: 18px 20px;
+    font-size: 17px;
     font-weight: 500;
     cursor: pointer;
     list-style: none;
+    transition: color 0.2s;
   }
   summary::-webkit-details-marker {
     display: none;
   }
-  summary::after {
-    content: '+';
-    color: var(--muted);
-    font-size: 20px;
-    line-height: 1;
-    transition: rotate 0.2s var(--ease);
+  summary:hover {
+    color: #fff;
   }
-  details[open] summary::after {
-    rotate: 45deg;
+  /* + turns into × on a leaf-green disc */
+  .ic {
+    position: relative;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line-2);
+    transition:
+      transform 0.45s var(--ease),
+      background-color 0.3s,
+      border-color 0.3s;
   }
-  details:not([open]) {
-    border-bottom-color: var(--line);
-    border-radius: 0;
+  .ic::before,
+  .ic::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 12px;
+    height: 1.5px;
+    margin: -0.75px 0 0 -6px;
+    border-radius: 2px;
+    background: var(--ink-2);
+    transition: background-color 0.3s;
   }
-  details p {
+  .ic::after {
+    transform: rotate(90deg);
+  }
+  summary:hover .ic {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  details[open] .ic {
+    transform: rotate(135deg);
+    background: var(--leaf);
+    border-color: var(--leaf);
+  }
+  details[open] .ic::before,
+  details[open] .ic::after {
+    background: #03140a;
+  }
+  .a p {
     margin: 0;
-    padding: 0 20px 20px;
+    padding: 0 64px 22px 20px;
     color: var(--muted);
     font-size: 15.5px;
-    max-width: 38em;
+    line-height: 1.65;
+    max-width: 40em;
   }
   @media (max-width: 860px) {
     .faq {

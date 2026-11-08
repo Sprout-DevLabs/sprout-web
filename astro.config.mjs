@@ -2,8 +2,9 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
-const fonts =
-  'https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=JetBrains+Mono:wght@400..600&display=swap';
+const fonts = 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..600&display=swap';
+// General Sans (Fontshare, free for commercial use) carries headings and reading.
+const sans = 'https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap';
 
 export default defineConfig({
   site: 'https://sprout-devlabs.github.io',
@@ -43,6 +44,7 @@ export default defineConfig({
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
         { tag: 'link', attrs: { rel: 'stylesheet', href: fonts } },
+        { tag: 'link', attrs: { rel: 'stylesheet', href: sans } },
       ],
       sidebar: [
         {
