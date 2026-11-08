@@ -61,3 +61,30 @@ export async function initStars() {
     btn.setAttribute('aria-label', `Star on GitHub: ${n} stars`);
   });
 }
+
+// Tab lists ([data-tabs]): click or arrow keys switch the panel.
+export function initTabs() {
+  document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role=tab]')];
+    const show = (tab: HTMLButtonElement) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        root.querySelector<HTMLElement>(`#${t.getAttribute('aria-controls')}`)!.hidden = !on;
+      });
+    };
+    tabs.forEach((t, i) => {
+      t.tabIndex = t.getAttribute('aria-selected') === 'true' ? 0 : -1;
+      t.addEventListener('click', () => show(t));
+      t.addEventListener('keydown', (e) => {
+        const d = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        const next = tabs[(i + d + tabs.length) % tabs.length];
+        show(next);
+        next.focus();
+      });
+    });
+  });
+}

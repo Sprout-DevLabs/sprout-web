@@ -1,0 +1,78 @@
+---
+// Kubernetes timing: median of the controlled run at 636d292 on /benchmarks.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const rows = [
+  { label: 'Reads', items: ['Go', 'TypeScript', 'JavaScript', 'Python', 'Rust', 'Java', 'Kotlin'] },
+  { label: 'Works with', items: ['Claude Code', 'Cursor', 'VS Code', 'Claude Desktop', 'any MCP client'] },
+];
+---
+
+<section class="statement-sec">
+  <div class="wrap">
+    <p class="statement">
+      Maps all <a href={`${base}/benchmarks/`}>31,412 files</a> of Kubernetes in 0.23 s. <span class="dim">From a weekend
+      script to a monorepo, one binary and no account.</span>
+    </p>
+    <div class="rows">
+      {
+        rows.map((r) => (
+          <div class="row">
+            <p>{r.label}:</p>
+            <ul>
+              {r.items.map((it) => (
+                <li>{it}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .statement-sec {
+    padding: clamp(120px, 14vw, 180px) 0 clamp(72px, 9vw, 120px);
+  }
+  .statement {
+    margin: 0;
+    max-width: 21em;
+    font: 600 clamp(30px, 4.2vw, 52px) / 1.12 var(--display);
+    letter-spacing: -0.04em;
+    text-wrap: pretty;
+  }
+  .statement a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--leaf);
+    text-decoration-thickness: 3px;
+    text-underline-offset: 8px;
+  }
+  .rows {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px 56px;
+    margin-top: clamp(48px, 6vw, 72px);
+  }
+  .row p {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .row ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 30px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: 600 19px var(--display);
+    letter-spacing: -0.02em;
+    color: var(--ink-2);
+  }
+  @media (max-width: 760px) {
+    .rows {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

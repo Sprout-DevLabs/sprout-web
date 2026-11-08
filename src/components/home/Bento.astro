@@ -1,0 +1,376 @@
+---
+// Real output on pallets/click (2247b35). Benchmark: Sprout v0.4.2, tokens =
+// characters ÷ 4; rules are examples, the check output is Sprout v0.6.0's.
+import Term from '../Term.astro';
+import rules from '../../data/sproutrules.txt?raw';
+import check from '../../data/check.txt?raw';
+import tree from '../../data/tree.txt?raw';
+import context from '../../data/context.txt?raw';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const runs = [
+  { who: 'grep, hit by hit', calls: 42, tokens: 5992, cls: 'slow' },
+  { who: 'sprout impact', calls: 1, tokens: 225, cls: 'fast' },
+];
+const tools = [
+  ['project_map', 'The map, key files and signatures'],
+  ['reading_order', 'Where to start, and why'],
+  ['impact', 'What could break, and the tests to run'],
+  ['context', 'What a file uses, its users and tests'],
+  ['deps', 'What a file uses'],
+  ['dependents', 'What uses a file'],
+  ['tree', 'Any folder as a tree'],
+  ['diff_tree', 'What a branch changed'],
+];
+---
+
+<section class="section bento-sec" id="features">
+  <div class="wrap">
+    <div class="grid">
+      <a class="cell wide" href={`${base}/benchmarks/`}>
+        <div class="preview bench">
+          <p class="q">Which tests run after I change <code>src/click/core.py</code>?</p>
+          {
+            runs.map((r) => (
+              <div class:list={['run', r.cls]}>
+                <div class="run-head">
+                  <span>{r.who}</span>
+                  <span>
+                    <b>{r.calls}</b> {r.calls === 1 ? 'call' : 'calls'} · <b>{r.tokens.toLocaleString('en-US')}</b> tokens
+                  </span>
+                </div>
+                <span class="track"><span class="bar" style={`--w:${(r.tokens / runs[0].tokens) * 100}%`} /></span>
+              </div>
+            ))
+          }
+          <p class="fine">pallets/click · Sprout v0.4.2 · tokens = characters ÷ 4</p>
+        </div>
+        <div class="cap">
+          <div><h3>1 call, not 42</h3><p>Every test a change reaches, in 225 tokens</p></div>
+          <span class="arrow-link">Benchmarks</span>
+        </div>
+      </a>
+
+      <a class="cell" href={`${base}/docs/guides/check/`}>
+        <div class="preview code">
+          <div class="file">.sproutrules</div>
+          <pre class="rules">{rules.trimEnd().split('\n').map((l) => (l.startsWith('#') ? <span class="c">{l}</span> : <span>{l}</span>))}</pre>
+          <div class="file bad">$ sprout check <em>exit 1</em></div>
+          <Term text={check} />
+        </div>
+        <div class="cap">
+          <div><h3>Rules for CI</h3><p>Fail the build on a forbidden import</p></div>
+          <span class="arrow-link">Guide</span>
+        </div>
+      </a>
+
+      <a class="cell" href={`${base}/docs/guides/tree/`}>
+        <div class="preview code"><Term text={tree} max={14} /></div>
+        <div class="cap">
+          <div><h3>The tree</h3><p>Respects .gitignore, counts what it hides</p></div>
+          <span class="arrow-link">Guide</span>
+        </div>
+      </a>
+
+      <a class="cell" href={`${base}/docs/guides/mcp/`}>
+        <div class="preview tools" data-typing>
+          <div class="field">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5" /><path d="m10.5 10.5 3 3" /></svg>
+            <span data-q></span><i class="caret-i" aria-hidden="true"></i>
+          </div>
+          <ul>
+            {tools.map(([n, w]) => (
+              <li data-name={n}><code>{n}</code><span>{w}</span></li>
+            ))}
+          </ul>
+        </div>
+        <div class="cap">
+          <div><h3>8 MCP tools</h3><p>One server, any agent</p></div>
+          <span class="arrow-link">Setup</span>
+        </div>
+      </a>
+
+      <a class="cell" href={`${base}/docs/guides/context/`}>
+        <div class="preview code"><Term text={context} max={14} /></div>
+        <div class="cap">
+          <div><h3>Context</h3><p>What to know before editing a file</p></div>
+          <span class="arrow-link">Guide</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { reducedMotion } from '../../scripts/motion';
+  // The tools card types a few searches and filters its list as it goes.
+  const box = document.querySelector<HTMLElement>('[data-typing]');
+  if (box && !reducedMotion()) {
+    const out = box.querySelector<HTMLElement>('[data-q]')!;
+    const items = [...box.querySelectorAll<HTMLElement>('li')];
+    const words = ['impact', 'dep', 'tree', ''];
+    let w = 0;
+    let n = 0;
+    let back = false;
+    const tick = () => {
+      const word = words[w];
+      n += back ? -1 : 1;
+      const q = word.slice(0, n);
+      out.textContent = q;
+      items.forEach((li) => li.classList.toggle('out', !!q && !li.dataset.name!.includes(q)));
+      let wait = back ? 45 : 110;
+      if (!back && n >= word.length) {
+        back = true;
+        wait = word ? 1800 : 1200;
+      } else if (back && n <= 0) {
+        back = false;
+        n = 0;
+        w = (w + 1) % words.length;
+        wait = 400;
+      }
+      timer = window.setTimeout(tick, wait);
+    };
+    let timer = 0;
+    new IntersectionObserver(([e]) => {
+      clearTimeout(timer);
+      if (e.isIntersecting) timer = window.setTimeout(tick, 600);
+    }).observe(box);
+  }
+</script>
+
+<style>
+  .bento-sec {
+    padding-top: 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .cell {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    border-radius: 22px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.015);
+    text-decoration: none;
+    transition: border-color 0.25s;
+  }
+  .cell:hover {
+    border-color: var(--line-2);
+  }
+  .wide {
+    grid-column: span 4;
+  }
+  .grid > .cell:nth-child(2) {
+    grid-column: span 2;
+  }
+  .preview {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 15px;
+    border: 1px solid var(--line);
+    background: var(--term);
+    font: 12px/1.65 var(--mono);
+    color: var(--term-fg);
+  }
+  .code {
+    padding: 18px;
+    -webkit-mask-image: linear-gradient(#000 72%, transparent);
+    mask-image: linear-gradient(#000 72%, transparent);
+  }
+  .code :global(.term) {
+    font-size: 11.5px;
+  }
+  .cap {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    padding: 18px 14px 12px;
+  }
+  .cap h3 {
+    font-size: 17px;
+  }
+  .cap p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 14.5px;
+  }
+  .cap .arrow-link {
+    flex: none;
+  }
+
+  /* benchmark */
+  .bench {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 26px;
+    padding: 28px clamp(20px, 4vw, 44px);
+    font-family: var(--sans);
+  }
+  .q {
+    margin: 0;
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+  .q code {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #fff;
+  }
+  .run-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    font: 12.5px var(--mono);
+    color: var(--term-dim);
+  }
+  .run-head b {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .slow b {
+    color: var(--term-mod);
+  }
+  .fast b {
+    color: var(--term-add);
+  }
+  .track {
+    display: block;
+    height: 10px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+  }
+  .bar {
+    display: block;
+    height: 100%;
+    width: max(var(--w), 8px);
+    border-radius: inherit;
+  }
+  .slow .bar {
+    background: linear-gradient(90deg, rgba(241, 194, 78, 0.3), var(--term-mod));
+  }
+  .fast .bar {
+    background: var(--term-add);
+    box-shadow: 0 0 14px rgba(95, 214, 141, 0.8);
+  }
+  .fine {
+    margin: 0;
+    font: 11.5px var(--mono);
+    color: var(--term-dim);
+  }
+
+  /* rules */
+  .file {
+    margin-bottom: 8px;
+    color: var(--term-dim);
+  }
+  .file.bad {
+    margin-top: 14px;
+  }
+  .file em {
+    margin-left: 8px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(255, 124, 95, 0.12);
+    color: var(--term-del);
+    font-style: normal;
+    font-size: 11px;
+  }
+  .rules {
+    margin: 0;
+    font: inherit;
+    font-size: 11.5px;
+  }
+  .rules span {
+    display: block;
+  }
+  .rules .c {
+    color: var(--term-dim);
+  }
+
+  /* tools */
+  .tools {
+    padding: 14px;
+    font-family: var(--sans);
+  }
+  .field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line-2);
+    background: rgba(255, 255, 255, 0.03);
+    font: 13px var(--mono);
+    color: var(--ink);
+  }
+  .field svg {
+    width: 14px;
+    height: 14px;
+    color: var(--muted);
+  }
+  .caret-i {
+    width: 1.5px;
+    height: 15px;
+    margin-left: -6px;
+    background: var(--leaf);
+    animation: blink 1s steps(1) infinite;
+  }
+  .tools ul {
+    display: grid;
+    gap: 2px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tools li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: var(--muted);
+    transition: opacity 0.2s;
+  }
+  .tools li:first-child:not(.out),
+  .tools li:not(.out) ~ li {
+    opacity: 1;
+  }
+  .tools li.out {
+    opacity: 0.18;
+  }
+  .tools code {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font-size: 12.5px;
+  }
+  .tools li span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 960px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .cell,
+    .wide,
+    .grid > .cell:nth-child(2) {
+      grid-column: auto;
+    }
+  }
+</style>

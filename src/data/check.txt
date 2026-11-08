@@ -1,0 +1,4 @@
+1 import breaks .sproutrules (18 files checked)
+
+.sproutrules:5  src/click/formatting.py -> src/click/parser.py
+  src/click/formatting.py -> src/click/parser.py  imports .parser

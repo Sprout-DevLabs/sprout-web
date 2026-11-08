@@ -1,0 +1,21 @@
+src/click
+├── __init__.py
+├── _compat.py
+├── _termui_impl.py
+├── _textwrap.py
+├── _utils.py
+├── _winconsole.py
+├── core.py
+├── decorators.py
+├── exceptions.py
+├── formatting.py
+├── globals.py
+├── parser.py
+├── py.typed
+├── shell_completion.py
+├── termui.py
+├── testing.py
+├── types.py
+└── utils.py
+
+0 directories, 18 files

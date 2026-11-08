@@ -1,420 +1,106 @@
 ---
-import CopyCommand from './CopyCommand.astro';
-import StarButton from './StarButton.astro';
-import Term from './Term.astro';
-import impact from '../data/impact.txt?raw';
-import Mark from '../assets/sprout-mark.svg';
+import Showcase from './home/Showcase.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const lines = ['Stop your coding agent grepping around.', 'One call gives it the map.'];
-// The same question on pallets/click (2247b35), answered by an agent
-// grepping hit by hit and by one sprout impact call.
-const runs = [
-  { who: 'grep', calls: 42, tokens: 5992, cls: 'slow' },
-  { who: 'sprout', calls: 1, tokens: 225, cls: 'fast' },
-];
 ---
 
 <section class="hero">
-  <canvas class="field" aria-hidden="true"></canvas>
+  <canvas class="silk" aria-hidden="true"></canvas>
   <div class="wrap hero-copy">
-    <div class="seed" aria-hidden="true"><Mark /></div>
     <a class="news" href="https://github.com/Sprout-DevLabs/sprout/releases/latest">
-      <span class="dot" aria-hidden="true"></span> v0.6.0 <span class="news-sep" aria-hidden="true">/</span> sprout check
+      <span class="tag">New</span> Architecture rules in v0.6.0
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m6 4 4 4-4 4" /></svg>
     </a>
-    <h1 aria-label={lines.join(' ')}>
-      {
-        lines.map((line, l) => (
-          <span class:list={['line', { em: l === 1 }]} aria-hidden="true">
-            {line.split(' ').map((w, i) => (
-              <>
-                <span class="wm"><span class="wi" style={`--i:${i + l * 6}`}>{w}</span></span>{' '}
-              </>
-            ))}
-          </span>
-        ))
-      }
-    </h1>
-    <p class="lead rise" style="--d:1.05s">The dependency map of your codebase, for you and your coding agent.</p>
-    <div class="actions rise" style="--d:1.2s">
-      <a class="pill pill-light" href={`${base}/docs/install/`}>
-        Get started
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
-      </a>
-      <StarButton />
-    </div>
-    <div class="quick rise" style="--d:1.32s">
-      <CopyCommand command="brew install sprout-devlabs/tap/sprout" />
+    <h1>Stop your agent<br /> grepping around.</h1>
+    <p class="lead">One call gives your coding agent the map: where to start, what a change breaks, which tests to run.</p>
+    <div class="actions">
+      <a class="btn btn-solid" href={`${base}/docs/install/`}>Get Sprout</a>
+      <a class="btn btn-dark" href={`${base}/docs/`}>Read the docs</a>
     </div>
   </div>
-
-  <div class="wrap race-wrap rise" style="--d:1.5s">
-    <div class="frame">
-    <figure class="panel race">
-      <figcaption class="race-q">
-        <span><span class="k">query</span> tests covering <code>src/click/core.py</code></span>
-        <span class="repo">pallets/click</span>
-      </figcaption>
-      <div class="bars">
-        {
-          runs.map((r) => (
-            <div class:list={['run', r.cls]}>
-              <span class="who">{r.who}</span>
-              <span class="track"><span class="bar" style={`--w:${(r.tokens / runs[0].tokens) * 100}%`} /></span>
-              <span class="fig"><b>{r.calls}</b> {r.calls === 1 ? 'call' : 'calls'}</span>
-              <span class="fig"><b>{r.tokens.toLocaleString('en-US')}</b> tokens</span>
-            </div>
-          ))
-        }
-      </div>
-      <div class="out-wrap">
-        <div class="prompt-line"><span class="sigil">$</span> sprout impact src/click/core.py</div>
-        <Term text={impact} max={14} class="out" />
-      </div>
-      <p class="race-foot">Sprout v0.4.2 · tokens = characters ÷ 4</p>
-    </figure>
-    </div>
+  <div class="wrap">
+    <Showcase />
   </div>
 </section>
 
 <script>
-  import { field } from '../scripts/field';
+  import { silk } from '../scripts/silk';
   import { reducedMotion } from '../scripts/motion';
-  const canvas = document.querySelector<HTMLCanvasElement>('.hero .field');
-  if (canvas) field(canvas, reducedMotion());
+  const canvas = document.querySelector<HTMLCanvasElement>('.hero .silk');
+  if (canvas) silk(canvas, reducedMotion());
 </script>
 
 <style>
   .hero {
     position: relative;
     isolation: isolate;
-    background: linear-gradient(var(--bg) min(62svh, 600px), transparent min(100svh, 980px));
-    padding: clamp(40px, 6vw, 72px) 0 clamp(72px, 9vw, 128px);
+    padding: clamp(56px, 9vw, 112px) 0 clamp(80px, 10vw, 140px);
   }
-  /* the field fills the first screen; its centre is held back so the copy reads first */
-  .field {
+  .silk {
     position: absolute;
     inset: 0 0 auto;
     width: 100%;
-    height: min(100svh, 980px);
+    height: min(110svh, 1000px);
     z-index: -1;
-    -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 38%, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.5) 45%, #000 80%),
-      linear-gradient(#000 70%, transparent);
-    -webkit-mask-composite: source-in;
-    mask-image: radial-gradient(ellipse 62% 58% at 50% 38%, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.5) 45%, #000 80%),
-      linear-gradient(#000 70%, transparent);
-    mask-composite: intersect;
+    opacity: 0;
+    transition: opacity 1.2s;
+    -webkit-mask-image: linear-gradient(#000 45%, transparent 92%);
+    mask-image: linear-gradient(#000 45%, transparent 92%);
   }
-  .hero::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto;
-    height: 760px;
-    z-index: -1;
-    background: radial-gradient(42% 46% at 50% 16%, rgba(255, 255, 255, 0.06), transparent 70%);
-    pointer-events: none;
+  .silk:global(.on) {
+    opacity: 1;
   }
   .hero-copy {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: grid;
+    justify-items: center;
     text-align: center;
-  }
-  .hero-copy > * {
-    max-width: 100%;
-  }
-  .seed {
-    color: var(--sage);
-    margin-bottom: 20px;
-    transform-origin: 50% 64%; /* its ground line */
-    filter: drop-shadow(0 0 20px rgba(79, 207, 130, 0.22));
-  }
-  .seed :global(svg) {
-    height: 60px;
-    width: auto;
-    display: block;
   }
   .news {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
+    gap: 10px;
+    padding: 4px 12px 4px 4px;
     border-radius: 999px;
     border: 1px solid var(--line-2);
-    background: color-mix(in srgb, var(--surface) 80%, transparent);
-    backdrop-filter: blur(6px);
+    background: rgba(9, 9, 11, 0.5);
+    backdrop-filter: blur(10px);
     color: var(--ink-2);
-    font: 500 12.5px var(--mono);
-    white-space: nowrap;
+    font-size: 13.5px;
     text-decoration: none;
-  }
-  .news-sep {
-    color: var(--muted);
+    transition: border-color 0.2s;
   }
   .news:hover {
-    border-color: var(--muted);
+    border-color: rgba(255, 255, 255, 0.24);
   }
-  .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+  .tag {
+    padding: 2px 8px;
+    border-radius: 999px;
     background: var(--leaf);
-    box-shadow: 0 0 0 0 rgba(79, 207, 130, 0.6);
-    animation: ping 2s ease-out infinite;
+    color: #03140a;
+    font-weight: 600;
+    font-size: 12px;
   }
-  @keyframes ping {
-    70%,
-    100% {
-      box-shadow: 0 0 0 8px rgba(79, 207, 130, 0);
-    }
+  .news svg {
+    width: 14px;
+    height: 14px;
+    color: var(--muted);
   }
   h1 {
-    margin: 26px 0 0;
-    max-width: 15em;
-    font: 600 clamp(40px, 6.2vw, 80px) / 1 var(--display);
-    letter-spacing: -0.055em;
-    text-wrap: balance;
-  }
-  h1 .line {
-    display: block;
-  }
-  h1 .em {
-    margin-top: 0.08em;
-  }
-  h1 .em .wi {
-    color: var(--muted);
+    margin-top: 28px;
+    font: 700 clamp(44px, 7vw, 84px) / 1 var(--display);
+    letter-spacing: -0.05em;
   }
   .lead {
     margin: 22px auto 0;
-    max-width: 34em;
+    max-width: 30em;
+    font-size: clamp(17px, 1.6vw, 19px);
+    color: var(--ink-2);
   }
   .actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
-    gap: 12px;
-  }
-  .actions {
-    margin-top: 30px;
-  }
-  .actions > :global(*) {
-    min-width: 0;
-    max-width: 100%;
-  }
-  .quick {
-    margin-top: 22px;
-  }
-  .quick :global(.cmd) {
-    height: 40px;
-    padding-left: 16px;
-    border-radius: 12px;
-    background: transparent;
-    border-color: var(--line);
-    box-shadow: none;
-    color: var(--ink-2);
-    font-size: 13px;
-  }
-  .quick :global(.cmd .copy-ic) {
-    width: 28px;
-    height: 28px;
-    background: rgba(255, 255, 255, 0.06);
-  }
-  .race-wrap {
-    max-width: calc(1040px + 2 * var(--gutter));
-    margin-top: clamp(56px, 8vw, 96px);
-  }
-
-  /* The opening: the logo sprouts from its ground line, the headline rises
-     word by word, then everything else follows. Without JS or with reduced
-     motion, it is all simply there. */
-  @media (prefers-reduced-motion: no-preference) {
-    :global(.js) .seed {
-      animation: sprout 1s var(--ease) 0.1s both;
-    }
-    :global(.js) h1 .wi {
-      animation: rise-word 0.9s var(--ease) both;
-      animation-delay: calc(0.4s + var(--i) * 0.055s);
-    }
-    :global(.js) .news {
-      animation: fade-up 0.7s var(--ease) 0.3s both;
-    }
-    :global(.js) .rise {
-      animation: fade-up 0.9s var(--ease) var(--d) both;
-    }
-  }
-  @keyframes sprout {
-    from {
-      clip-path: inset(62% 0 34% 0);
-      transform: scale(0.7);
-      opacity: 0;
-    }
-    30% {
-      opacity: 1;
-    }
-    to {
-      /* far past the edges: the mark is ~30px wide and its glow spreads
-         28px, so a tighter inset cuts the glow into a visible box */
-      clip-path: inset(-300%);
-      transform: none;
-    }
-  }
-  @keyframes rise-word {
-    from {
-      transform: translateY(110%);
-    }
-  }
-  @keyframes fade-up {
-    from {
-      opacity: 0;
-      transform: translateY(18px);
-    }
-  }
-
-  .race {
-    margin: 0;
-    font-family: var(--sans);
-  }
-  .race-q {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--term-line);
-    background: var(--term-2);
-    font: 12.5px/1.5 var(--mono);
-    color: var(--term-fg);
-  }
-  .k {
-    margin-right: 10px;
-    color: var(--term-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 11px;
-  }
-  .race code {
-    background: none;
-    border: 0;
-    padding: 0;
-    color: #fff;
-    font-size: inherit;
-  }
-  .repo,
-  .race-foot {
-    color: var(--term-dim);
-    font: 11.5px var(--mono);
-  }
-  .bars {
-    display: grid;
-    gap: 14px;
-    padding: 22px 20px;
-    border-bottom: 1px solid var(--term-line);
-  }
-  .run {
-    display: grid;
-    grid-template-columns: 64px minmax(0, 1fr) 92px 120px;
-    align-items: center;
-    gap: 16px;
-    font: 12.5px var(--mono);
-    color: var(--term-dim);
-  }
-  .who {
-    color: var(--term-fg);
-  }
-  .track {
-    height: 8px;
-    border-radius: 99px;
-    background: rgba(214, 238, 222, 0.05);
-    overflow: hidden;
-  }
-  .bar {
-    display: block;
-    height: 100%;
-    width: max(var(--w), 6px);
-    border-radius: inherit;
-    transform-origin: left;
-  }
-  .slow .bar {
-    background: linear-gradient(90deg, rgba(241, 194, 78, 0.35), var(--term-mod));
-  }
-  .fast .bar {
-    background: var(--term-add);
-    box-shadow: 0 0 12px rgba(95, 214, 141, 0.7);
-  }
-  .fig {
-    text-align: right;
-    white-space: nowrap;
-  }
-  .fig b {
-    font-weight: 600;
-    font-size: 15px;
-    margin-right: 4px;
-  }
-  .slow b {
-    color: var(--term-mod);
-  }
-  .fast b {
-    color: var(--term-add);
-  }
-  .out-wrap {
-    padding: 18px 20px 4px;
-  }
-  .prompt-line {
-    font: 12.5px/1.65 var(--mono);
-    color: var(--term-fg);
-    margin-bottom: 10px;
-  }
-  .sigil {
-    color: var(--term-add);
-    margin-right: 6px;
-  }
-  .race :global(.out) {
-    position: relative;
-    font: 12px/1.65 var(--mono);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .race-foot {
-    margin: 0;
-    padding: 12px 20px 16px;
-    text-align: right;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    :global(.js) .bar {
-      animation: grow 1.2s var(--ease) 1.9s both;
-    }
-  }
-  @keyframes grow {
-    from {
-      transform: scaleX(0);
-    }
-  }
-  @media (max-width: 640px) {
-    .race-q {
-      flex-direction: column;
-      gap: 2px;
-      padding: 12px 16px;
-    }
-    .bars {
-      padding: 18px 16px;
-    }
-    .run {
-      grid-template-columns: 1fr auto auto;
-      gap: 6px 14px;
-    }
-    .track {
-      grid-column: 1 / -1;
-      grid-row: 2;
-    }
-    .out-wrap {
-      padding: 16px 16px 4px;
-    }
-    .race :global(.out) {
-      font-size: 11px;
-    }
-    .race-foot {
-      padding: 10px 16px 14px;
-      text-align: left;
-    }
+    gap: 10px;
+    margin-top: 32px;
   }
 </style>
