@@ -1,0 +1,116 @@
+---
+// Example rules on pallets/click (2247b35); check.txt is the real output of
+// `sprout check` from Sprout v0.6.0 with sproutrules.txt in place.
+import CopyCommand from './CopyCommand.astro';
+import Term from './Term.astro';
+import rules from '../data/sproutrules.txt?raw';
+import result from '../data/check.txt?raw';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<section class="section" id="check">
+  <div class="wrap split">
+    <div class="section-head">
+      <h2>Keep the architecture you drew.</h2>
+      <p class="lead">
+        Write down which folders may not import which, one rule per line in <code>.sproutrules</code>. <code>sprout check</code>
+        fails the build when a change crosses one, and names the import that did it.
+      </p>
+      <div class="setup">
+        <CopyCommand command="sprout check --diff origin/main...HEAD" />
+      </div>
+      <p class="muted small">
+        <code>--diff</code> checks only what a pull request changed, so you can adopt a rule before every old break is fixed.
+        <a href={`${base}/docs/guides/check/`}>Rules and CI setup</a>
+      </p>
+    </div>
+    <div class="stack" data-cascade>
+      <div class="panel">
+        <div class="panel-bar"><span class="file-ic" aria-hidden="true"></span>.sproutrules</div>
+        <pre class="rules">{
+          rules.trimEnd().split('\n').map((l) =>
+            l.startsWith('#') ? <span class="c">{l}</span> : <span>{l.split(' -> ')[0]} <b>-&gt;</b> {l.split(' -> ')[1]}</span>,
+          )
+        }</pre>
+      </div>
+      <div class="panel">
+        <div class="panel-bar">
+          <span><span class="sigil">$</span> sprout check</span>
+          <span class="exit">exit 1</span>
+        </div>
+        <div class="panel-body"><Term text={result} /></div>
+      </div>
+      <p class="muted small">Example rules on pallets/click. The output is real: help formatting does import the parser.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section-head {
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .setup {
+    display: grid;
+    justify-items: start;
+  }
+  .small {
+    font-size: 14px;
+    margin: 0;
+  }
+  .small a {
+    color: var(--ink-2);
+  }
+  .stack {
+    display: grid;
+    gap: 14px;
+    align-self: center;
+  }
+  .panel-bar {
+    justify-content: space-between;
+  }
+  .panel-bar:first-child:has(.file-ic) {
+    justify-content: start;
+    gap: 8px;
+  }
+  .file-ic {
+    width: 10px;
+    height: 12px;
+    border-radius: 2px;
+    border: 1.4px solid var(--term-dim);
+  }
+  .sigil {
+    color: var(--term-add);
+  }
+  .exit {
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(255, 124, 95, 0.12);
+    color: var(--term-del);
+    font-size: 11.5px;
+  }
+  .rules {
+    margin: 0;
+    padding: 18px 22px 20px;
+    font: 400 12.5px/1.75 var(--mono);
+    color: var(--term-fg);
+    overflow-x: auto;
+  }
+  .rules span {
+    display: block;
+  }
+  .rules .c {
+    color: var(--term-dim);
+  }
+  .rules b {
+    color: var(--term-mod);
+    font-weight: 500;
+  }
+  .stack :global(.term) {
+    overflow-x: auto;
+  }
+  .stack :global(.term .tl-head:first-child) {
+    color: var(--term-del);
+  }
+</style>

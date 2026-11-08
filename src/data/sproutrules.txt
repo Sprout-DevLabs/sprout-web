@@ -1,0 +1,5 @@
+# the library never imports its tests
+src/ -> tests/
+# low-level helpers stay below the command layer
+src/click/utils.py -> src/click/core.py
+src/click/formatting.py -> src/click/parser.py
