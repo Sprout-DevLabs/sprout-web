@@ -2,7 +2,7 @@
 
 :root {
   --sl-font: 'Geist', ui-sans-serif, system-ui, sans-serif;
-  --sl-font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --sl-content-width: 46rem;
   --sl-line-height: 1.7;
 }

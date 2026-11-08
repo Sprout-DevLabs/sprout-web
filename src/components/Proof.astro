@@ -2,69 +2,35 @@
 // Kubernetes timing: median of the controlled run at 636d292 on the
 // /benchmarks page. Accuracy: tools/accuracy in the sprout repo.
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const stats = [
-  { n: '0.23', unit: ' s', what: 'to map Kubernetes: 31,412 files, warm cache.', link: 'Benchmark log', href: `${base}/benchmarks/` },
-  { n: '100%', unit: '', what: "of in-repo imports found, checked against each language's own tooling.", link: "How it's measured", href: 'https://github.com/Sprout-DevLabs/sprout/tree/main/tools/accuracy' },
-  { n: '7', unit: ' languages', what: 'Go, TypeScript, JavaScript, Python, Rust, Java, Kotlin. One binary, MIT.', link: 'Read the source', href: 'https://github.com/Sprout-DevLabs/sprout' },
-];
 ---
 
 <section class="section" id="proof">
-  <div class="wrap stats" data-cascade>
-    {
-      stats.map((s) => (
-        <div class="stat" data-spot>
-          <div class="n"><span data-count>{s.n}</span><small>{s.unit}</small></div>
-          <p>{s.what}</p>
-          <a href={s.href}>{s.link}</a>
-        </div>
-      ))
-    }
+  <div class="wrap">
+    <p class="eyebrow">03 / Proof</p>
+    <p class="statement">
+      Maps all 31,412 files of Kubernetes in 0.23 s. <span class="dim">Finds 100% of in-repo imports on click, ky and
+      fastapi-template, checked against each language's own tooling.</span> Seven languages, one binary.
+    </p>
+    <div class="links">
+      <a class="arrow-link" href={`${base}/benchmarks/`}>Benchmark log</a>
+      <a class="arrow-link" href="https://github.com/Sprout-DevLabs/sprout/tree/main/tools/accuracy">How accuracy is measured</a>
+      <a class="arrow-link" href="https://github.com/Sprout-DevLabs/sprout">Read the source</a>
+    </div>
   </div>
 </section>
 
 <style>
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
+  .statement {
+    margin: 20px 0 0;
+    max-width: 22em;
+    font: 600 clamp(28px, 3.8vw, 46px) / 1.15 var(--display);
+    letter-spacing: -0.035em;
+    text-wrap: pretty;
   }
-  .stat {
-    padding: 28px;
-    border-radius: 14px;
-    border: 1px solid var(--line);
-    background: var(--surface);
-  }
-  .n {
-    font: 600 52px/1 var(--display);
-    letter-spacing: -0.05em;
-    width: fit-content;
-    background: linear-gradient(180deg, #fff 20%, var(--leaf-ink));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .n small {
-    margin-left: 4px;
-    font-size: 22px;
-    letter-spacing: -0.02em;
-  }
-  .stat p {
-    margin: 14px 0 0;
-    font-size: 15px;
-    line-height: 1.55;
-    color: var(--ink-2);
-  }
-  .stat a {
-    display: inline-block;
-    margin-top: 14px;
-    font-size: 14px;
-    color: var(--leaf-ink);
-    text-underline-offset: 4px;
-  }
-  @media (max-width: 960px) {
-    .stats {
-      grid-template-columns: minmax(0, 1fr);
-    }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 32px;
+    margin-top: 40px;
   }
 </style>

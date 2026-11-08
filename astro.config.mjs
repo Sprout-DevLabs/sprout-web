@@ -3,7 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 const fonts =
-  'https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap';
+  'https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=JetBrains+Mono:wght@400..600&display=swap';
 
 export default defineConfig({
   site: 'https://sprout-devlabs.github.io',

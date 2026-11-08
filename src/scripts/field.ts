@@ -7,7 +7,7 @@
 
 const STEP = 16; // grid cell, css px
 const LEVELS = 13;
-const SAGE = '198,213,190';
+const SAGE = '228,228,231';
 const LEAF = '79,207,130';
 
 // Smooth 3D value noise: hashed lattice values, smoothstep-blended.
@@ -115,7 +115,7 @@ export function field(canvas: HTMLCanvasElement, still: boolean) {
     for (let n = 1; n <= LEVELS; n++) {
       const level = 0.12 + (n / (LEVELS + 1)) * 0.95;
       const index = n % 4 === 0;
-      ctx!.strokeStyle = index ? `rgba(${LEAF},0.34)` : `rgba(${SAGE},0.13)`;
+      ctx!.strokeStyle = index ? `rgba(${LEAF},0.22)` : `rgba(${SAGE},0.13)`;
       ctx!.lineWidth = index ? 1.3 : 1;
       contour(level);
       ctx!.stroke();
