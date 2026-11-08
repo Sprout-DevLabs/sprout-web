@@ -1,7 +1,7 @@
 /* Sprout: the map of your codebase.
    Dark soil for the page, instrument panels for live output, and the
    logo's forest and sage for the brand. Bricolage Grotesque carries headlines, Geist the reading,
-   Geist Mono every tree. */
+   JetBrains Mono every tree. */
 
 :root {
   --bg: #09090b;
@@ -40,7 +40,7 @@
 
   --display: 'Geist', ui-sans-serif, system-ui, sans-serif;
   --sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --wrap: 1200px;
   --gutter: clamp(20px, 4vw, 40px);
