@@ -1,9 +1,9 @@
 ---
 // A command that copies itself when clicked.
-interface Props { command: string; label?: string }
-const { command, label } = Astro.props;
+interface Props { command: string; label?: string; primary?: boolean }
+const { command, label, primary } = Astro.props;
 ---
-<button class="cmd" type="button" data-copy={command} aria-label={label ?? `Copy: ${command}`}>
+<button class:list={['cmd', { primary }]} type="button" data-copy={command} aria-label={label ?? `Copy: ${command}`}>
   <span class="sigil" aria-hidden="true">$</span>
   <span class="txt">{command}</span>
   <span class="copy-ic" aria-hidden="true">

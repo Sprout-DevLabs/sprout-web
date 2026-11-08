@@ -37,7 +37,7 @@ const runs = [
     </h1>
     <p class="lead rise" style="--d:1.05s">The dependency map of your codebase, for you and your coding agent.</p>
     <div class="actions rise" style="--d:1.2s">
-      <CopyCommand command="brew install sprout-devlabs/tap/sprout" />
+      <CopyCommand command="brew install sprout-devlabs/tap/sprout" primary />
       <StarButton />
     </div>
     <p class="also rise" style="--d:1.32s">
@@ -106,7 +106,7 @@ const runs = [
     inset: 0 0 auto;
     height: 760px;
     z-index: -1;
-    background: radial-gradient(42% 46% at 50% 16%, rgba(79, 207, 130, 0.16), transparent 70%);
+    background: radial-gradient(42% 46% at 50% 16%, rgba(79, 207, 130, 0.09), transparent 70%);
     pointer-events: none;
   }
   .hero-copy {
@@ -122,7 +122,7 @@ const runs = [
     color: var(--sage);
     margin-bottom: 20px;
     transform-origin: 50% 64%; /* its ground line */
-    filter: drop-shadow(0 0 28px rgba(79, 207, 130, 0.35));
+    filter: drop-shadow(0 0 20px rgba(79, 207, 130, 0.22));
   }
   .seed :global(svg) {
     height: 60px;
@@ -166,8 +166,8 @@ const runs = [
   h1 {
     margin: 26px 0 0;
     max-width: 15em;
-    font: 800 clamp(40px, 6vw, 78px) / 0.96 var(--display);
-    letter-spacing: -0.04em;
+    font: 600 clamp(40px, 6.2vw, 80px) / 1 var(--display);
+    letter-spacing: -0.055em;
     text-wrap: balance;
   }
   h1 .line {
@@ -175,8 +175,12 @@ const runs = [
   }
   h1 .em {
     margin-top: 0.08em;
-    color: var(--leaf);
-    filter: drop-shadow(0 0 22px rgba(79, 207, 130, 0.28));
+  }
+  h1 .em .wi {
+    background: linear-gradient(180deg, var(--leaf-ink), #3a9e63);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
   .lead {
     margin: 22px auto 0;
