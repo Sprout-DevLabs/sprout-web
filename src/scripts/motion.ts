@@ -17,7 +17,7 @@ export function setupMotion() {
 // One pill glides between nav links under the pointer, instead of each
 // link lighting up on its own.
 function navPill() {
-  const wrap = document.querySelector<HTMLElement>('.nav .wrap');
+  const wrap = document.querySelector<HTMLElement>('.nav-links');
   if (!wrap || !matchMedia('(hover: hover)').matches) return;
   const pill = document.createElement('span');
   pill.className = 'nav-pill';

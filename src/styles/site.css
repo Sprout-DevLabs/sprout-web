@@ -1,6 +1,6 @@
 /* Sprout: the map of your codebase.
    Dark soil for the page, instrument panels for live output, and the
-   logo's forest and sage for the brand. Bricolage Grotesque carries headlines, Geist the reading,
+   logo's forest and sage for the brand. General Sans carries headlines and reading,
    JetBrains Mono every tree. */
 
 :root {
@@ -38,8 +38,8 @@
   --term-del: #ff7c5f;
   --term-size: #7fd6c7;
 
-  --display: 'Geist', ui-sans-serif, system-ui, sans-serif;
-  --sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --display: 'General Sans', ui-sans-serif, system-ui, sans-serif;
+  --sans: 'General Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --wrap: 1200px;
@@ -249,69 +249,6 @@ h3 {
   transform: scale(0.5);
 }
 
-/* ---------- nav ---------- */
-
-.nav {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  backdrop-filter: saturate(1.4) blur(14px);
-  -webkit-backdrop-filter: saturate(1.4) blur(14px);
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.3s;
-}
-.nav.scrolled {
-  border-bottom-color: var(--line);
-}
-.nav .wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 68px;
-}
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-right: auto;
-  font: 600 18px var(--display);
-  letter-spacing: -0.03em;
-  text-decoration: none;
-}
-.brand svg {
-  width: auto;
-  height: 28px;
-  color: var(--sage);
-}
-.nav-link {
-  font-size: 15px;
-  color: var(--muted);
-  text-decoration: none;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition:
-    color 0.2s,
-    background-color 0.2s;
-}
-.nav-link:hover {
-  color: var(--ink);
-  background: var(--bg-2);
-}
-@media (max-width: 560px) {
-  .nav-hide-sm {
-    display: none;
-  }
-}
-@media (max-width: 380px) {
-  .nav .wrap {
-    gap: 2px;
-  }
-  .nav-link {
-    padding-inline: 8px;
-  }
-}
-
 /* ---------- sections ---------- */
 
 .section {
@@ -511,27 +448,6 @@ h3 {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
-}
-
-/* the nav pill (motion.ts) */
-.nav .wrap {
-  position: relative;
-}
-.nav-pill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: 8px;
-  background: var(--bg-2);
-  opacity: 0;
-  pointer-events: none;
-}
-.nav-link {
-  position: relative;
-  z-index: 1;
-}
-.has-pill .nav-link:hover {
-  background: none;
 }
 
 /* Copying: the check draws itself, and a label rises above the command. */
@@ -783,53 +699,210 @@ main {
   border-radius: 9px;
   font-size: 14px;
 }
-.nav-links {
-  display: flex;
-  margin-left: 20px;
-  margin-right: auto;
+
+/* ---------- nav: a bar that lifts into a floating capsule once you scroll ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 10px var(--gutter) 0;
+  view-transition-name: nav;
 }
-.nav .brand {
-  margin-right: 0;
+.bar {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  max-width: calc(var(--wrap) + 24px);
+  height: 58px;
+  margin: 0 auto;
+  padding: 0 8px 0 16px;
+  border-radius: 18px;
+  border: 1px solid transparent;
+  transition:
+    max-width 0.5s var(--ease),
+    background-color 0.3s,
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+.nav.scrolled .bar {
+  max-width: 1020px;
+  background: rgba(17, 17, 20, 0.86);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+  border-color: var(--line-2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 18px 50px -18px rgba(0, 0, 0, 0.85);
+}
+.brand {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font: 600 19px var(--display);
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+.brand svg {
+  width: auto;
+  height: 26px;
+  color: var(--sage);
+}
+.nav-links {
+  position: relative;
+  display: flex;
+  gap: 2px;
+}
+.nav-link {
+  position: relative;
+  z-index: 1;
+  padding: 7px 13px;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-link:hover {
+  color: var(--ink);
+}
+.nav-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.07);
+  opacity: 0;
+  pointer-events: none;
+}
+.nav-end {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .nav-search {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   height: 34px;
-  padding: 0 8px 0 12px;
+  padding: 0 6px 0 11px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13.5px;
   text-decoration: none;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
 }
 .nav-search:hover {
   color: var(--ink);
+  border-color: var(--line-2);
 }
 .nav-search svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
 }
 .nav-search kbd {
   padding: 1px 6px;
   border-radius: 6px;
   border: 1px solid var(--line-2);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
   font: 11px var(--mono);
 }
-@media (max-width: 860px) {
-  .nav-links {
-    display: none;
-  }
-  .nav .brand {
-    margin-right: auto;
+.nav .star-btn {
+  height: 34px;
+}
+
+/* the menu: phones only */
+.menu {
+  display: none;
+  position: relative;
+}
+.menu summary {
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  cursor: pointer;
+  list-style: none;
+}
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+.menu summary span {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--ink);
+  transition: transform 0.3s var(--ease);
+}
+.menu[open] summary span:first-child {
+  transform: translateY(3.25px) rotate(45deg);
+}
+.menu[open] summary span:last-child {
+  transform: translateY(-3.25px) rotate(-45deg);
+}
+.menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  display: grid;
+  gap: 2px;
+  width: min(280px, calc(100vw - 2 * var(--gutter)));
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid var(--line-2);
+  background: #131316;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.9);
+  animation: menu-in 0.25s var(--ease);
+}
+.menu-panel a:not(.btn) {
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--ink-2);
+  font-weight: 500;
+  text-decoration: none;
+}
+.menu-panel a:not(.btn):hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.menu-panel .btn {
+  justify-content: center;
+  margin-top: 6px;
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
   }
 }
-@media (max-width: 420px) {
+@media (max-width: 900px) {
+  .bar {
+    grid-template-columns: 1fr auto;
+  }
+  .nav-links,
+  .nav-search span,
   .nav .star-btn {
     display: none;
   }
 }
 @media (max-width: 560px) {
-  .nav-search {
+  .nav-search,
+  .nav-cta {
     display: none;
+  }
+  .menu {
+    display: block;
   }
 }

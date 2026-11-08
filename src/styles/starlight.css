@@ -1,7 +1,7 @@
 /* Starlight, dressed in Sprout's palette and type. */
 
 :root {
-  --sl-font: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --sl-font: 'General Sans', ui-sans-serif, system-ui, sans-serif;
   --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --sl-content-width: 46rem;
   --sl-line-height: 1.7;
@@ -41,7 +41,7 @@
 .sl-markdown-content h2,
 .sl-markdown-content h3,
 h1#_top {
-  font-family: 'Geist', var(--sl-font);
+  font-family: var(--sl-font);
   letter-spacing: -0.025em;
   font-weight: 650;
 }
@@ -51,7 +51,7 @@ h1#_top {
 }
 .site-title {
   color: var(--sl-color-white);
-  font-family: 'Geist', var(--sl-font);
+  font-family: var(--sl-font);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
