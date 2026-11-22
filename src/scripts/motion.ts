@@ -1,7 +1,7 @@
 import { animate } from 'motion';
 
 // Site-wide motion, kept to the pointer: a pill follows it across the nav
-// links and cards light up under it. Content never animates on scroll; the
+// links. Content never animates on scroll; the
 // logo sweep in Ground.astro is the one exception. With reduced motion,
 // nothing moves.
 
@@ -11,7 +11,6 @@ export function setupMotion() {
   if (reducedMotion()) return;
   document.documentElement.classList.add('moving');
   navPill();
-  spotlight();
 }
 
 // One pill glides between nav links under the pointer, instead of each
@@ -41,14 +40,3 @@ function navPill() {
   });
 }
 
-// Cards light up where the pointer is: the CSS draws the glow at --mx/--my.
-function spotlight() {
-  if (!matchMedia('(hover: hover)').matches) return;
-  document.querySelectorAll<HTMLElement>('[data-spot]').forEach((el) => {
-    el.addEventListener('pointermove', (e) => {
-      const b = el.getBoundingClientRect();
-      el.style.setProperty('--mx', `${e.clientX - b.left}px`);
-      el.style.setProperty('--my', `${e.clientY - b.top}px`);
-    });
-  });
-}

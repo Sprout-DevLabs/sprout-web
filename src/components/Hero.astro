@@ -1,5 +1,6 @@
 ---
 import Showcase from './home/Showcase.astro';
+import CopyCommand from './CopyCommand.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
@@ -17,6 +18,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <a class="btn btn-solid" href={`${base}/docs/install/`}>Get Sprout</a>
       <a class="btn btn-dark" href={`${base}/docs/`}>Read the docs</a>
     </div>
+    <div class="quick"><CopyCommand command="brew install sprout-devlabs/tap/sprout" /></div>
   </div>
   <div class="wrap">
     <Showcase />
@@ -34,7 +36,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   .hero {
     position: relative;
     isolation: isolate;
-    padding: clamp(56px, 9vw, 112px) 0 clamp(80px, 10vw, 140px);
+    padding: clamp(56px, 9vw, 112px) 0 clamp(72px, 8vw, 112px);
   }
   .silk {
     position: absolute;
@@ -102,5 +104,25 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     justify-content: center;
     gap: 10px;
     margin-top: 32px;
+  }
+  .quick {
+    margin-top: 16px;
+    max-width: 100%;
+  }
+  .quick :global(.cmd) {
+    height: 38px;
+    padding-left: 14px;
+    border-radius: 10px;
+    background: rgba(9, 9, 11, 0.5);
+    backdrop-filter: blur(8px);
+    border-color: var(--line);
+    box-shadow: none;
+    color: var(--ink-2);
+    font-size: 12.5px;
+  }
+  .quick :global(.cmd .copy-ic) {
+    width: 26px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.06);
   }
 </style>

@@ -4,6 +4,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const rows = [
   { label: 'Reads', items: ['Go', 'TypeScript', 'JavaScript', 'Python', 'Rust', 'Java', 'Kotlin'] },
   { label: 'Works with', items: ['Claude Code', 'Cursor', 'VS Code', 'Claude Desktop', 'any MCP client'] },
+  { label: 'Runs on', items: ['macOS', 'Linux', 'Windows'] },
 ];
 ---
 
@@ -13,26 +14,28 @@ const rows = [
       Maps all <a href={`${base}/benchmarks/`}>31,412 files</a> of Kubernetes in 0.23 s. <span class="dim">From a weekend
       script to a monorepo, one binary and no account.</span>
     </p>
-    <div class="rows">
+    <dl class="spec">
       {
         rows.map((r) => (
           <div class="row">
-            <p>{r.label}:</p>
-            <ul>
-              {r.items.map((it) => (
-                <li>{it}</li>
-              ))}
-            </ul>
+            <dt>{r.label}</dt>
+            <dd>
+              <ul>
+                {r.items.map((it) => (
+                  <li>{it}</li>
+                ))}
+              </ul>
+            </dd>
           </div>
         ))
       }
-    </div>
+    </dl>
   </div>
 </section>
 
 <style>
   .statement-sec {
-    padding: clamp(120px, 14vw, 180px) 0 clamp(72px, 9vw, 120px);
+    padding: clamp(64px, 8vw, 104px) 0 clamp(72px, 8vw, 112px);
   }
   .statement {
     margin: 0;
@@ -48,30 +51,45 @@ const rows = [
     text-decoration-thickness: 3px;
     text-underline-offset: 8px;
   }
-  .rows {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px 56px;
-    margin-top: clamp(48px, 6vw, 72px);
+  /* A spec sheet: label on the left, values on one ruled line each. */
+  .spec {
+    margin: clamp(48px, 6vw, 72px) 0 0;
+    border-bottom: 1px solid var(--line);
   }
-  .row p {
-    margin: 0 0 14px;
+  .row {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 8px 24px;
+    align-items: baseline;
+    padding: 20px 0;
+    border-top: 1px solid var(--line);
+  }
+  dt {
     color: var(--muted);
     font-size: 15px;
   }
-  .row ul {
+  dd {
+    margin: 0;
+  }
+  ul {
     display: flex;
     flex-wrap: wrap;
-    gap: 14px 30px;
     margin: 0;
     padding: 0;
     list-style: none;
-    font: 600 19px var(--display);
+    font: 550 clamp(17px, 1.6vw, 20px) var(--display);
     letter-spacing: -0.02em;
     color: var(--ink-2);
   }
+  /* values part on a short slash, so a wrapped line never starts with one */
+  li:not(:last-child)::after {
+    content: '/';
+    margin: 0 14px;
+    color: #3f3f46;
+    font-weight: 400;
+  }
   @media (max-width: 760px) {
-    .rows {
+    .row {
       grid-template-columns: minmax(0, 1fr);
     }
   }
