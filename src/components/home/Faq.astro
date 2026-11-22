@@ -69,6 +69,11 @@ const qa = [
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     gap: 40px;
   }
+  .faq > div:first-child {
+    position: sticky;
+    top: 96px;
+    align-self: start;
+  }
   .faq > div > p {
     margin: 14px 0 0;
   }
@@ -165,6 +170,9 @@ const qa = [
   @media (max-width: 860px) {
     .faq {
       grid-template-columns: minmax(0, 1fr);
+    }
+    .faq > div:first-child {
+      position: static;
     }
   }
 </style>
